@@ -23,11 +23,11 @@ public class AvroClicksSessionizer {
     private final KafkaProducer<String, LogLine> producer;
     private final String inputTopic;
     private final String outputTopic;
-    private String zookeeper;
-    private String groupId;
-    private String url;
-    private Map<String, SessionState> state = new HashMap<String, SessionState>();
-
+    private final String zookeeper;
+    private final String groupId;
+    private final String url;
+    private final Map<String, SessionState> state = new HashMap<String, SessionState>();
+    private final int sessionLengthMs;
 
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -43,41 +43,46 @@ public class AvroClicksSessionizer {
         String outputTopic = "sessionized_clicks";
         String url = args[0];
 
-        AvroClicksSessionizer sessionizer = new AvroClicksSessionizer(zookeeper, groupId, inputTopic, outputTopic, url);
+        // Typically events are considered to be part of the same session if they are less than 30 minutes apart
+        // To make this example show interesting results sooner, we limit the interval to 5 seconds
+        int sessionLengthMs = 5*1000;
+
+        AvroClicksSessionizer sessionizer = new AvroClicksSessionizer(zookeeper, groupId, inputTopic, outputTopic, url, sessionLengthMs);
         sessionizer.run();
-
-
-
     }
 
-    public AvroClicksSessionizer(String zookeeper, String groupId, String inputTopic, String outputTopic, String url) {
+    public AvroClicksSessionizer(String zookeeper, String groupId, String inputTopic, String outputTopic, String url, int sessionLengthMs) {
         this.consumer = kafka.consumer.Consumer.createJavaConsumerConnector(
                 new ConsumerConfig(createConsumerConfig(zookeeper, groupId, url)));
-        this.producer = getProducer(outputTopic, url);
-
+        this.producer = getProducer(url);
         this.zookeeper = zookeeper;
         this.groupId = groupId;
         this.inputTopic = inputTopic;
         this.outputTopic = outputTopic;
         this.url = url;
+        this.sessionLengthMs = sessionLengthMs;
     }
 
     private Properties createConsumerConfig(String zookeeper, String groupId, String url) {
         Properties props = new Properties();
         props.put("zookeeper.connect", zookeeper);
         props.put("group.id", groupId);
-        props.put("auto.commit.enable", "false");
-        props.put("auto.offset.reset", "smallest");
         props.put("schema.registry.url", url);
         props.put("specific.avro.reader", true);
+
+        // We configure the consumer to avoid committing offsets and to always start consuming from beginning of topic
+        // This is not a best practice, but we want the example consumer to show results when running it again and again
+        props.put("auto.commit.enable", "false");
+        props.put("auto.offset.reset", "smallest");
 
         return props;
     }
 
     private void run() {
         Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
+
         // Hard coding single threaded consumer
-        topicCountMap.put(inputTopic, new Integer(1));
+        topicCountMap.put(inputTopic, 1);
 
         Properties props = createConsumerConfig(zookeeper, groupId, url);
         VerifiableProperties vProps = new VerifiableProperties(props);
@@ -88,13 +93,11 @@ public class AvroClicksSessionizer {
 
         KafkaStream stream = consumer.createMessageStreams(topicCountMap, stringDecoder, avroDecoder).get(inputTopic).get(0);
         ConsumerIterator it = stream.iterator();
-
         System.out.println("Ready to start iterating wih properties: " + props.toString());
         System.out.println("Reading topic:" + inputTopic);
 
         while (it.hasNext()) {
             MessageAndMetadata messageAndMetadata = it.next();
-
             String ip = (String) messageAndMetadata.key();
 
             // Once we release a new version of the avro deserializer that can return SpecificData, the deep copy will be unnecessary
@@ -107,9 +110,11 @@ public class AvroClicksSessionizer {
                 state.put(ip, new SessionState(event.getTimestamp(), 0));
             } else {
                 sessionId = oldState.getSessionId();
+
                 // if the old timestamp is more than 30 minutes older than new one, we have a new session
-                if (oldState.getLastConnection() < event.getTimestamp() - (30 * 60 * 1000))
+                if (oldState.getLastConnection() < event.getTimestamp() - sessionLengthMs)
                     sessionId = sessionId + 1;
+
                 SessionState newState = new SessionState(event.getTimestamp(), sessionId);
                 state.put(ip, newState);
             }
@@ -118,11 +123,11 @@ public class AvroClicksSessionizer {
             ProducerRecord<String, LogLine> record = new ProducerRecord<String, LogLine>(outputTopic, event.getIp().toString(), event);
             producer.send(record);
         }
-
     }
 
-    private KafkaProducer<String, LogLine> getProducer(String topic, String url) {
+    private KafkaProducer<String, LogLine> getProducer(String url) {
         Properties props = new Properties();
+
         // hardcoding the Kafka server URI for this example
         props.put("bootstrap.servers", "localhost:9092");
         props.put("acks", "all");
@@ -134,7 +139,5 @@ public class AvroClicksSessionizer {
         KafkaProducer<String, LogLine> producer = new KafkaProducer<String, LogLine>(props);
         return producer;
     }
-
-
 }
 

@@ -38,7 +38,8 @@ Then create a topic called clicks:
 
 Then run the producer to produce 100 clicks:
 
-    $ java -cp target/uber-clickstream-generating-producer-1.0-SNAPSHOT.jar io.confluent.examples.producer.AvroClicksProducer 100 http://localhost:8081
+    $ java -cp target/uber-clickstream-generating-producer-1.0-SNAPSHOT.jar io.confluent.examples.producer.AvroClicksProducer http://localhost:8081
+
     
 You can validate the result by using the avro console consumer (part of the schema repository):
 
