@@ -9,7 +9,6 @@ public class EventGenerator {
 
     static int numUsers = 10; // 10 users is easy to follow in a demo
     static int currUser;
-
     static String[] websites = {"support.html","about.html","foo.html", "bar.html", "home.html", "search.html", "list.html", "help.html", "bar.html", "foo.html"};
 
 
@@ -29,5 +28,4 @@ public class EventGenerator {
 
         return event;
     }
-
 }

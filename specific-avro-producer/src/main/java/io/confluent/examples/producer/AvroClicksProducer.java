@@ -43,7 +43,6 @@ public class AvroClicksProducer {
             // Using IP as key, so events from same IP will go to same partition
             ProducerRecord<String, LogLine> record = new ProducerRecord<String, LogLine>(topic, event.getIp().toString(), event);
             producer.send(record);
-
             Thread.sleep(wait);
         }
     }
