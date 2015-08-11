@@ -28,6 +28,7 @@ public class AvroClicksSessionizer {
     private final String url;
     private final Map<String, SessionState> state = new HashMap<String, SessionState>();
     private final int sessionLengthMs;
+    private static AvroClicksSessionizer sessionizer;
 
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -47,7 +48,15 @@ public class AvroClicksSessionizer {
         // To make this example show interesting results sooner, we limit the interval to 5 seconds
         int sessionLengthMs = 5*1000;
 
-        AvroClicksSessionizer sessionizer = new AvroClicksSessionizer(zookeeper, groupId, inputTopic, outputTopic, url, sessionLengthMs);
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                sessionizer.consumer.shutdown();
+            }
+        });
+
+        sessionizer = new AvroClicksSessionizer(zookeeper, groupId, inputTopic, outputTopic, url, sessionLengthMs);
         sessionizer.run();
     }
 

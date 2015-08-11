@@ -11,7 +11,7 @@ import java.util.Random;
 public class AvroClicksProducer {
 
     public static void main(String[] args) throws InterruptedException {
-        if (args.length != 2) {
+        if (args.length != 1) {
             System.out.println("Please provide command line arguments: schemaRegistryUrl");
             System.exit(-1);
         }
