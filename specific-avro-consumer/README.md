@@ -6,7 +6,7 @@ Sessionization is a very common step in preparing user click information collect
 It involves grouping user clicks into visits and marking all the clicks that belong to the same visit with unique session identifier.
 These sessions are later used to analyse what users are doing on the website during a visit, and answer questions such as "how many visits end in a purchase" or "what is the last page visited before purchasing".
 The way we decide if a visit from a user is a new session is by examining the time gap between his current and previous visit. 
-If the gap is below 30 minutes, we decide he is still continuing his previous visit, if it is larger than we consider this a new visit.
+If the gap is below 30 minutes, we decide the user is still continuing their previous visit, if it is larger than we consider this a new visit.
 
 A "click" event contains fields for IP, timestamp, url (current page user is visiting), referrer (previous page in visit), user agent (browser) and session ID.
 When we first record (or generate) a field, the session timestamp is empty. Only by reading all events that belong to the same user, can we decide when an existing sessions continues and when a new one starts.
