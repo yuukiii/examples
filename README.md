@@ -24,18 +24,18 @@ running. In what follows, we assume that Zookeeper, Kafka and Schema Registry ar
 started with the default settings.
 
     # Start Zookeeper
-    $ bin/zookeeper-server-start config/zookeeper.properties
+    $ bin/zookeeper-server-start etc/kafka/zookeeper.properties
 
     # Start Kafka
-    $ bin/kafka-server-start config/server.properties
+    $ bin/kafka-server-start etc/kafka/server.properties
 
     # Start Schema Registry
-    $ bin/schema-registry-start config/schema-registry.properties
+    $ bin/schema-registry-start etc/schema-registry/schema-registry.properties
 
 Then create a topic called page_visits:
 
     # Create page_visits topic
-    $ bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 \
+    $ bin/kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 \
       --partitions 1 --topic page_visits
 
 Next, cd to the `examples` directory:
