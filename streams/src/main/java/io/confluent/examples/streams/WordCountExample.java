@@ -15,11 +15,13 @@
  */
 package io.confluent.examples.streams;
 
-import io.confluent.examples.streams.utils.KStreamAvroDeserializer;
-import io.confluent.examples.streams.utils.KStreamAvroSerializer;
+import io.confluent.examples.streams.classes.WikiFeed;
+import io.confluent.examples.streams.classes.WikiFeedAvroDeserializer;
+import io.confluent.examples.streams.utils.GenericAvroDeserializer;
+import io.confluent.examples.streams.utils.GenericAvroSerializer;
 import io.confluent.examples.streams.utils.SystemTimestampExtractor;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreaming;
@@ -31,8 +33,6 @@ import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.KeyValue;
 import org.apache.kafka.streams.kstream.Windowed;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 
@@ -41,46 +41,15 @@ import java.util.Properties;
  */
 public class WordCountExample {
 
-    public static Map<String, Object> parse(GenericRecord record) {
-
-        String title = (String) record.get("title");
-        String flags = (String) record.get("flags");
-        String diffUrl = (String) record.get("diffUrl");
-        String user = (String) record.get("user");
-        int byteDiff = Integer.parseInt((String) record.get("byteDiff"));
-        String summary = (String) record.get("summary");
-
-        Map<String, Boolean> flagMap = new HashMap<>();
-
-        flagMap.put("is-minor", flags.contains("M"));
-        flagMap.put("is-new", flags.contains("N"));
-        flagMap.put("is-unpatrolled", flags.contains("!"));
-        flagMap.put("is-bot-edit", flags.contains("B"));
-        flagMap.put("is-special", title.startsWith("Special:"));
-        flagMap.put("is-talk", title.startsWith("Talk:"));
-
-        Map<String, Object> root = new HashMap<>();
-
-        root.put("title", title);
-        root.put("user", user);
-        root.put("unparsed-flags", flags);
-        root.put("diff-bytes", byteDiff);
-        root.put("diff-url", diffUrl);
-        root.put("summary", summary);
-        root.put("flags", flagMap);
-
-        return root;
-    }
-
     @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
         props.put(StreamingConfig.JOB_ID_CONFIG, "wordcount-example");
         props.put(StreamingConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(StreamingConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(StreamingConfig.VALUE_SERIALIZER_CLASS_CONFIG, KStreamAvroSerializer.class);
-        props.put(StreamingConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KStreamAvroDeserializer.class);
+        props.put(StreamingConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
+        props.put(StreamingConfig.VALUE_SERIALIZER_CLASS_CONFIG, GenericAvroSerializer.class);
+        props.put(StreamingConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
+        props.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GenericAvroDeserializer.class);
         props.put(StreamingConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
 
         StringSerializer keySerializer = new StringSerializer();
@@ -91,19 +60,17 @@ public class WordCountExample {
         KStreamBuilder builder = new KStreamBuilder();
 
         // read the source stream
-        KStream<byte[], GenericRecord> feeds = builder.stream(
+        KStream<byte[], WikiFeed> feeds = builder.stream(
                 new ByteArrayDeserializer(),
-                new KStreamAvroDeserializer(),
+                new WikiFeedAvroDeserializer(),
                 "WikipediaFeed");
 
         // aggregate the new feed counts of by user
         KTable<Windowed<String>, Long> aggregated = feeds
-                // parse the record
-                .mapValues(value -> parse(value))
                 // filter out old feeds
-                .filter((dummy, valueMap) -> ((Map<String, Boolean>) valueMap.get("flags")).get("is-new"))
+                .filter((dummy, value) -> value.getIsNew())
                 // map the user id as key
-                .map((key, valueMap) -> new KeyValue(valueMap.get("user"), valueMap))
+                .map((key, value) -> new KeyValue(value.getUser(), value))
                 // sum by key
                 .countByKey(HoppingWindows.of("window").with(60000L), keySerializer, keyDeserializer);
 

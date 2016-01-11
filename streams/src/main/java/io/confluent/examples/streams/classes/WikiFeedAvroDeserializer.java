@@ -13,31 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.confluent.examples.streams.utils;
+package io.confluent.examples.streams.classes;
 
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.Deserializer;
 
 import java.util.Map;
 
-public class KStreamAvroDeserializer implements Deserializer<GenericRecord> {
+public class WikiFeedAvroDeserializer implements Deserializer<WikiFeed> {
 
     KafkaAvroDeserializer inner;
 
     /**
      * Constructor used by Kafka Streams.
      */
-    public KStreamAvroDeserializer() {
+    public WikiFeedAvroDeserializer() {
 
     }
 
-    public KStreamAvroDeserializer(SchemaRegistryClient client) {
+    public WikiFeedAvroDeserializer(SchemaRegistryClient client) {
         inner = new KafkaAvroDeserializer(client);
     }
 
-    public KStreamAvroDeserializer(SchemaRegistryClient client, Map<String, ?> props) {
+    public WikiFeedAvroDeserializer(SchemaRegistryClient client, Map<String, ?> props) {
         inner = new KafkaAvroDeserializer(client, props);
     }
 
@@ -47,8 +46,8 @@ public class KStreamAvroDeserializer implements Deserializer<GenericRecord> {
     }
 
     @Override
-    public GenericRecord deserialize(String s, byte[] bytes) {
-        return (GenericRecord) inner.deserialize(s, bytes);
+    public WikiFeed deserialize(String s, byte[] bytes) {
+        return (WikiFeed) inner.deserialize(s, bytes);
     }
 
     @Override

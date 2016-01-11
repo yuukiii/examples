@@ -13,27 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.confluent.examples.streams.utils;
+package io.confluent.examples.streams.classes;
 
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.util.Map;
 
-public class KStreamAvroSerializer implements Serializer<GenericRecord> {
+public class WikiFeedAvroSerializer implements Serializer<WikiFeed> {
 
     KafkaAvroSerializer inner;
 
     /**
      * Constructor used by Kafka Streams.
      */
-    public KStreamAvroSerializer() {
+    public WikiFeedAvroSerializer() {
 
     }
 
-    public KStreamAvroSerializer(SchemaRegistryClient client) {
+    public WikiFeedAvroSerializer(SchemaRegistryClient client) {
         inner = new KafkaAvroSerializer(client);
     }
 
@@ -43,7 +42,7 @@ public class KStreamAvroSerializer implements Serializer<GenericRecord> {
     }
 
     @Override
-    public byte[] serialize(String topic, GenericRecord record) {
+    public byte[] serialize(String topic, WikiFeed record) {
         return inner.serialize(topic, record);
     }
 

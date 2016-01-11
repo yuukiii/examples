@@ -15,8 +15,8 @@
  */
 package io.confluent.examples.streams;
 
-import io.confluent.examples.streams.utils.KStreamAvroDeserializer;
-import io.confluent.examples.streams.utils.KStreamAvroSerializer;
+import io.confluent.examples.streams.utils.GenericAvroDeserializer;
+import io.confluent.examples.streams.utils.GenericAvroSerializer;
 import io.confluent.examples.streams.utils.SystemTimestampExtractor;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -35,23 +35,15 @@ import java.util.Properties;
  */
 public class UserRegionExample {
 
-    public static byte[] extractChars(GenericRecord record) {
-        return ((String) record.get("experience")).getBytes();
-    }
-
-    public static String extractRegion(GenericRecord record) {
-        return (String) record.get("region");
-    }
-
     @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
         props.put(StreamingConfig.JOB_ID_CONFIG, "regiongroup-example");
         props.put(StreamingConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(StreamingConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(StreamingConfig.VALUE_SERIALIZER_CLASS_CONFIG, KStreamAvroSerializer.class);
+        props.put(StreamingConfig.VALUE_SERIALIZER_CLASS_CONFIG, GenericAvroSerializer.class);
         props.put(StreamingConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KStreamAvroDeserializer.class);
+        props.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GenericAvroDeserializer.class);
         props.put(StreamingConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
 
         StringSerializer keySerializer = new StringSerializer();
@@ -62,19 +54,14 @@ public class UserRegionExample {
         KStreamBuilder builder = new KStreamBuilder();
 
         // read the source stream
-        KTable<String, GenericRecord> profile = builder.table(
-                keySerializer,
-                new KStreamAvroSerializer(),
-                keyDeserializer,
-                new KStreamAvroDeserializer(),
-                "UserProfile");
+        KTable<String, GenericRecord> profile = builder.table("UserProfile");
 
         // aggregate the user counts of by region
         KTable<String, Long> regionCount = profile
                 // filter out incomplete profiles with less than 200 characters
-                .filter((userId, record) -> extractChars(record).length > 200)
+                .filter((userId, record) -> ((String) record.get("experience")).getBytes().length > 200)
                 // count by region
-                .count((userId, record) -> extractRegion(record), keySerializer, keyDeserializer, "CountsByRegion")
+                .count((userId, record) -> (String) record.get("region"), keySerializer, keyDeserializer, "CountsByRegion")
                 // filter out regions with less than 10M users
                 .filter((regionName, count) -> count > 10 * 1000 * 1000);
 

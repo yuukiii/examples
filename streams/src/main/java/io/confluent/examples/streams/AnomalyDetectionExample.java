@@ -15,8 +15,8 @@
  */
 package io.confluent.examples.streams;
 
-import io.confluent.examples.streams.utils.KStreamAvroDeserializer;
-import io.confluent.examples.streams.utils.KStreamAvroSerializer;
+import io.confluent.examples.streams.utils.GenericAvroDeserializer;
+import io.confluent.examples.streams.utils.GenericAvroSerializer;
 import io.confluent.examples.streams.utils.SystemTimestampExtractor;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
@@ -44,9 +44,9 @@ public class AnomalyDetectionExample {
         props.put(StreamingConfig.JOB_ID_CONFIG, "anomalydetection-example");
         props.put(StreamingConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(StreamingConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(StreamingConfig.VALUE_SERIALIZER_CLASS_CONFIG, KStreamAvroSerializer.class);
+        props.put(StreamingConfig.VALUE_SERIALIZER_CLASS_CONFIG, GenericAvroSerializer.class);
         props.put(StreamingConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KStreamAvroDeserializer.class);
+        props.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GenericAvroDeserializer.class);
         props.put(StreamingConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
 
         StringSerializer keySerializer = new StringSerializer();
@@ -57,10 +57,7 @@ public class AnomalyDetectionExample {
         KStreamBuilder builder = new KStreamBuilder();
 
         // read the source stream
-        KStream<byte[], GenericRecord> views = builder.stream(
-                new ByteArrayDeserializer(),
-                new KStreamAvroDeserializer(),
-                "PageViews");
+        KStream<byte[], GenericRecord> views = builder.stream("PageViews");
 
         KStream<String, Long> anomalyUsers = views
                 // map the user id as key
