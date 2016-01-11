@@ -24,58 +24,24 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreaming;
 import org.apache.kafka.streams.StreamingConfig;
-import org.apache.kafka.streams.kstream.HoppingWindows;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
-import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.KeyValue;
+import org.apache.kafka.streams.kstream.SlidingWindows;
 import org.apache.kafka.streams.kstream.Windowed;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
-
 /**
- * From the wiki feed irc stream compute the number of new user feeds for every minute.
+ * Detect users doing more than 40 page views per minute from the pageview stream
+ * and output a stream of blocked users (assuming a sliding window of 1 minute).
  */
-public class WordCountExample {
-
-    public static Map<String, Object> parse(GenericRecord record) {
-
-        String title = (String) record.get("title");
-        String flags = (String) record.get("flags");
-        String diffUrl = (String) record.get("diffUrl");
-        String user = (String) record.get("user");
-        int byteDiff = Integer.parseInt((String) record.get("byteDiff"));
-        String summary = (String) record.get("summary");
-
-        Map<String, Boolean> flagMap = new HashMap<>();
-
-        flagMap.put("is-minor", flags.contains("M"));
-        flagMap.put("is-new", flags.contains("N"));
-        flagMap.put("is-unpatrolled", flags.contains("!"));
-        flagMap.put("is-bot-edit", flags.contains("B"));
-        flagMap.put("is-special", title.startsWith("Special:"));
-        flagMap.put("is-talk", title.startsWith("Talk:"));
-
-        Map<String, Object> root = new HashMap<>();
-
-        root.put("title", title);
-        root.put("user", user);
-        root.put("unparsed-flags", flags);
-        root.put("diff-bytes", byteDiff);
-        root.put("diff-url", diffUrl);
-        root.put("summary", summary);
-        root.put("flags", flagMap);
-
-        return root;
-    }
+public class AnomalyDetectionExample {
 
     @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
-        props.put(StreamingConfig.JOB_ID_CONFIG, "wordcount-example");
+        props.put(StreamingConfig.JOB_ID_CONFIG, "anomalydetection-example");
         props.put(StreamingConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(StreamingConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(StreamingConfig.VALUE_SERIALIZER_CLASS_CONFIG, KStreamAvroSerializer.class);
@@ -91,25 +57,24 @@ public class WordCountExample {
         KStreamBuilder builder = new KStreamBuilder();
 
         // read the source stream
-        KStream<byte[], GenericRecord> feeds = builder.stream(
+        KStream<byte[], GenericRecord> views = builder.stream(
                 new ByteArrayDeserializer(),
                 new KStreamAvroDeserializer(),
-                "WikipediaFeed");
+                "PageViews");
 
-        // aggregate the new feed counts of by user
-        KTable<Windowed<String>, Long> aggregated = feeds
-                // parse the record
-                .mapValues(value -> parse(value))
-                // filter out old feeds
-                .filter((dummy, valueMap) -> ((Map<String, Boolean>) valueMap.get("flags")).get("is-new"))
+        KStream<String, Long> anomalyUsers = views
                 // map the user id as key
-                .map((key, valueMap) -> new KeyValue(valueMap.get("user"), valueMap))
-                // sum by key
-                .countByKey(HoppingWindows.of("window").with(60000L), keySerializer, keyDeserializer);
-
+                .map((dummy, record) -> new KeyValue((String) record.get("user"), record))
+                // count users on the one-minute sliding window
+                .countByKey(SlidingWindows.of("PageViewCountWindow").with(60 * 1000L), keySerializer, keyDeserializer)
+                // get users whose one-minute count is larger than 40
+                .filter((windowedUserId, count) -> (Long) count > 40)   // TODO: avoid casting
+                // transform to streams and get rid of windows
+                .toStream()
+                .map((windowedUserId, count) -> new KeyValue(((Windowed<String>) windowedUserId).value(), count));   // TODO: avoid casting
 
         // write to the result topic
-        aggregated.to("WikipediaStats");
+        anomalyUsers.to("AnomalyUsers");
 
         KafkaStreaming kstream = new KafkaStreaming(builder, config);
         kstream.start();

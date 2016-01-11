@@ -18,6 +18,7 @@ package io.confluent.examples.streams;
 import io.confluent.examples.streams.utils.KStreamAvroDeserializer;
 import io.confluent.examples.streams.utils.KStreamAvroSerializer;
 import io.confluent.examples.streams.utils.SystemTimestampExtractor;
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -30,52 +31,20 @@ import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.KeyValue;
 import org.apache.kafka.streams.kstream.Windowed;
+import org.apache.kafka.streams.kstream.internals.DefaultWindowedDeserializer;
+import org.apache.kafka.streams.kstream.internals.DefaultWindowedSerializer;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
-
 /**
- * From the wiki feed irc stream compute the number of new user feeds for every minute.
+ * Compute the number of pageviews by geo-region.
  */
-public class WordCountExample {
-
-    public static Map<String, Object> parse(GenericRecord record) {
-
-        String title = (String) record.get("title");
-        String flags = (String) record.get("flags");
-        String diffUrl = (String) record.get("diffUrl");
-        String user = (String) record.get("user");
-        int byteDiff = Integer.parseInt((String) record.get("byteDiff"));
-        String summary = (String) record.get("summary");
-
-        Map<String, Boolean> flagMap = new HashMap<>();
-
-        flagMap.put("is-minor", flags.contains("M"));
-        flagMap.put("is-new", flags.contains("N"));
-        flagMap.put("is-unpatrolled", flags.contains("!"));
-        flagMap.put("is-bot-edit", flags.contains("B"));
-        flagMap.put("is-special", title.startsWith("Special:"));
-        flagMap.put("is-talk", title.startsWith("Talk:"));
-
-        Map<String, Object> root = new HashMap<>();
-
-        root.put("title", title);
-        root.put("user", user);
-        root.put("unparsed-flags", flags);
-        root.put("diff-bytes", byteDiff);
-        root.put("diff-url", diffUrl);
-        root.put("summary", summary);
-        root.put("flags", flagMap);
-
-        return root;
-    }
+public class PageViewRegion {
 
     @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
-        props.put(StreamingConfig.JOB_ID_CONFIG, "wordcount-example");
+        props.put(StreamingConfig.JOB_ID_CONFIG, "anomalydetection-example");
         props.put(StreamingConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(StreamingConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(StreamingConfig.VALUE_SERIALIZER_CLASS_CONFIG, KStreamAvroSerializer.class);
@@ -90,26 +59,54 @@ public class WordCountExample {
 
         KStreamBuilder builder = new KStreamBuilder();
 
-        // read the source stream
-        KStream<byte[], GenericRecord> feeds = builder.stream(
-                new ByteArrayDeserializer(),
-                new KStreamAvroDeserializer(),
-                "WikipediaFeed");
+        KStream<String, GenericRecord> views = builder.stream(new ByteArrayDeserializer(), new KStreamAvroDeserializer(), "PageViews")
+                // map user id as key
+                .map((key, valueMap) -> new KeyValue((String) valueMap.get("user"), valueMap));
 
-        // aggregate the new feed counts of by user
-        KTable<Windowed<String>, Long> aggregated = feeds
-                // parse the record
-                .mapValues(value -> parse(value))
-                // filter out old feeds
-                .filter((dummy, valueMap) -> ((Map<String, Boolean>) valueMap.get("flags")).get("is-new"))
-                // map the user id as key
-                .map((key, valueMap) -> new KeyValue(valueMap.get("user"), valueMap))
-                // sum by key
-                .countByKey(HoppingWindows.of("window").with(60000L), keySerializer, keyDeserializer);
+        KTable<String, String> users = builder.table(
+                    keySerializer,
+                    new KStreamAvroSerializer(),
+                    keyDeserializer,
+                    new KStreamAvroDeserializer(),
+                    "UserProfile")
+                .mapValues(record -> (String) record.get("region"));
 
 
-        // write to the result topic
-        aggregated.to("WikipediaStats");
+        KStream<String, GenericRecord> stream2 = views.leftJoin(users, (view, region) -> new GenericRecord() {
+            @Override
+            public void put(String s, Object o) {
+
+            }
+
+            @Override
+            public Object get(String s) {
+                return null;
+            }
+
+            @Override
+            public void put(int i, Object o) {
+
+            }
+
+            @Override
+            public Object get(int i) {
+                return null;
+            }
+
+            @Override
+            public Schema getSchema() {
+                return null;
+            }
+        });
+
+        stream2.map((userId, geoViewRecord -> new KeyValue<PageId, Region>(view.pageId, geoViewRecord.region))
+                .through("GeoPageViews") // repartition by page
+                .countByKey(new Count(), HoppingWindows.of("GeoPageViewsWindow").with(7 * 24 * 60 * 60 * 1000))
+                .toStream((pageId, count, window) -> new KeyValue<pageId, WeeklyCount>(pageId, new WeeklyCount(count, window.start()))
+                                .to("PageAccessByRegion")
+
+
+        topAriclesByIndustry.to("TopNewsPerIndustry");
 
         KafkaStreaming kstream = new KafkaStreaming(builder, config);
         kstream.start();

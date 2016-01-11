@@ -13,32 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.confluent.examples.streams;
+package io.confluent.examples.streams.utils;
 
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
-import io.confluent.kafka.serializers.KafkaAvroDeserializer;
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.Serializer;
 
 import java.util.Map;
 
-public class KStreamAvroDeserializer implements Deserializer<GenericRecord> {
+public class KStreamAvroSerializer implements Serializer<GenericRecord> {
 
-    KafkaAvroDeserializer inner;
+    KafkaAvroSerializer inner;
 
     /**
      * Constructor used by Kafka Streams.
      */
-    public KStreamAvroDeserializer() {
+    public KStreamAvroSerializer() {
 
     }
 
-    public KStreamAvroDeserializer(SchemaRegistryClient client) {
-        inner = new KafkaAvroDeserializer(client);
-    }
-
-    public KStreamAvroDeserializer(SchemaRegistryClient client, Map<String, ?> props) {
-        inner = new KafkaAvroDeserializer(client, props);
+    public KStreamAvroSerializer(SchemaRegistryClient client) {
+        inner = new KafkaAvroSerializer(client);
     }
 
     @Override
@@ -47,8 +43,8 @@ public class KStreamAvroDeserializer implements Deserializer<GenericRecord> {
     }
 
     @Override
-    public GenericRecord deserialize(String s, byte[] bytes) {
-        return (GenericRecord) inner.deserialize(s, bytes);
+    public byte[] serialize(String topic, GenericRecord record) {
+        return inner.serialize(topic, record);
     }
 
     @Override
