@@ -25,7 +25,7 @@ You must first build the latest version of Kafka `trunk` and install it locally:
 
 # Development
 
-This project uses the standard maven lifecycles such as:
+This project uses the standard maven lifecycle and commands such as:
 
     $ mvn compile # This also generates Java classes from the Avro schemas
     $ mvn test    # But no tests yet!
