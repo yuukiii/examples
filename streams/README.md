@@ -18,14 +18,18 @@ IntelliJ IDEA users:
 
 You must first build the latest version of Kafka `trunk` and install it locally:
 
-    $ git clone git@github.com:apache/kafka.git
-    $ git checkout trunk
-    $ ./gradlew clean installAll
+```shell
+$ git clone git@github.com:apache/kafka.git
+$ git checkout trunk
+$ ./gradlew clean installAll
+```
 
 
 # Development
 
 This project uses the standard maven lifecycle and commands such as:
 
-    $ mvn compile # This also generates Java classes from the Avro schemas
-    $ mvn test    # But no tests yet!
+```shell
+$ mvn compile # This also generates Java classes from the Avro schemas
+$ mvn test    # But no tests yet!
+```
