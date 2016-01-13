@@ -79,7 +79,7 @@ public class TopArticlesExample {
         KStream<byte[], GenericRecord> views = builder.stream("PageViews");
 
         KStream<GenericRecord, GenericRecord> articleViews = views
-                //  filter only article pages
+                // filter only article pages
                 .filter((dummy, record) -> isArticle(record))
                 // map <page id, industry> as key
                 .map((dummy, article) -> new KeyValue<>(article, article));
