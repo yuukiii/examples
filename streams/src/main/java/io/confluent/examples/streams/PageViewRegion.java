@@ -41,7 +41,6 @@ import java.util.Properties;
  */
 public class PageViewRegion {
 
-    @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
         props.put(StreamingConfig.JOB_ID_CONFIG, "anomalydetection-example");
@@ -61,7 +60,7 @@ public class PageViewRegion {
 
         KStream<String, GenericRecord> views = builder.stream("PageViews");
 
-        KStream<String, GenericRecord> viewsByUser = views.map((dummy, record) -> new KeyValue((String) record.get("user"), record));
+        KStream<String, GenericRecord> viewsByUser = views.map((dummy, record) -> new KeyValue<>((String) record.get("user"), record));
 
         KTable<String, GenericRecord> users = builder.table("UserProfile");
 

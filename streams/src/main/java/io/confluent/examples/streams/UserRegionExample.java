@@ -35,7 +35,6 @@ import java.util.Properties;
  */
 public class UserRegionExample {
 
-    @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
         props.put(StreamingConfig.JOB_ID_CONFIG, "regiongroup-example");

@@ -41,7 +41,6 @@ import java.util.Properties;
  */
 public class WordCountExample {
 
-    @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
         props.put(StreamingConfig.JOB_ID_CONFIG, "wordcount-example");
@@ -69,10 +68,9 @@ public class WordCountExample {
                 // filter out old feeds
                 .filter((dummy, value) -> value.getIsNew())
                 // map the user id as key
-                .map((key, value) -> new KeyValue(value.getUser(), value))
+                .map((key, value) -> new KeyValue<>(value.getUser(), value))
                 // sum by key
                 .countByKey(HoppingWindows.of("window").with(60000L), keySerializer, keyDeserializer);
-
 
         // write to the result topic
         aggregated.to("WikipediaStats");

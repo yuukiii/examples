@@ -60,7 +60,6 @@ public class TopArticlesExample {
         return flags.contains("ART");
     }
 
-    @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
         props.put(StreamingConfig.JOB_ID_CONFIG, "anomalydetection-example");
@@ -164,12 +163,12 @@ public class TopArticlesExample {
                         (windowedArticle, stats) -> {
                             Windowed<String> windowedIndustry = new Windowed<>((String) windowedArticle.value().get("industry"), windowedArticle.window());
 
-                            return new KeyValue(windowedIndustry, stats);
+                            return new KeyValue<>(windowedIndustry, stats);
                         },
                         new DefaultWindowedSerializer<>(genericAvroSerializer),
-                        new CollectionSerializer(),
+                        new CollectionSerializer<>(),
                         new DefaultWindowedDeserializer<>(genericAvroDeserializer),
-                        new CollectionDeserializer(), "Top100Articles");
+                        new CollectionDeserializer<>(), "Top100Articles");
 
         topViewCounts.to("TopNewsPerIndustry");
 
