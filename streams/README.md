@@ -2,11 +2,9 @@
 
 # Requirements
 
-## Prerequisites
+## Java 8
 
-* Java 8
-
-Make sure your IDE is configured to use Java 8, too.
+The code examples require Java 8.
 
 IntelliJ IDEA users:
 
@@ -16,7 +14,7 @@ IntelliJ IDEA users:
     * Set "Project language level" to "8 - Lambdas, type annotations, etc."
 
 
-## Kafka version that includes Kafka Streams
+## A Kafka version that includes Kafka Streams
 
 You must first build the latest version of Kafka `trunk` and install it locally:
 
