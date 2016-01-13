@@ -7,6 +7,14 @@ import org.apache.kafka.common.serialization.{ByteArrayDeserializer, ByteArraySe
 import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder, KeyValue}
 import org.apache.kafka.streams.{KafkaStreaming, StreamingConfig}
 
+/**
+  * Demonstrates how to perform simple, state-less transformations via map functions.
+  *
+  * Use cases include e.g. basic data sanitization, data anonymization by obfuscating sensitive data
+  * fields (such as personally identifiable information aka PII).
+  *
+  * Requires Scala 2.12 for Java 8 and Java lambda support.
+  */
 class MapFunctionScalaExample {
 
   def main(args: Array[String]) {
