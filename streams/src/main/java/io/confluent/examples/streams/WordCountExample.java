@@ -52,9 +52,6 @@ public class WordCountExample {
         props.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GenericAvroDeserializer.class);
         props.put(StreamingConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
 
-        StringSerializer keySerializer = new StringSerializer();
-        StringDeserializer keyDeserializer = new StringDeserializer();
-
         StreamingConfig config = new StreamingConfig(props);
 
         KStreamBuilder builder = new KStreamBuilder();
@@ -66,6 +63,8 @@ public class WordCountExample {
                 "WikipediaFeed");
 
         // aggregate the new feed counts of by user
+        StringSerializer keySerializer = new StringSerializer();
+        StringDeserializer keyDeserializer = new StringDeserializer();
         KTable<Windowed<String>, Long> aggregated = feeds
                 // filter out old feeds
                 .filter((dummy, value) -> value.getIsNew())
