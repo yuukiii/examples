@@ -38,7 +38,6 @@ import java.util.Properties;
  */
 public class AnomalyDetectionExample {
 
-    @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
         props.put(StreamingConfig.JOB_ID_CONFIG, "anomalydetection-example");
@@ -61,14 +60,14 @@ public class AnomalyDetectionExample {
 
         KStream<String, Long> anomalyUsers = views
                 // map the user id as key
-                .map((dummy, record) -> new KeyValue((String) record.get("user"), record))
+                .map((dummy, record) -> new KeyValue<>((String) record.get("user"), record))
                 // count users on the one-minute sliding window
                 .countByKey(SlidingWindows.of("PageViewCountWindow").with(60 * 1000L), keySerializer, keyDeserializer)
                 // get users whose one-minute count is larger than 40
                 .filter((windowedUserId, count) -> (Long) count > 40)   // TODO: avoid casting
                 // transform to streams and get rid of windows
                 .toStream()
-                .map((windowedUserId, count) -> new KeyValue(((Windowed<String>) windowedUserId).value(), count));   // TODO: avoid casting
+                .map((windowedUserId, count) -> new KeyValue<>(windowedUserId.value(), count));
 
         // write to the result topic
         anomalyUsers.to("AnomalyUsers");

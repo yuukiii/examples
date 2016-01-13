@@ -41,7 +41,6 @@ import java.util.Properties;
  */
 public class WordCountExample {
 
-    @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
         props.put(StreamingConfig.JOB_ID_CONFIG, "wordcount-example");
@@ -51,9 +50,6 @@ public class WordCountExample {
         props.put(StreamingConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
         props.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GenericAvroDeserializer.class);
         props.put(StreamingConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
-
-        StringSerializer keySerializer = new StringSerializer();
-        StringDeserializer keyDeserializer = new StringDeserializer();
 
         StreamingConfig config = new StreamingConfig(props);
 
@@ -66,14 +62,15 @@ public class WordCountExample {
                 "WikipediaFeed");
 
         // aggregate the new feed counts of by user
+        StringSerializer keySerializer = new StringSerializer();
+        StringDeserializer keyDeserializer = new StringDeserializer();
         KTable<Windowed<String>, Long> aggregated = feeds
                 // filter out old feeds
                 .filter((dummy, value) -> value.getIsNew())
                 // map the user id as key
-                .map((key, value) -> new KeyValue(value.getUser(), value))
+                .map((key, value) -> new KeyValue<>(value.getUser(), value))
                 // sum by key
                 .countByKey(HoppingWindows.of("window").with(60000L), keySerializer, keyDeserializer);
-
 
         // write to the result topic
         aggregated.to("WikipediaStats");

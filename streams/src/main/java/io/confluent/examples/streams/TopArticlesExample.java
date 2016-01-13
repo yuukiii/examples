@@ -28,7 +28,6 @@ import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.streams.KafkaStreaming;
 import org.apache.kafka.streams.StreamingConfig;
 import org.apache.kafka.streams.kstream.Aggregator;
-import org.apache.kafka.streams.kstream.AggregatorSupplier;
 import org.apache.kafka.streams.kstream.HoppingWindows;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
@@ -60,7 +59,6 @@ public class TopArticlesExample {
         return flags.contains("ART");
     }
 
-    @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
         props.put(StreamingConfig.JOB_ID_CONFIG, "anomalydetection-example");
@@ -81,7 +79,7 @@ public class TopArticlesExample {
         KStream<byte[], GenericRecord> views = builder.stream("PageViews");
 
         KStream<GenericRecord, GenericRecord> articleViews = views
-                //  filter only article pages
+                // filter only article pages
                 .filter((dummy, record) -> isArticle(record))
                 // map <page id, industry> as key
                 .map((dummy, article) -> new KeyValue<>(article, article));
@@ -164,12 +162,12 @@ public class TopArticlesExample {
                         (windowedArticle, stats) -> {
                             Windowed<String> windowedIndustry = new Windowed<>((String) windowedArticle.value().get("industry"), windowedArticle.window());
 
-                            return new KeyValue(windowedIndustry, stats);
+                            return new KeyValue<>(windowedIndustry, stats);
                         },
                         new DefaultWindowedSerializer<>(genericAvroSerializer),
-                        new CollectionSerializer(),
+                        new CollectionSerializer<>(),
                         new DefaultWindowedDeserializer<>(genericAvroDeserializer),
-                        new CollectionDeserializer(), "Top100Articles");
+                        new CollectionDeserializer<>(), "Top100Articles");
 
         topViewCounts.to("TopNewsPerIndustry");
 
