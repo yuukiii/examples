@@ -1,4 +1,4 @@
-{"namespace": "io.confluent.examples.streams.classes",
+{"namespace": "io.confluent.examples.streams.avro",
  "type": "record",
  "name": "PageView",
  "fields": [

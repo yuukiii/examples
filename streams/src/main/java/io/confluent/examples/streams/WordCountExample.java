@@ -15,7 +15,7 @@
  */
 package io.confluent.examples.streams;
 
-import io.confluent.examples.streams.classes.WikiFeed;
+import io.confluent.examples.streams.avro.WikiFeed;
 import io.confluent.examples.streams.utils.SpecificAvroDeserializer;
 import io.confluent.examples.streams.utils.SpecificAvroSerializer;
 import io.confluent.examples.streams.utils.SystemTimestampExtractor;
