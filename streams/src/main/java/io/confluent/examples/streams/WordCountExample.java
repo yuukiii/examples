@@ -15,6 +15,7 @@
  */
 package io.confluent.examples.streams;
 
+import io.confluent.examples.streams.classes.WikiFeed;
 import io.confluent.examples.streams.utils.SpecificAvroDeserializer;
 import io.confluent.examples.streams.utils.SpecificAvroSerializer;
 import io.confluent.examples.streams.utils.SystemTimestampExtractor;
@@ -22,6 +23,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreaming;
 import org.apache.kafka.streams.StreamingConfig;
 import org.apache.kafka.streams.kstream.HoppingWindows;
+import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.KeyValue;
