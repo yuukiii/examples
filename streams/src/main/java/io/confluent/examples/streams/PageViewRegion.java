@@ -21,7 +21,6 @@ import io.confluent.examples.streams.utils.SystemTimestampExtractor;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreaming;
@@ -51,9 +50,6 @@ public class PageViewRegion {
         props.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GenericAvroDeserializer.class);
         props.put(StreamingConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
 
-        StringSerializer keySerializer = new StringSerializer();
-        StringDeserializer keyDeserializer = new StringDeserializer();
-
         StreamingConfig config = new StreamingConfig(props);
 
         KStreamBuilder builder = new KStreamBuilder();
@@ -66,6 +62,7 @@ public class PageViewRegion {
 
         KTable<String, String> userRegions = users.mapValues(record -> (String) record.get("region"));
 
+        // users need to specify the schemas for all intermediate classes
         Schema schema = new Schema.Parser().parse(new File("pageviewregion.avsc"));
 
         KTable<Windowed<String>, Long> regionCount = viewsByUser
@@ -78,7 +75,7 @@ public class PageViewRegion {
                     return viewRegion;
                 })
                 .map((user, viewRegion) -> new KeyValue<>((String) viewRegion.get("region"), viewRegion))
-                .countByKey(HoppingWindows.of("GeoPageViewsWindow").with(7 * 24 * 60 * 60 * 1000), keySerializer, keyDeserializer);
+                .countByKey(HoppingWindows.of("GeoPageViewsWindow").with(7 * 24 * 60 * 60 * 1000), null, null);
 
         // write to the result topic
         regionCount.to("PageViewsByRegion");

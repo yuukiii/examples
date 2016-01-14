@@ -19,7 +19,6 @@ import io.confluent.examples.streams.utils.GenericAvroDeserializer;
 import io.confluent.examples.streams.utils.GenericAvroSerializer;
 import io.confluent.examples.streams.utils.SystemTimestampExtractor;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreaming;
@@ -28,7 +27,6 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KeyValue;
 import org.apache.kafka.streams.kstream.SlidingWindows;
-import org.apache.kafka.streams.kstream.Windowed;
 
 import java.util.Properties;
 
@@ -48,23 +46,20 @@ public class AnomalyDetectionExample {
         props.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GenericAvroDeserializer.class);
         props.put(StreamingConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
 
-        StringSerializer keySerializer = new StringSerializer();
-        StringDeserializer keyDeserializer = new StringDeserializer();
-
         StreamingConfig config = new StreamingConfig(props);
 
         KStreamBuilder builder = new KStreamBuilder();
 
         // read the source stream
-        KStream<byte[], GenericRecord> views = builder.stream("PageViews");
+        KStream<String, GenericRecord> views = builder.stream("PageViews");
 
         KStream<String, Long> anomalyUsers = views
                 // map the user id as key
                 .map((dummy, record) -> new KeyValue<>((String) record.get("user"), record))
                 // count users on the one-minute sliding window
-                .countByKey(SlidingWindows.of("PageViewCountWindow").with(60 * 1000L), keySerializer, keyDeserializer)
+                .countByKey(SlidingWindows.of("PageViewCountWindow").with(60 * 1000L), null, null)
                 // get users whose one-minute count is larger than 40
-                .filter((windowedUserId, count) -> (Long) count > 40)   // TODO: avoid casting
+                .filter((windowedUserId, count) -> count > 40)
                 // transform to streams and get rid of windows
                 .toStream()
                 .map((windowedUserId, count) -> new KeyValue<>(windowedUserId.value(), count));

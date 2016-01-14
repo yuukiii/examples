@@ -19,6 +19,7 @@ import io.confluent.examples.streams.utils.GenericAvroDeserializer;
 import io.confluent.examples.streams.utils.GenericAvroSerializer;
 import io.confluent.examples.streams.utils.SystemTimestampExtractor;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreaming;
@@ -45,8 +46,7 @@ public class UserRegionExample {
         props.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GenericAvroDeserializer.class);
         props.put(StreamingConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
 
-        StringSerializer keySerializer = new StringSerializer();
-        StringDeserializer keyDeserializer = new StringDeserializer();
+        LongSerializer longSerializer = new LongSerializer();
 
         StreamingConfig config = new StreamingConfig(props);
 
@@ -59,13 +59,13 @@ public class UserRegionExample {
         KTable<String, Long> regionCount = profile
                 // filter out incomplete profiles with less than 200 characters
                 .filter((userId, record) -> ((String) record.get("experience")).getBytes().length > 200)
-                // count by region
-                .count((userId, record) -> (String) record.get("region"), keySerializer, keyDeserializer, "CountsByRegion")
+                // count by region, we can set null to all serdes to use defaults
+                .count((userId, record) -> (String) record.get("region"), null, null, null, null, "CountsByRegion")
                 // filter out regions with less than 10M users
                 .filter((regionName, count) -> count > 10 * 1000 * 1000);
 
-        // write to the result topic
-        regionCount.to("LargeCountsByRegion");
+        // write to the result topic, we need to override the value serializer to for type long
+        regionCount.to("LargeCountsByRegion", null, longSerializer);
 
         KafkaStreaming kstream = new KafkaStreaming(builder, config);
         kstream.start();
