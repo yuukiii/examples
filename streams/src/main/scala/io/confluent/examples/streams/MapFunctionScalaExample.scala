@@ -13,7 +13,7 @@ import org.apache.kafka.streams.{KafkaStreaming, StreamingConfig}
   * Use cases include e.g. basic data sanitization, data anonymization by obfuscating sensitive data
   * fields (such as personally identifiable information aka PII).
   *
-  * Requires Scala 2.12 for Java 8 and Java lambda support.
+  * Requires a version of Scala that supports Java 8 and SAM / Java lambda (e.g. Scala 2.12).
   */
 class MapFunctionScalaExample {
 
