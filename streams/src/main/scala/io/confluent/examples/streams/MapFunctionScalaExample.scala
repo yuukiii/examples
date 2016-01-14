@@ -35,15 +35,26 @@ class MapFunctionScalaExample {
     //
     uppercasedWithMapValues.to("UppercasedTextLinesTopic")
 
+    // We are using implicit conversions to convert Scala's `Tuple2` into Kafka Streams' `KeyValue`.
+    // This allows us to write streams transformations as, for example:
+    //
+    //    map((key, value) => (key, value.toUpperCase())
+    //
+    // instead of the more verbose
+    //
+    //    map((key, value) => new KeyValue(key, value.toUpperCase())
+    //
+    import KeyValueImplicits._
+
     // Variant 2: using `map`, modify value only (equivalent to variant 1)
-    val uppercasedWithMap: KStream[Array[Byte], String] = textLines.map((key, value) => new KeyValue(key, value.toUpperCase()))
+    val uppercasedWithMap: KStream[Array[Byte], String] = textLines.map((key, value) => (key, value.toUpperCase()))
 
     // Variant 3: using `map`, modify both key and value
     //
     // Note: Whether, in general, you should follow this artificial example and store the original
     //       value in the key field is debatable and depends on your use case.  If in doubt, don't
     //       do it.
-    val originalAndUppercased: KStream[String, String] = textLines.map((key, value) => KeyValue.pair(value, value.toUpperCase()))
+    val originalAndUppercased: KStream[String, String] = textLines.map((key, value) => (value, value.toUpperCase()))
 
     // Write the results to a new Kafka topic "OriginalAndUppercased".
     //
@@ -69,5 +80,14 @@ class MapFunctionScalaExample {
     val stream: KafkaStreaming = new KafkaStreaming(builder, streamingConfig)
     stream.start()
   }
+
+}
+
+/**
+  * Implicit conversions that provide us with some syntactic sugar when writing stream transformations.
+  */
+object KeyValueImplicits {
+
+  implicit def Tuple2ToKeyValue[K, V](tuple: (K, V)): KeyValue[K, V] = new KeyValue(tuple._1, tuple._2)
 
 }
