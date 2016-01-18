@@ -11,7 +11,6 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreaming;
 import org.apache.kafka.streams.StreamingConfig;
-import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -22,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Future;
@@ -34,31 +34,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests whether Streams is able to read data from an input topic and write the same data (as-is) to
  * a new output topic.
- *
- * THE CODE IS A WORK IN PROGRESS AND NOT WORKING CORRECTLY YET.
- *
- * The logging output of the test includes the location of Kafka's log.dirs, which you can use to
- * quickly inspect the contents of the related topics/partitions (see `testInputTopic` and
- * `testOutputTopic`).
- *
- * Logging output example:
- *
- *    DEBUG [main] logs.dir at /var/folders/j3/1y7_mtp51fn8xh1h9ff3kt3m0000gn/T/kafka-embedded-logs-dir-1511050635 was not removed
- *
  */
-public class NoOpStreamsIntegrationTest {
+public class PassThroughIntegrationTest {
 
-  private static final Logger log = LoggerFactory.getLogger(NoOpStreamsIntegrationTest.class);
+  private static final Logger log = LoggerFactory.getLogger(PassThroughIntegrationTest.class);
 
   private static EmbeddedSingleNodeKafkaCluster cluster = null;
-  private static String testInputTopic = "inputTopic";
-  private static String testOutputTopic = "outputTopic";
+  private static String inputTopic = "inputTopic";
+  private static String outputTopic = "outputTopic";
 
   @BeforeClass
   public static void startKafkaCluster() throws Exception {
     cluster = new EmbeddedSingleNodeKafkaCluster();
-    cluster.createTopic(testInputTopic);
-    cluster.createTopic(testOutputTopic);
+    cluster.createTopic(inputTopic);
+    cluster.createTopic(outputTopic);
   }
 
   @AfterClass
@@ -70,25 +59,19 @@ public class NoOpStreamsIntegrationTest {
 
   @Test
   public void shouldWriteTheInputDataAsIsToTheOutputTopic() throws Exception {
-    //
-    // The test input data.
-    //
-    List<String> lines = Arrays.asList(
+    List<String> inputLines = Arrays.asList(
         "hello world",
         "the world is not enough",
         "the world of the stock market is coming to an end"
     );
 
     //
-    // Configure and start the Streams job.
+    // Step 1: Configure and start the Streams job.
     //
     KStreamBuilder builder = new KStreamBuilder();
-    KStream<String, String> textLines = builder.stream(testInputTopic);
 
-    // write the input data as-is to the output topic
-    textLines.to(testOutputTopic);
-    // Alternatively, modify the input data with a trivial transformation
-    //textLines.mapValues(String::toUpperCase).to(testOutputTopic);
+    // Write the input data as-is to the output topic.
+    builder.stream(inputTopic).to(outputTopic);
 
     Properties streamingConfiguration = new Properties();
     streamingConfiguration.put(StreamingConfig.JOB_ID_CONFIG, "noop-test-streams");
@@ -98,67 +81,66 @@ public class NoOpStreamsIntegrationTest {
     streamingConfiguration.put(StreamingConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     streamingConfiguration.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     streamingConfiguration.put(StreamingConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
-    //streamingConfiguration.put(StreamingConfig.TOTAL_RECORDS_TO_PROCESS, lines.size());
-    streamingConfiguration.put(StreamingConfig.COMMIT_INTERVAL_MS_CONFIG, "1000");
-    streamingConfiguration.put(StreamingConfig.BUFFERED_RECORDS_PER_PARTITION_CONFIG, "1");
-    streamingConfiguration.put(StreamingConfig.WINDOW_TIME_MS_CONFIG, "100");
+    // You can also define consumer configuration settings.
+    //streamingConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
     KafkaStreaming kafkaStreaming = new KafkaStreaming(builder, new StreamingConfig(streamingConfiguration));
     kafkaStreaming.start();
 
+    // Wait briefly for the streaming job to be fully up and running (otherwise it might miss
+    // some or all of the input data we produce below).
+    Thread.sleep(500);
+
     //
-    // Produce some input data to the input topic
+    // Step 2: Produce some input data to the input topic.
     //
     Properties producerConfig = new Properties();
     producerConfig.put("bootstrap.servers", cluster.bootstrapServers());
     producerConfig.put("acks", "all");
     producerConfig.put("retries", 0);
-    producerConfig.put("batch.size", 1);
-    producerConfig.put("linger.ms", 0);
     producerConfig.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
     producerConfig.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
     Producer<String, String> producer = new KafkaProducer<>(producerConfig);
-    for (String line : lines) {
-      log.debug("Producing message with value '{}' to topic {}", line, testInputTopic);
-      Future<RecordMetadata> f = producer.send(new ProducerRecord<>(testInputTopic, line));
+    for (String line : inputLines) {
+      log.debug("Producing message with value '{}' to topic {}", line, inputTopic);
+      Future<RecordMetadata> f = producer.send(new ProducerRecord<>(inputTopic, line));
       f.get();
     }
     producer.flush();
     producer.close();
 
+    // Give the streaming job some time to do its work.
+    Thread.sleep(500);
+    kafkaStreaming.close();
+
     //
-    // For comparison with Streams functionality, read the input topic also with the standard Kafka
-    // consumer API.
+    // Step 3: Verify the job's output data.
     //
     Properties consumerConfig = new Properties();
     consumerConfig.put("bootstrap.servers", cluster.bootstrapServers());
     consumerConfig.put("group.id", "noop-test-standard-consumer");
-    consumerConfig.put("enable.auto.commit", "true");
-    consumerConfig.put("auto.offset.reset", "earliest"); // important!
-    consumerConfig.put("auto.commit.interval.ms", "50");
-    consumerConfig.put("session.timeout.ms", "30000");
+    consumerConfig.put("auto.offset.reset", "earliest");
     consumerConfig.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
     consumerConfig.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-    log.debug("Consumer configuration: {}", consumerConfig);
 
     KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerConfig);
-    consumer.subscribe(Collections.singletonList(testInputTopic));
-    int remainingMessages = lines.size();
-    while (remainingMessages > 0) {
-      ConsumerRecords<String, String> records = consumer.poll(100);
+    consumer.subscribe(Collections.singletonList(outputTopic));
+    int pollIntervalMs = 100;
+    int maxTotalPollTimeMs = 2000;
+    int totalPollTimeMs = 0;
+    List<String> consumedLines = new LinkedList<>();
+    while (totalPollTimeMs < maxTotalPollTimeMs && consumedLines.size() < inputLines.size()) {
+      totalPollTimeMs += pollIntervalMs;
+      ConsumerRecords<String, String> records = consumer.poll(pollIntervalMs);
       for (ConsumerRecord<String, String> record : records) {
         log.debug("Received message with offset = {}, key = {}, value = {}",
             record.offset(), record.key(), record.value());
-        remainingMessages -= 1;
+        consumedLines.add(record.value());
       }
     }
 
-    Thread.sleep(5 * 1000);
-    kafkaStreaming.close();
-
-    // TODO: Actually implement some asserts.
-    assertThat("foo").isEqualTo("foo");
+    assertThat(consumedLines).isEqualTo(inputLines);
   }
 
 }

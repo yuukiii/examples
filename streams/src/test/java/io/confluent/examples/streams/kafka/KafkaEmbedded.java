@@ -100,9 +100,8 @@ public class KafkaEmbedded {
         brokerList(), zookeeperConnect());
     kafka.shutdown();
     kafka.awaitShutdown();
-    // TODO: Re-enable the purging of log.dirs to achieve a proper clean-up, and update log message
-    log.debug("logs.dir at {} was not removed", logDir);
-    //CoreUtils.rm(logDir);
+    log.debug("Removing logs.dir at {} ...", logDir);
+    CoreUtils.rm(logDir);
     log.debug("Shutdown of embedded Kafka broker at {} completed (with ZK ensemble at {}) ...",
         brokerList(), zookeeperConnect());
   }
