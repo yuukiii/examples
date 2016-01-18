@@ -41,7 +41,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * quickly inspect the contents of the related topics/partitions (see `testInputTopic` and
  * `testOutputTopic`).
  *
- * Example:
+ * Logging output example:
+ *
+ *    DEBUG [main] logs.dir at /var/folders/j3/1y7_mtp51fn8xh1h9ff3kt3m0000gn/T/kafka-embedded-logs-dir-1511050635 was not removed
  *
  */
 public class NoOpStreamsIntegrationTest {
