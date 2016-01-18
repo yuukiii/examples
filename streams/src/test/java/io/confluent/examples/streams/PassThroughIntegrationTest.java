@@ -89,7 +89,7 @@ public class PassThroughIntegrationTest {
 
     // Wait briefly for the streaming job to be fully up and running (otherwise it might miss
     // some or all of the input data we produce below).
-    Thread.sleep(500);
+    Thread.sleep(1000);
 
     //
     // Step 2: Produce some input data to the input topic.
@@ -111,7 +111,7 @@ public class PassThroughIntegrationTest {
     producer.close();
 
     // Give the streaming job some time to do its work.
-    Thread.sleep(500);
+    Thread.sleep(1000);
     kafkaStreaming.close();
 
     //
