@@ -32,7 +32,7 @@ import io.confluent.examples.streams.utils.SystemTimestampExtractor;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests whether Streams is able to read data from an input topic and write the same data (as-is) to
+ * Verifies that Streams is able to read data from an input topic and write the same data (as-is) to
  * a new output topic.
  */
 public class PassThroughIntegrationTest {
