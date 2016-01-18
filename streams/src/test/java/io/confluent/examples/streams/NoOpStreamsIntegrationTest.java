@@ -83,7 +83,7 @@ public class NoOpStreamsIntegrationTest {
     // Configure and start the Streams job.
     //
     KStreamBuilder builder = new KStreamBuilder();
-    KStream<byte[], String> textLines = builder.stream(testInputTopic);
+    KStream<String, String> textLines = builder.stream(testInputTopic);
 
     // write the input data as-is to the output topic
     textLines.to(testOutputTopic);
