@@ -157,6 +157,14 @@
                                           <artifactId>scala-library</artifactId>
                     <scalaVersion>2.12.0-M3</scalaVersion>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
