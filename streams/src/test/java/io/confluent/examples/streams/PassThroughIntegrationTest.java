@@ -74,7 +74,7 @@ public class PassThroughIntegrationTest {
     builder.stream(inputTopic).to(outputTopic);
 
     Properties streamingConfiguration = new Properties();
-    streamingConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "noop-test-streams");
+    streamingConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "pass-through-integration-test");
     streamingConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
     streamingConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     streamingConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -119,7 +119,7 @@ public class PassThroughIntegrationTest {
     //
     Properties consumerConfig = new Properties();
     consumerConfig.put("bootstrap.servers", cluster.bootstrapServers());
-    consumerConfig.put("group.id", "noop-test-standard-consumer");
+    consumerConfig.put("group.id", "pass-through-integration-test-standard-consumer");
     consumerConfig.put("auto.offset.reset", "earliest");
     consumerConfig.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
     consumerConfig.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
