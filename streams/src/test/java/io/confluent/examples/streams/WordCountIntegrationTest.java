@@ -98,6 +98,8 @@ public class WordCountIntegrationTest {
     KStream<String, Long> counts = source
         .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
         .map((key, value) -> new KeyValue<>(value, value))
+        // The following countByKey().toStream().map() chain can be simplified to just
+        // countByKey() once https://github.com/apache/kafka/pull/870 is merged.
         .countByKey(UnlimitedWindows.of("Counts").startOn(0L),
             stringSerializer, longSerializer, stringDeserializer, longDeserializer)
         .toStream()
