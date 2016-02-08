@@ -1,7 +1,5 @@
 package io.confluent.examples.streams;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -15,13 +13,10 @@ import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Future;
@@ -36,8 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * a new output topic.
  */
 public class PassThroughIntegrationTest {
-
-  private static final Logger log = LoggerFactory.getLogger(PassThroughIntegrationTest.class);
 
   private static EmbeddedSingleNodeKafkaCluster cluster = null;
   private static String inputTopic = "inputTopic";
@@ -102,9 +95,8 @@ public class PassThroughIntegrationTest {
     producerConfig.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
     Producer<String, String> producer = new KafkaProducer<>(producerConfig);
-    for (String line : inputValues) {
-      log.debug("Producing message with value '{}' to topic {}", line, inputTopic);
-      Future<RecordMetadata> f = producer.send(new ProducerRecord<>(inputTopic, line));
+    for (String value : inputValues) {
+      Future<RecordMetadata> f = producer.send(new ProducerRecord<>(inputTopic, value));
       f.get();
     }
     producer.flush();

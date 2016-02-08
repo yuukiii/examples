@@ -91,8 +91,8 @@ public class MapFunctionIntegrationTest {
     producerConfig.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
     Producer<String, String> producer = new KafkaProducer<>(producerConfig);
-    for (String line : inputValues) {
-      Future<RecordMetadata> f = producer.send(new ProducerRecord<>(inputTopic, line));
+    for (String value : inputValues) {
+      Future<RecordMetadata> f = producer.send(new ProducerRecord<>(inputTopic, value));
       f.get();
     }
     producer.flush();
