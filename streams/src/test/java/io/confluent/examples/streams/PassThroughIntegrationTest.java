@@ -9,8 +9,8 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.kafka.streams.KafkaStreaming;
-import org.apache.kafka.streams.StreamingConfig;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -74,18 +74,18 @@ public class PassThroughIntegrationTest {
     builder.stream(inputTopic).to(outputTopic);
 
     Properties streamingConfiguration = new Properties();
-    streamingConfiguration.put(StreamingConfig.JOB_ID_CONFIG, "noop-test-streams");
-    streamingConfiguration.put(StreamingConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
-    streamingConfiguration.put(StreamingConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    streamingConfiguration.put(StreamingConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    streamingConfiguration.put(StreamingConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    streamingConfiguration.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    streamingConfiguration.put(StreamingConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
+    streamingConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "noop-test-streams");
+    streamingConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    streamingConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    streamingConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    streamingConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    streamingConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    streamingConfiguration.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
     // You can also define consumer configuration settings.
     //streamingConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-    KafkaStreaming kafkaStreaming = new KafkaStreaming(builder, new StreamingConfig(streamingConfiguration));
-    kafkaStreaming.start();
+    KafkaStreams streams = new KafkaStreams(builder, streamingConfiguration);
+    streams.start();
 
     // Wait briefly for the streaming job to be fully up and running (otherwise it might miss
     // some or all of the input data we produce below).
@@ -112,7 +112,7 @@ public class PassThroughIntegrationTest {
 
     // Give the streaming job some time to do its work.
     Thread.sleep(1000);
-    kafkaStreaming.close();
+    streams.close();
 
     //
     // Step 3: Verify the job's output data.

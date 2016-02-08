@@ -18,16 +18,22 @@ package io.confluent.examples.streams;
 import io.confluent.examples.streams.avro.WikiFeed;
 import io.confluent.examples.streams.utils.SpecificAvroDeserializer;
 import io.confluent.examples.streams.utils.SpecificAvroSerializer;
-import io.confluent.examples.streams.utils.SystemTimestampExtractor;
+
+import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.LongDeserializer;
+import org.apache.kafka.common.serialization.LongSerializer;
+import org.apache.kafka.common.serialization.Serializer;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.kafka.streams.KafkaStreaming;
-import org.apache.kafka.streams.StreamingConfig;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.HoppingWindows;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.KeyValue;
 import org.apache.kafka.streams.kstream.Windowed;
+import org.apache.kafka.streams.processor.internals.WallclockTimestampExtractor;
 
 import java.util.Properties;
 
@@ -38,16 +44,19 @@ import java.util.Properties;
 public class WordCountExample {
 
     public static void main(String[] args) throws Exception {
-        Properties props = new Properties();
-        props.put(StreamingConfig.JOB_ID_CONFIG, "wordcount-example");
-        props.put(StreamingConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(StreamingConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(StreamingConfig.VALUE_SERIALIZER_CLASS_CONFIG, SpecificAvroSerializer.class);
-        props.put(StreamingConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, SpecificAvroDeserializer.class);
-        props.put(StreamingConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
+        Properties streamsConfiguration = new Properties();
+        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "wordcount-example");
+        streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, SpecificAvroSerializer.class);
+        streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, SpecificAvroDeserializer.class);
+        streamsConfiguration.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, WallclockTimestampExtractor.class);
 
-        StreamingConfig config = new StreamingConfig(props);
+        final Serializer<Long> longSerializer = new LongSerializer();
+        final Deserializer<Long> longDeserializer = new LongDeserializer();
+        final Serializer<String> stringSerializer = new StringSerializer();
+        final Deserializer<String> stringDeserializer = new StringDeserializer();
 
         KStreamBuilder builder = new KStreamBuilder();
 
@@ -61,12 +70,14 @@ public class WordCountExample {
                 // map the user id as key
                 .map((key, value) -> new KeyValue<>(value.getUser(), value))
                 // sum by key, need to override the serdes for String typed key
-                .countByKey(HoppingWindows.of("window").with(60000L), null, null);
+                .countByKey(HoppingWindows.of("window").with(60000L),
+                    stringSerializer, longSerializer, stringDeserializer, longDeserializer);
 
         // write to the result topic
         aggregated.to("WikipediaStats");
 
-        KafkaStreaming kstream = new KafkaStreaming(builder, config);
-        kstream.start();
+        KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
+        streams.start();
     }
+
 }

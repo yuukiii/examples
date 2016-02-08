@@ -19,11 +19,11 @@ import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.kafka.streams.KafkaStreaming;
-import org.apache.kafka.streams.StreamingConfig;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
-import org.apache.kafka.streams.kstream.KeyValue;
 
 import java.util.Properties;
 
@@ -79,16 +79,16 @@ public class MapFunctionExample {
     originalAndUppercased.to("OriginalAndUppercased", new StringSerializer(), new StringSerializer());
 
     Properties streamingConfiguration = new Properties();
-    streamingConfiguration.put(StreamingConfig.JOB_ID_CONFIG, "map-function-example");
-    streamingConfiguration.put(StreamingConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-    streamingConfiguration.put(StreamingConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
-    streamingConfiguration.put(StreamingConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    streamingConfiguration.put(StreamingConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
-    streamingConfiguration.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    streamingConfiguration.put(StreamingConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
+    streamingConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "map-function-example");
+    streamingConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    streamingConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
+    streamingConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    streamingConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
+    streamingConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    streamingConfiguration.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
 
-    KafkaStreaming stream = new KafkaStreaming(builder, new StreamingConfig(streamingConfiguration));
-    stream.start();
+    KafkaStreams streams = new KafkaStreams(builder, streamingConfiguration);
+    streams.start();
   }
 
 }

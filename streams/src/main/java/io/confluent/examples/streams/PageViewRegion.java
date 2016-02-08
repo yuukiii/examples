@@ -17,19 +17,22 @@ package io.confluent.examples.streams;
 
 import io.confluent.examples.streams.utils.GenericAvroDeserializer;
 import io.confluent.examples.streams.utils.GenericAvroSerializer;
-import io.confluent.examples.streams.utils.SystemTimestampExtractor;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.LongDeserializer;
+import org.apache.kafka.common.serialization.LongSerializer;
+import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.kafka.streams.KafkaStreaming;
-import org.apache.kafka.streams.StreamingConfig;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.HoppingWindows;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.KeyValue;
 import org.apache.kafka.streams.kstream.Windowed;
 
 import java.io.File;
@@ -41,16 +44,16 @@ import java.util.Properties;
 public class PageViewRegion {
 
     public static void main(String[] args) throws Exception {
-        Properties props = new Properties();
-        props.put(StreamingConfig.JOB_ID_CONFIG, "anomalydetection-example");
-        props.put(StreamingConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(StreamingConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(StreamingConfig.VALUE_SERIALIZER_CLASS_CONFIG, GenericAvroSerializer.class);
-        props.put(StreamingConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GenericAvroDeserializer.class);
-        props.put(StreamingConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
+        Properties streamsConfiguration = new Properties();
+        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "pageview-region-example");
+        streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, GenericAvroSerializer.class);
+        streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GenericAvroDeserializer.class);
 
-        StreamingConfig config = new StreamingConfig(props);
+        final Serializer<Long> longSerializer = new LongSerializer();
+        final Deserializer<Long> longDeserializer = new LongDeserializer();
 
         KStreamBuilder builder = new KStreamBuilder();
 
@@ -62,7 +65,8 @@ public class PageViewRegion {
 
         KTable<String, String> userRegions = users.mapValues(record -> (String) record.get("region"));
 
-        // users need to specify the schemas for all intermediate classes
+        // We must specify the Avro schemas for all intermediate (Avro) classes, if any.
+        // In this example, we want to create an intermediate GenericRecord to hold the view region (see below).
         Schema schema = new Schema.Parser().parse(new File("pageviewregion.avsc"));
 
         KTable<Windowed<String>, Long> regionCount = viewsByUser
@@ -71,16 +75,17 @@ public class PageViewRegion {
                     viewRegion.put("user", view.get("user"));
                     viewRegion.put("page", view.get("page"));
                     viewRegion.put("region", region);
-
                     return viewRegion;
                 })
                 .map((user, viewRegion) -> new KeyValue<>((String) viewRegion.get("region"), viewRegion))
-                .countByKey(HoppingWindows.of("GeoPageViewsWindow").with(7 * 24 * 60 * 60 * 1000), null, null);
+                .countByKey(HoppingWindows.of("GeoPageViewsWindow").with(7 * 24 * 60 * 60 * 1000),
+                    null, longSerializer, null, longDeserializer);
 
         // write to the result topic
         regionCount.to("PageViewsByRegion");
 
-        KafkaStreaming kstream = new KafkaStreaming(builder, config);
-        kstream.start();
+        KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
+        streams.start();
     }
+
 }
