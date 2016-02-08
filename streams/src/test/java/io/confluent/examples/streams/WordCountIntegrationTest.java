@@ -24,7 +24,10 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -150,10 +153,15 @@ public class WordCountIntegrationTest {
     assertThat(actualValues).containsExactlyElementsOf(expectedValues);
   }
 
-  private static void purgeLocalStreamsState(Properties streamingConfiguration) {
-    String value = streamingConfiguration.getProperty(StreamsConfig.STATE_DIR_CONFIG);
-    if (value != null && value.startsWith("/tmp")) {
-      CoreUtils.rm(value);
+  private static void purgeLocalStreamsState(Properties streamingConfiguration) throws IOException {
+    String path = streamingConfiguration.getProperty(StreamsConfig.STATE_DIR_CONFIG);
+    if (path != null) {
+      File node = Paths.get(path).normalize().toFile();
+      // Only purge state when it's under /tmp.  This is a safety net to prevent accidentally
+      // deleting important local directory trees.
+      if (node.getAbsolutePath().startsWith("/tmp")) {
+        CoreUtils.rm(node);
+      }
     }
   }
 
