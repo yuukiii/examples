@@ -126,21 +126,8 @@ public class PassThroughIntegrationTest {
 
     KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerConfig);
     consumer.subscribe(Collections.singletonList(outputTopic));
-    int pollIntervalMs = 100;
-    int maxTotalPollTimeMs = 2000;
-    int totalPollTimeMs = 0;
-    List<String> consumedLines = new LinkedList<>();
-    while (totalPollTimeMs < maxTotalPollTimeMs && consumedLines.size() < inputLines.size()) {
-      totalPollTimeMs += pollIntervalMs;
-      ConsumerRecords<String, String> records = consumer.poll(pollIntervalMs);
-      for (ConsumerRecord<String, String> record : records) {
-        log.debug("Received message with offset = {}, key = {}, value = {}",
-            record.offset(), record.key(), record.value());
-        consumedLines.add(record.value());
-      }
-    }
-
-    assertThat(consumedLines).isEqualTo(inputLines);
+    List<String> actualValues = IntegrationTestUtils.readValues(consumer, inputLines.size());
+    assertThat(actualValues).isEqualTo(inputLines);
   }
 
 }
