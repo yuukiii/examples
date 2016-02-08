@@ -59,7 +59,7 @@ public class PassThroughIntegrationTest {
 
   @Test
   public void shouldWriteTheInputDataAsIsToTheOutputTopic() throws Exception {
-    List<String> inputLines = Arrays.asList(
+    List<String> inputValues = Arrays.asList(
         "hello world",
         "the world is not enough",
         "the world of the stock market is coming to an end"
@@ -102,7 +102,7 @@ public class PassThroughIntegrationTest {
     producerConfig.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
     Producer<String, String> producer = new KafkaProducer<>(producerConfig);
-    for (String line : inputLines) {
+    for (String line : inputValues) {
       log.debug("Producing message with value '{}' to topic {}", line, inputTopic);
       Future<RecordMetadata> f = producer.send(new ProducerRecord<>(inputTopic, line));
       f.get();
@@ -126,8 +126,8 @@ public class PassThroughIntegrationTest {
 
     KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerConfig);
     consumer.subscribe(Collections.singletonList(outputTopic));
-    List<String> actualValues = IntegrationTestUtils.readValues(consumer, inputLines.size());
-    assertThat(actualValues).isEqualTo(inputLines);
+    List<String> actualValues = IntegrationTestUtils.readValues(consumer, inputValues.size());
+    assertThat(actualValues).isEqualTo(inputValues);
   }
 
 }
