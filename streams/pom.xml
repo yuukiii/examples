@@ -19,7 +19,7 @@
     <properties>
         <java.version>1.8</java.version>
         <kafka.version>0.9.1.0-SNAPSHOT</kafka.version>
-        <kafka.scala.version>2.10</kafka.scala.version>
+        <kafka.scala.version>2.11</kafka.scala.version>
         <scala.version>${kafka.scala.version}.6</scala.version>
         <confluent.version>2.0.0-SNAPSHOT</confluent.version>
         <avro.version>1.7.7</avro.version>
@@ -146,17 +146,23 @@
                 <artifactId>scala-maven-plugin</artifactId>
                 <version>3.2.1</version>
                 <configuration>
-                    <!--
-                        Override the Scala version to be used.
-                        Normally, the plugin would automatically pick the version defined via the
-                        'org.scala-lang:scala-library' dependency above, but that dependency must
-                        be either 2.10 or 2.11 because Kafka is not yet built against 2.12.
-                    -->
-
-                              <groupId>org.scala-lang</groupId>
-                                          <artifactId>scala-library</artifactId>
-                    <scalaVersion>2.12.0-M3</scalaVersion>
+                    <args>
+                        <!--
+                           In combination with Scala 2.11, `-Xexperimental` enables SAM
+                           for Java 8 lambda support.  Make sure `kafka.scala.version`
+                           is set to `2.11`, not `2.10`.
+                        -->
+                        <arg>-Xexperimental</arg>
+                    </args>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>

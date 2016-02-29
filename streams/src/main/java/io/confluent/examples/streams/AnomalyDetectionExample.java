@@ -17,16 +17,19 @@ package io.confluent.examples.streams;
 
 import io.confluent.examples.streams.utils.GenericAvroDeserializer;
 import io.confluent.examples.streams.utils.GenericAvroSerializer;
-import io.confluent.examples.streams.utils.SystemTimestampExtractor;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.LongDeserializer;
+import org.apache.kafka.common.serialization.LongSerializer;
+import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.kafka.streams.KafkaStreaming;
-import org.apache.kafka.streams.StreamingConfig;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
-import org.apache.kafka.streams.kstream.KeyValue;
-import org.apache.kafka.streams.kstream.SlidingWindows;
+import org.apache.kafka.streams.kstream.TumblingWindows;
 
 import java.util.Properties;
 
@@ -37,16 +40,16 @@ import java.util.Properties;
 public class AnomalyDetectionExample {
 
     public static void main(String[] args) throws Exception {
-        Properties props = new Properties();
-        props.put(StreamingConfig.JOB_ID_CONFIG, "anomalydetection-example");
-        props.put(StreamingConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(StreamingConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(StreamingConfig.VALUE_SERIALIZER_CLASS_CONFIG, GenericAvroSerializer.class);
-        props.put(StreamingConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GenericAvroDeserializer.class);
-        props.put(StreamingConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
+        Properties streamsConfiguration = new Properties();
+        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "anomaly-detection-example");
+        streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, GenericAvroSerializer.class);
+        streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GenericAvroDeserializer.class);
 
-        StreamingConfig config = new StreamingConfig(props);
+        final Serializer<Long> longSerializer = new LongSerializer();
+        final Deserializer<Long> longDeserializer = new LongDeserializer();
 
         KStreamBuilder builder = new KStreamBuilder();
 
@@ -56,18 +59,20 @@ public class AnomalyDetectionExample {
         KStream<String, Long> anomalyUsers = views
                 // map the user id as key
                 .map((dummy, record) -> new KeyValue<>((String) record.get("user"), record))
-                // count users on the one-minute sliding window
-                .countByKey(SlidingWindows.of("PageViewCountWindow").with(60 * 1000L), null, null)
+                // count users on the one-minute tumbling window
+                .countByKey(TumblingWindows.of("PageViewCountWindow").with(60 * 1000L),
+                    null, longSerializer, null, longDeserializer)
                 // get users whose one-minute count is larger than 40
                 .filter((windowedUserId, count) -> count > 40)
-                // transform to streams and get rid of windows
+                // get rid of windows by transforming to a stream
                 .toStream()
                 .map((windowedUserId, count) -> new KeyValue<>(windowedUserId.value(), count));
 
         // write to the result topic
         anomalyUsers.to("AnomalyUsers");
 
-        KafkaStreaming kstream = new KafkaStreaming(builder, config);
-        kstream.start();
+        KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
+        streams.start();
     }
+
 }

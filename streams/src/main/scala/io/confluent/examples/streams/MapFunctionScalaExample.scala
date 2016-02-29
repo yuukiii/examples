@@ -4,8 +4,8 @@ import java.util.Properties
 
 import io.confluent.examples.streams.utils.SystemTimestampExtractor
 import org.apache.kafka.common.serialization.{ByteArrayDeserializer, ByteArraySerializer, StringDeserializer, StringSerializer}
-import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder, KeyValue}
-import org.apache.kafka.streams.{KafkaStreaming, StreamingConfig}
+import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder}
+import org.apache.kafka.streams._
 
 /**
   * Demonstrates how to perform simple, state-less transformations via map functions.
@@ -13,7 +13,8 @@ import org.apache.kafka.streams.{KafkaStreaming, StreamingConfig}
   * Use cases include e.g. basic data sanitization, data anonymization by obfuscating sensitive data
   * fields (such as personally identifiable information aka PII).
   *
-  * Requires a version of Scala that supports Java 8 and SAM / Java lambda (e.g. Scala 2.12).
+  * Requires a version of Scala that supports Java 8 and SAM / Java lambda (e.g. Scala 2.11 with
+  * `-Xexperimental` compiler flag, or 2.12).
   */
 class MapFunctionScalaExample {
 
@@ -68,16 +69,16 @@ class MapFunctionScalaExample {
 
     val streamingConfig = {
       val settings = new Properties
-      settings.put(StreamingConfig.JOB_ID_CONFIG, "map-function-example")
-      settings.put(StreamingConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
-      settings.put(StreamingConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[ByteArraySerializer])
-      settings.put(StreamingConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
-      settings.put(StreamingConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[ByteArrayDeserializer])
-      settings.put(StreamingConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
-      settings.put(StreamingConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, classOf[SystemTimestampExtractor])
-      new StreamingConfig(settings)
+      settings.put(StreamsConfig.JOB_ID_CONFIG, "map-function-example")
+      settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
+      settings.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[ByteArraySerializer])
+      settings.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
+      settings.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[ByteArrayDeserializer])
+      settings.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
+      settings.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, classOf[SystemTimestampExtractor])
+      settings
     }
-    val stream: KafkaStreaming = new KafkaStreaming(builder, streamingConfig)
+    val stream: KafkaStreams = new KafkaStreams(builder, streamingConfig)
     stream.start()
   }
 
