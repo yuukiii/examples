@@ -1,58 +1,10 @@
-Examples
-========
+# Confluent Examples
 
-This repository includes projects demonstrating how to use the Java Kafka producer
-and consumer. You can find detailed explanation of the code at the
-[application development section](http://confluent.io/docs/current/app-development.html)
-of the Confluent Platform documentation.
+This repository contains code examples for [Apache Kafka](http://kafka.apache.org/) and the
+[Confluent Platform](http://www.confluent.io/product).
 
-To build the producer project
-
-    $ cd producer
-    $ mvn clean package
-
-To build the consumer project
-
-    $ cd consumer
-    $ mvn clean package
-
-Quickstart
-----------
-
-Before running the examples, make sure that Zookeeper, Kafka and Schema Registry are
-running. In what follows, we assume that Zookeeper, Kafka and Schema Registry are
-started with the default settings.
-
-    # Start Zookeeper
-    $ bin/zookeeper-server-start etc/kafka/zookeeper.properties
-
-    # Start Kafka
-    $ bin/kafka-server-start etc/kafka/server.properties
-
-    # Start Schema Registry
-    $ bin/schema-registry-start etc/schema-registry/schema-registry.properties
-
-Then create a topic called page_visits:
-
-    # Create page_visits topic
-    $ bin/kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 \
-      --partitions 1 --topic page_visits
-
-Next, cd to the `examples` directory:
-
-    $ cd examples
-
-First cd to the `producer` directory, then run the example producer to publish 10 records.
-
-    # Run the producer
-    $ cd producer
-    $ mvn exec:java -Dexec.mainClass="io.confluent.examples.producer.ProducerExample" \
-      -Dexec.args="10 http://localhost:8081"
-
-Then cd to the `consumer` directory, and run the consumer group example to consume
-the records we just published to the cluster and display in the console.
-
-    # Run the consumer
-    $ cd ../consumer
-    $ mvn exec:java -Dexec.mainClass="io.confluent.examples.consumer.ConsumerGroupExample" \
-      -Dexec.args="localhost:2181 group page_visits 1 http://localhost:8081"
+* [kafka-clients](kafka-clients/): example Kafka client applications such as a Java producer application
+  (for writing data to Kafka) and a Java consumer application (for reading data from Kafka)
+* [kafka-streams](kafka-streams/): examples that demonstrate how to implement real-time processing applications using
+   Kafka Streams, which is a new stream processing library included with the [Apache Kafka](http://kafka.apache.org/)
+   open source project.
