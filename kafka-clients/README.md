@@ -13,21 +13,21 @@ In what follows, we assume that Zookeeper, Kafka, and Schema Registry are starte
 See the [Confluent Quickstart guide](http://docs.confluent.io/2.0.1/quickstart.html) for detailed instructions.
 
 ```shell
-# Start Zookeeper
-$ bin/zookeeper-server-start etc/kafka/zookeeper.properties
+# Start Zookeeper. Since this is a long-running service, you should run it in its own terminal.
+$ ./bin/zookeeper-server-start ./etc/kafka/zookeeper.properties
 
-# Start Kafka
-$ bin/kafka-server-start etc/kafka/server.properties
+# Start Kafka, also in its own terminal.
+$ ./bin/kafka-server-start ./etc/kafka/server.properties
 
-# Start Schema Registry
-$ bin/schema-registry-start etc/schema-registry/schema-registry.properties
+# Start the Schema Registry, also in its own terminal.
+./bin/schema-registry-start ./etc/schema-registry/schema-registry.properties
 ```
 
 Then create a topic called `page_visits`:
 
 ```shell
 # Create page_visits topic
-$ bin/kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 \
+$ ./bin/kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 \
                    --partitions 1 --topic page_visits
 ```
 
