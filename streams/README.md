@@ -1,5 +1,9 @@
 # Kafka Streams examples
 
+This sub-repository includes examples demonstrating how to implement real-time processing applications using Kafka Streams.
+
+It builds based on the Confluent Platform 2.1.0-alpha1 (aka the "Streams Tech Preview") release.
+
 # Requirements
 
 ## Java 8
@@ -21,7 +25,8 @@ You must first build the latest version of Kafka `trunk` and install it locally:
 ```shell
 $ git clone git@github.com:apache/kafka.git
 $ git checkout trunk
-$ ./gradlew clean installAll
+$ ./gradlew clean
+$ ./gradlew -PscalaVersion=2.11.7 install
 ```
 
 
