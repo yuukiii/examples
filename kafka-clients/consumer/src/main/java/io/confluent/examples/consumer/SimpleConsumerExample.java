@@ -109,7 +109,7 @@ public class SimpleConsumerExample {
       try {
         Thread.sleep(1000);
       } catch (InterruptedException ie) {
-
+        // ignore any exceptions
       }
     }
     throw new Exception("Unable to find new leader after Broker failure. Exiting");
@@ -192,6 +192,7 @@ public class SimpleConsumerExample {
         try {
           Thread.sleep(1000);
         } catch (InterruptedException ie) {
+          // ignore any exceptions
         }
       }
     }
