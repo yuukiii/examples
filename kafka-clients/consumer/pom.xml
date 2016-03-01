@@ -18,7 +18,7 @@
 
     <properties>
         <kafka.version>0.9.0.1-cp1</kafka.version>
-        <kafka.scala.version>2.10</kafka.scala.version>
+        <kafka.scala.version>2.11</kafka.scala.version>
         <confluent.version>1.0</confluent.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
