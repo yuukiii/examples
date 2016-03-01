@@ -42,6 +42,8 @@ clusters, feed input data to them, process the data using Kafka Streams, and fin
 
 ## Apache Kafka with Kafka Streams included
 
+> The instructions in this section are only required until the Kafka Streams Tech Preview is released.
+
 Until the Kafka Streams Tech Preview is available, you have three options to get your hands on the Kafka Streams
 library, sorted by ease-of-use (easiest first):
 
