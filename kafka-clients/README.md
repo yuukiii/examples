@@ -6,6 +6,11 @@ and consumer. You can find detailed explanation of the code at the
 of the Confluent Platform documentation.
 
 
+# Requirements
+
+* The examples described in this README require the version of Kafka shipped with Confluent Platform 2.0.1.
+
+
 # Quickstart
 
 Before running the examples, we must launch Zookeeper, Kafka, and Schema Registry.
