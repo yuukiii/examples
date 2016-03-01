@@ -15,6 +15,28 @@ directory depend on the [Confluent Platform 2.1.0-alpha1 release](http://www.con
 _Kafka Streams Tech Preview_, which includes the latest Kafka Streams implementation backported to Kafka 0.9.
 
 
+# List of examples
+
+Java:
+
+* [MapFunctionExample.java](src/main/java/io/confluent/examples/streams/MapFunctionExample.java)
+  -- demonstrates how to perform simple, state-less transformations via map functions, using the high-level KStream DSL
+
+Scala:
+
+* [MapFunctionScalaExample](src/main/scala/io/confluent/examples/streams/MapFunctionScalaExample.scala)
+  -- demonstrates how to perform simple, state-less transformations via map functions, using the high-level KStream DSL
+
+There are also a few integration tests, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka
+clusters, feed input data to them, process the data using Kafka Streams, and finally verify the output results.
+
+* [WordCountIntegrationTest](src/test/java/io/confluent/examples/streams/WordCountIntegrationTest.java)
+* [MapFunctionIntegrationTest](src/test/java/io/confluent/examples/streams/MapFunctionIntegrationTest.java)
+* [PassThroughIntegrationTest](src/test/java/io/confluent/examples/streams/PassThroughIntegrationTest.java)
+
+> Tip: Run `mvn test` to launch the integration tests.
+
+
 # Requirements
 
 ## Java 8
@@ -28,6 +50,15 @@ IntelliJ IDEA users:
 * Select "Project" on the left.
     * Set "Project SDK" to Java 1.8.
     * Set "Project language level" to "8 - Lambdas, type annotations, etc."
+
+
+## Scala
+
+> Scala is required only for the Scala examples in this repository.  If you are a Java developer you can safely ignore
+> this section.
+
+If you want to experiment with the Scala examples in this repository, you need a version of Scala that supports Java 8
+and SAM / Java lambda (e.g. Scala 2.11 with * `-Xexperimental` compiler flag, or 2.12).
 
 
 ## A Kafka version that includes Kafka Streams
