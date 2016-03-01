@@ -31,6 +31,12 @@
             <id>confluent</id>
             <url>http://packages.confluent.io/maven/</url>
         </repository>
+
+        <!-- This is Confluent's staging maven repository; need to be removed in the final state -->
+        <repository>
+            <id>confluent-staging</id>
+            <url>http://staging-confluent-packages-maven-2.1.0.s3.amazonaws.com/maven/</url>
+        </repository>
     </repositories>
 
     <properties>
@@ -205,7 +211,7 @@
                         </goals>
                         <configuration>
                             <sourceDirectory>${project.basedir}/src/main/avro/io/confluent/examples/streams</sourceDirectory>
-                            <outputDirectory>${project.basedir}/src/main/java</outputDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
                             <stringType>String</stringType>
                         </configuration>
                     </execution>
