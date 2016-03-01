@@ -59,7 +59,7 @@ public class SimpleConsumerExample {
           for (PartitionMetadata part : item.partitionsMetadata()) {
             if (part.partitionId() == partition) {
               replicaBrokers.clear();
-              for (kafka.cluster.Broker replica : part.replicas()) {
+              for (kafka.cluster.BrokerEndPoint replica : part.replicas()) {
                 replicaBrokers.add(replica.host());
               }
               return part;
