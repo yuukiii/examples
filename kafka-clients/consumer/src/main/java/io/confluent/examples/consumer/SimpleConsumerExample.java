@@ -37,10 +37,10 @@ import kafka.message.MessageAndOffset;
 
 public class SimpleConsumerExample {
 
-  private List<String> replicaBrokers = new ArrayList<String>();
+  private List<String> replicaBrokers = new ArrayList<>();
 
   public SimpleConsumerExample() {
-    replicaBrokers = new ArrayList<String>();
+    replicaBrokers = new ArrayList<>();
   }
 
   // Find the Lead Broker for a Topic Partition
@@ -81,7 +81,7 @@ public class SimpleConsumerExample {
                                    long whichTime, String clientName) {
     TopicAndPartition topicAndPartition = new TopicAndPartition(topic, partition);
     Map<TopicAndPartition, PartitionOffsetRequestInfo> requestInfo =
-        new HashMap<TopicAndPartition, PartitionOffsetRequestInfo>();
+        new HashMap<>();
     requestInfo.put(topicAndPartition, new PartitionOffsetRequestInfo(whichTime, 1));
     kafka.javaapi.OffsetRequest request = new kafka.javaapi.OffsetRequest(
         requestInfo, kafka.api.OffsetRequest.CurrentVersion(), clientName);
@@ -207,7 +207,7 @@ public class SimpleConsumerExample {
     long maxReads = Long.parseLong(args[0]);
     String topic = args[1];
     int partition = Integer.parseInt(args[2]);
-    List<String> seeds = new ArrayList<String>();
+    List<String> seeds = new ArrayList<>();
     seeds.add(args[3]);
     int port = Integer.parseInt(args[4]);
 
