@@ -2,7 +2,7 @@
 
 This directory includes projects demonstrating how to use the Java Kafka producer
 and consumer. You can find detailed explanation of the code at the
-[application development section](http://confluent.io/docs/current/app-development.html)
+[application development section](http://confluent.io/docs/2.0.1/app-development.html)
 of the Confluent Platform documentation.
 
 
@@ -10,7 +10,7 @@ of the Confluent Platform documentation.
 
 Before running the examples, we must launch Zookeeper, Kafka, and Schema Registry.
 In what follows, we assume that Zookeeper, Kafka, and Schema Registry are started with the default settings.
-See the [Confluent Quickstart guide](http://docs.confluent.io/current/quickstart.html) for detailed instructions.
+See the [Confluent Quickstart guide](http://docs.confluent.io/2.0.1/quickstart.html) for detailed instructions.
 
 ```shell
 # Start Zookeeper
