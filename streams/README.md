@@ -17,24 +17,25 @@ _Kafka Streams Tech Preview_, which includes the latest Kafka Streams implementa
 
 # List of examples
 
-Java:
+## Java
 
 * [MapFunctionExample.java](src/main/java/io/confluent/examples/streams/MapFunctionExample.java)
-  -- demonstrates how to perform simple, state-less transformations via map functions, using the high-level KStream DSL
-
-Scala:
-
-* [MapFunctionScalaExample](src/main/scala/io/confluent/examples/streams/MapFunctionScalaExample.scala)
   -- demonstrates how to perform simple, state-less transformations via map functions, using the high-level KStream DSL
 
 There are also a few integration tests, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka
 clusters, feed input data to them, process the data using Kafka Streams, and finally verify the output results.
 
+> Tip: Run `mvn test` to launch the integration tests.
+
 * [WordCountIntegrationTest](src/test/java/io/confluent/examples/streams/WordCountIntegrationTest.java)
 * [MapFunctionIntegrationTest](src/test/java/io/confluent/examples/streams/MapFunctionIntegrationTest.java)
 * [PassThroughIntegrationTest](src/test/java/io/confluent/examples/streams/PassThroughIntegrationTest.java)
 
-> Tip: Run `mvn test` to launch the integration tests.
+
+## Scala
+
+* [MapFunctionScalaExample](src/main/scala/io/confluent/examples/streams/MapFunctionScalaExample.scala)
+  -- demonstrates how to perform simple, state-less transformations via map functions, using the high-level KStream DSL
 
 
 # Requirements
