@@ -20,7 +20,7 @@
         <java.version>1.8</java.version>
         <kafka.version>0.9.1.0-cp1</kafka.version>
         <kafka.scala.version>2.11</kafka.scala.version>
-        <scala.version>${kafka.scala.version}.6</scala.version>
+        <scala.version>${kafka.scala.version}.7</scala.version>
         <confluent.version>2.1.0-alpha1</confluent.version>
         <avro.version>1.7.7</avro.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
