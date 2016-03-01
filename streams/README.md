@@ -64,22 +64,22 @@ library, sorted by ease-of-use (easiest first):
 2. Build Apache Kafka 0.9 with backported Kafka Streams, and install it locally.  No changes required to
    [pom.xml](pom.xml).
 
-        ```shell
-        $ git clone git@github.com:confluentinc/kafka.git        # Confluent mirror of Apache Kafka's git repository
-        $ git checkout 0.9.0-cp-2.0.1-with-streams-tech-preview  # Kafka 0.9 with backported Kafka Streams
-        $ ./gradlew clean installAll
-        ```
+    ```shell
+    $ git clone git@github.com:confluentinc/kafka.git        # Confluent mirror of Apache Kafka's git repository
+    $ git checkout 0.9.0-cp-2.0.1-with-streams-tech-preview  # Kafka 0.9 with backported Kafka Streams
+    $ ./gradlew clean installAll
+    ```
 
 3. Build the latest version of Apache Kafka `trunk`, and install it locally.  Note that, in this case, you will need to
    update [pom.xml](pom.xml) to match the specified version of Kafka with the one in Kafka's `trunk` (cf.
    `version` in [gradle.properties](https://github.com/apache/kafka/blob/trunk/gradle.properties));  as of 01-Mar-2016,
    this version is `0.10.0.0-SNAPSHOT`.
 
-        ```shell
-        $ git clone git@github.com:apache/kafka.git
-        $ git checkout trunk
-        $ ./gradlew clean installAll
-        ```
+    ```shell
+    $ git clone git@github.com:apache/kafka.git
+    $ git checkout trunk
+    $ ./gradlew clean installAll
+    ```
 
 ## Java 8
 
