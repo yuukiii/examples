@@ -66,18 +66,19 @@ public class PassThroughIntegrationTest {
     // Write the input data as-is to the output topic.
     builder.stream(inputTopic).to(outputTopic);
 
-    Properties streamingConfiguration = new Properties();
-    streamingConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "pass-through-integration-test");
-    streamingConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
-    streamingConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    streamingConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    streamingConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    streamingConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    streamingConfiguration.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
+    Properties streamsConfiguration = new Properties();
+    streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "pass-through-integration-test");
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, cluster.zookeeperConnect());
+    streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    streamsConfiguration.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
     // You can also define consumer configuration settings.
     //streamingConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-    KafkaStreams streams = new KafkaStreams(builder, streamingConfiguration);
+    KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();
 
     // Wait briefly for the streaming job to be fully up and running (otherwise it might miss
