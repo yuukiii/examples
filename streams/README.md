@@ -46,20 +46,20 @@ library, sorted by ease-of-use (easiest first):
 
 1. Use Confluent's staging maven repository by adding/editing the following snippet to your copy of [pom.xml](pom.xml):
 
-        ```xml
-        <repositories>
-            <!-- Confluent's production maven repository is already defined in `pom.xml` -->
-            <repository>
-                <id>confluent</id>
-                <url>http://packages.confluent.io/maven/</url>
-            </repository>
-            <!-- This is Confluent's staging maven repository; add this when/where needed -->
-            <repository>
-                <id>confluent-staging</id>
-                <url>http://staging-confluent-packages-maven-2.1.0.s3.amazonaws.com/maven/</url>
-            </repository>
-        </repositories>
-        ```
+    ```xml
+    <repositories>
+        <!-- Confluent's production maven repository is already defined in `pom.xml` -->
+        <repository>
+            <id>confluent</id>
+            <url>http://packages.confluent.io/maven/</url>
+        </repository>
+        <!-- This is Confluent's staging maven repository; add this when/where needed -->
+        <repository>
+            <id>confluent-staging</id>
+            <url>http://staging-confluent-packages-maven-2.1.0.s3.amazonaws.com/maven/</url>
+        </repository>
+    </repositories>
+    ```
 
 2. Build Apache Kafka 0.9 with backported Kafka Streams, and install it locally.  No changes required to
    [pom.xml](pom.xml).
