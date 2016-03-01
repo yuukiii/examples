@@ -28,12 +28,11 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.HoppingWindows;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.Windowed;
-import org.apache.kafka.streams.processor.internals.WallclockTimestampExtractor;
+import org.apache.kafka.streams.kstream.KeyValueMapper;
+import org.apache.kafka.streams.kstream.Predicate;
 
 import java.util.Properties;
 
@@ -41,17 +40,30 @@ import java.util.Properties;
 /**
  * From the wiki feed irc stream compute the number of new user feeds for every minute.
  */
+
+/**
+ * Demonstrates, using the high-level KStream DSL, how to implement the WordCount program
+ * that computes a simple word occurrence histogram from an input text.
+ *
+ * In this example, the input stream reads from a topic named "streams-file-input", where the values of messages
+ * represent lines of text; and the histogram output is written to topic "streams-wordcount-output" where each record
+ * is an updated count of a single word.
+ *
+ * Before running this example you must create the source topic (e.g. via bin/kafka-topics.sh --create ...)
+ * and write some data to it (e.g. via bin-kafka-console-producer.sh). Otherwise you won't see any data arriving in the output topic.
+ */
+
 public class WordCountExample {
 
     public static void main(String[] args) throws Exception {
         Properties streamsConfiguration = new Properties();
-        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "wordcount-example");
+        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "streams-wordcount-example");
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
         streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, SpecificAvroSerializer.class);
         streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, SpecificAvroDeserializer.class);
-        streamsConfiguration.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, WallclockTimestampExtractor.class);
 
         final Serializer<Long> longSerializer = new LongSerializer();
         final Deserializer<Long> longDeserializer = new LongDeserializer();
@@ -64,20 +76,28 @@ public class WordCountExample {
         KStream<String, WikiFeed> feeds = builder.stream("WikipediaFeed");
 
         // aggregate the new feed counts of by user
-        KTable<Windowed<String>, Long> aggregated = feeds
+        KTable<String, Long> aggregated = feeds
                 // filter out old feeds
-                .filter((dummy, value) -> value.getIsNew())
+                .filter(new Predicate<String, WikiFeed> () {
+                    @Override
+                    public boolean test(String dummy, WikiFeed value) {
+                        return value.getIsNew();
+                    }
+                })
                 // map the user id as key
-                .map((key, value) -> new KeyValue<>(value.getUser(), value))
+                .map(new KeyValueMapper<String, WikiFeed, KeyValue<String, WikiFeed>>() {
+                    @Override
+                    public KeyValue<String, WikiFeed> apply(String key, WikiFeed value) {
+                        return new KeyValue<>(value.getUser(), value);
+                    }
+                })
                 // sum by key, need to override the serdes for String typed key
-                .countByKey(HoppingWindows.of("window").with(60000L),
-                    stringSerializer, longSerializer, stringDeserializer, longDeserializer);
+                .countByKey(stringSerializer, longSerializer, stringDeserializer, longDeserializer, "Counts");
 
-        // write to the result topic
-        aggregated.to("WikipediaStats");
+        // write to the result topic, need to override serdes
+        aggregated.to("WikipediaStats", stringSerializer, longSerializer);
 
         KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
         streams.start();
     }
-
 }
