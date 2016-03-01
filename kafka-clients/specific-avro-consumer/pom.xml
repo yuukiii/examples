@@ -8,6 +8,23 @@
     <artifactId>clickstream-sessionizing-consumer</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <organization>
+        <name>Confluent, Inc.</name>
+        <url>http://confluent.io</url>
+    </organization>
+    <url>http://confluent.io</url>
+    <description>
+        Kafka Java consumer example, using Avro's specific API
+    </description>
+
+    <licenses>
+        <license>
+            <name>Apache License 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
     <repositories>
         <repository>
             <id>confluent</id>
