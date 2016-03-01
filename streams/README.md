@@ -39,6 +39,48 @@ clusters, feed input data to them, process the data using Kafka Streams, and fin
 
 # Requirements
 
+## Apache Kafka with Kafka Streams included
+
+Until the Kafka Streams Tech Preview is available, you have three options to get your hands on the Kafka Streams
+library, sorted by ease-of-use (easiest first):
+
+1. Use Confluent's staging maven repository by adding/editing the following snippet to your copy of [pom.xml](pom.xml):
+
+        ```xml
+        <repositories>
+            <!-- Confluent's production maven repository is already defined in `pom.xml` -->
+            <repository>
+                <id>confluent</id>
+                <url>http://packages.confluent.io/maven/</url>
+            </repository>
+            <!-- This is Confluent's staging maven repository; add this when/where needed -->
+            <repository>
+                <id>confluent-staging</id>
+                <url>http://staging-confluent-packages-maven-2.1.0.s3.amazonaws.com/maven/</url>
+            </repository>
+        </repositories>
+        ```
+
+2. Build Apache Kafka 0.9 with backported Kafka Streams, and install it locally.  No changes required to
+   [pom.xml](pom.xml).
+
+        ```shell
+        $ git clone git@github.com:confluentinc/kafka.git        # Confluent mirror of Apache Kafka's git repository
+        $ git checkout 0.9.0-cp-2.0.1-with-streams-tech-preview  # Kafka 0.9 with backported Kafka Streams
+        $ ./gradlew clean installAll
+        ```
+
+3. Build the latest version of Apache Kafka `trunk`, and install it locally.  Note that, in this case, you will need to
+   update [pom.xml](pom.xml) to match the specified version of Kafka with the one in Kafka's `trunk` (cf.
+   `version` in [gradle.properties](https://github.com/apache/kafka/blob/trunk/gradle.properties));  as of 01-Mar-2016,
+   this version is `0.10.0.0-SNAPSHOT`.
+
+        ```shell
+        $ git clone git@github.com:apache/kafka.git
+        $ git checkout trunk
+        $ ./gradlew clean installAll
+        ```
+
 ## Java 8
 
 The code examples require Java 8, primarily because of the usage of
@@ -59,18 +101,6 @@ IntelliJ IDEA users:
 
 If you want to experiment with the Scala examples in this repository, you need a version of Scala that supports Java 8
 and SAM / Java lambda (e.g. Scala 2.11 with * `-Xexperimental` compiler flag, or 2.12).
-
-
-## A Kafka version that includes Kafka Streams
-
-You must first build the latest version of Kafka `trunk` and install it locally:
-
-```shell
-$ git clone git@github.com:apache/kafka.git
-$ git checkout trunk
-$ ./gradlew clean
-$ ./gradlew -PscalaVersion=2.11.7 install
-```
 
 
 # Development
