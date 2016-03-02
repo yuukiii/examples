@@ -48,6 +48,11 @@ import java.util.Properties;
  * Create a data feed of the top 100 news articles per industry, ranked by click-through-rate
  * (assuming this is for the past week).
  *
+ * Note: The generic Avro binding is used for serialization/deserialization.  This means the
+ * appropriate Avro schema files must be provided for each of the "intermediate" Avro classes, i.e.
+ * whenever new types of Avro objects (in the form of GenericRecord) are being passed between
+ * processing steps.
+ *
  * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */
 public class TopArticlesLambdaExample {
