@@ -33,11 +33,11 @@ import org.apache.kafka.streams.kstream.KTable;
 import java.util.Properties;
 
 /**
- * From the changelog stream of user profile data to compute the number of users
- * with complete profiles per region for regions having at least 10M users with
- * complete profiles. "Completeness" is defined as being at least 200 characters total.
+ * Computes, per region, the number of users with "complete" user profiles for such regions that
+ * have at least 10 million users with complete profiles.  A user profile is naively considered
+ * "complete" whenever it has a total of at least 200 characters.
  *
- * NOTE: this program works with Java 8 with lambda expression only.
+ * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */
 public class UserRegionLambdaExample {
 

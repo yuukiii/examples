@@ -46,10 +46,10 @@ import java.util.PriorityQueue;
 import java.util.Properties;
 
 /**
- * Create a feed of the top 100 news articles per industry ranked by
- * click-through-rate (assuming this is for the past week).
+ * Create a data feed of the top 100 news articles per industry, ranked by click-through-rate
+ * (assuming this is for the past week).
  *
- * NOTE: this program works with Java 8 with lambda expression only.
+ * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */
 public class TopArticlesLambdaExample {
 

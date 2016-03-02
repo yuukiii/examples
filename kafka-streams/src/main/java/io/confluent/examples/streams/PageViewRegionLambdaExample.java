@@ -39,10 +39,10 @@ import java.io.File;
 import java.util.Properties;
 
 /**
- * Compute the number of page views by geo-region.
+ * Compute the number of page views by geo-region.  Same as PageViewRegionExample but uses lambda
+ * expressions.
  *
- * NOTE: this program has the same logic as PageViewRegionExample, but with lambda expression
- *       (and hence works with Java 8+ only) to demonstrate its programming efficiency
+ * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */
 public class PageViewRegionLambdaExample {
 

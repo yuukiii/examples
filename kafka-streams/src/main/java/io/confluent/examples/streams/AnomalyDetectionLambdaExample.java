@@ -37,7 +37,7 @@ import java.util.Properties;
  * Detect users doing more than 40 page views per minute from the pageview stream
  * and output a stream of blocked users (assuming a sliding window of 1 minute).
  *
- * NOTE: this program works with Java 8 with lambda expression only.
+ * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */
 public class AnomalyDetectionLambdaExample {
 

@@ -29,8 +29,8 @@ import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Verifies that Streams is able to read data from an input topic and write the same data (as-is) to
- * a new output topic.
+ * End-to-end integration test that reads data from an input topic and writes the same data as-is to
+ * a new output topic, using an in-memory Kafka cluster.
  */
 public class PassThroughIntegrationTest {
 

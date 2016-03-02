@@ -44,7 +44,10 @@ import java.util.Properties;
 /**
  * Compute the number of page views by geo-region.
  *
- * NOTE: generic Avro binding is used for serdes, where schema files need to be located for each intermediate Avro classes.
+ * Note: The generic Avro binding is used for serialization/deserialization.  This means the
+ * appropriate Avro schema files must be provided for each of the "intermediate" Avro classes, i.e.
+ * whenever new types of Avro objects (in the form of GenericRecord) are being passed between
+ * processing steps.
  */
 public class PageViewRegionExample {
 

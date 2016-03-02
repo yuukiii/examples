@@ -36,10 +36,10 @@ import java.util.Properties;
 
 
 /**
- * From the wiki feed irc stream compute the number of new user feeds for every minute.
+ * From the wiki feed irc stream compute the number of new user feeds for every minute.  Same as
+ * WordCountExample but uses lambda expressions.
  *
- * NOTE: this program has the same logic as WordCountExample, but with lambda expression
- *       (and hence works with Java 8 only) to demonstrate its programming efficiency
+ * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */
 public class WordCountLambdaExample {
 
