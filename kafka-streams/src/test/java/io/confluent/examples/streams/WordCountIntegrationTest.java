@@ -156,8 +156,8 @@ public class WordCountIntegrationTest {
     assertThat(actualValues).containsExactlyElementsOf(expectedValues);
   }
 
-  private static void purgeLocalStreamsState(Properties streamingConfiguration) throws IOException {
-    String path = streamingConfiguration.getProperty(StreamsConfig.STATE_DIR_CONFIG);
+  private static void purgeLocalStreamsState(Properties streamsConfiguration) throws IOException {
+    String path = streamsConfiguration.getProperty(StreamsConfig.STATE_DIR_CONFIG);
     if (path != null) {
       File node = Paths.get(path).normalize().toFile();
       // Only purge state when it's under /tmp.  This is a safety net to prevent accidentally

@@ -76,7 +76,7 @@ public class PassThroughIntegrationTest {
     streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     streamsConfiguration.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
     // You can also define consumer configuration settings.
-    //streamingConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    //streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();
