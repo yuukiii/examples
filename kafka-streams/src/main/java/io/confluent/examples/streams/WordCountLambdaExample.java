@@ -36,16 +36,16 @@ import java.util.Properties;
 
 
 /**
- * From the wiki feed irc stream compute the number of new user feeds for every minute.
+ * From the wiki feed irc stream compute the number of new user feeds for every minute.  Same as
+ * WordCountExample but uses lambda expressions.
  *
- * NOTE: this program has the same logic as WordCountExample, but with lambda expression
- *       (and hence works with Java 8 only) to demonstrate its programming efficiency
+ * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */
 public class WordCountLambdaExample {
 
     public static void main(String[] args) throws Exception {
         Properties streamsConfiguration = new Properties();
-        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "streams-wordcount-example");
+        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "wordcount-lambda-example");
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
         streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);

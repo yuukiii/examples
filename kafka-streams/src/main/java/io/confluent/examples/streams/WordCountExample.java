@@ -40,13 +40,14 @@ import java.util.Properties;
 /**
  * From the wiki feed irc stream compute the number of new user feeds for every minute.
  *
- * NOTE: specific Avro binding is used for serdes, where WikiFeed is auto-generated from Avro code generation plugin.
+ * Note: The specific Avro binding is used for serialization/deserialization, where the `WikiFeed`
+ * class is auto-generated from its Avro schema by the maven avro plugin.
  */
 public class WordCountExample {
 
     public static void main(String[] args) throws Exception {
         Properties streamsConfiguration = new Properties();
-        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "streams-wordcount-example");
+        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "wordcount-example");
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
         streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);

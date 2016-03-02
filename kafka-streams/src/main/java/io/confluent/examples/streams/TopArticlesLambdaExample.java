@@ -46,12 +46,12 @@ import java.util.PriorityQueue;
 import java.util.Properties;
 
 /**
- * Create a feed of the top 100 news articles per industry ranked by
- * click-through-rate (assuming this is for the past week).
+ * Create a data feed of the top 100 news articles per industry, ranked by click-through-rate
+ * (assuming this is for the past week).
  *
- * NOTE: this program works with Java 8 with lambda expression only.
+ * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */
-public class TopArticlesExample {
+public class TopArticlesLambdaExample {
 
     public static boolean isArticle(GenericRecord record) {
         String flags = (String) record.get("flags");
@@ -61,7 +61,7 @@ public class TopArticlesExample {
 
     public static void main(String[] args) throws Exception {
         Properties streamsConfiguration = new Properties();
-        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "streams-top-articles-example");
+        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "top-articles-lambda-example");
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
         streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);

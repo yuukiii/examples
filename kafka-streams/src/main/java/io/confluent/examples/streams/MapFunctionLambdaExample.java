@@ -17,6 +17,10 @@ package io.confluent.examples.streams;
 
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
+import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.LongDeserializer;
+import org.apache.kafka.common.serialization.LongSerializer;
+import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
@@ -24,10 +28,9 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
+import org.apache.kafka.streams.processor.internals.WallclockTimestampExtractor;
 
 import java.util.Properties;
-
-import io.confluent.examples.streams.utils.SystemTimestampExtractor;
 
 /**
  * Demonstrates how to perform simple, state-less transformations via map functions.
@@ -35,17 +38,31 @@ import io.confluent.examples.streams.utils.SystemTimestampExtractor;
  * Use cases include e.g. basic data sanitization, data anonymization by obfuscating sensitive data
  * fields (such as personally identifiable information aka PII).
  *
- * NOTE: this program works with Java 8 with lambda expression only.
+ * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */
-public class MapFunctionExample {
+public class MapFunctionLambdaExample {
 
   public static void main(String[] args) throws Exception {
     KStreamBuilder builder = new KStreamBuilder();
 
+    final Serializer<String> stringSerializer = new StringSerializer();
+    final Deserializer<byte[]> byteArrayDeserializer = new ByteArrayDeserializer();
+    final Deserializer<String> stringDeserializer = new StringDeserializer();
+
+    Properties streamsConfiguration = new Properties();
+    streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "map-function-lambda-example");
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
+    streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
+    streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
+    streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    streamsConfiguration.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, WallclockTimestampExtractor.class);
+
     // Read the input Kafka topic into a KStream instance.
     KStream<byte[], String> textLines = builder.stream(
-        new ByteArrayDeserializer(),
-        new StringDeserializer(),
+        byteArrayDeserializer,
+        stringDeserializer,
         "TextLinesTopic");
 
     // Variant 1: using `mapValues`
@@ -53,11 +70,8 @@ public class MapFunctionExample {
 
     // Write (i.e. persist) the results to a new Kafka topic called "UppercasedTextLinesTopic".
     //
-    // Alternatively you could also explicitly set the serializers instead of relying on the default
-    // serializers specified in the streaming configuration (see further down below):
-    //
-    //     uppercasedWithMapValues.to("UppercasedTextLinesTopic", new ByteArraySerializer(), new StringSerializer());
-    //
+    // In this case we can rely on the default serializers for keys and values because their data
+    // types did not change, i.e. we only need to provide the name of the output topic.
     uppercasedWithMapValues.to("UppercasedTextLinesTopic");
 
     // Variant 2: using `map`, modify value only (equivalent to variant 1)
@@ -74,21 +88,7 @@ public class MapFunctionExample {
     //
     // In this case we must explicitly set the correct serializers because the default serializers
     // (cf. streaming configuration) do not match the type of this particular KStream instance.
-    //
-    // Note: Normally you would use a single instance of StringSerializer and pass it around.
-    //       We are creating new instances purely for didactic reasons so that you do not need to
-    //       jump around in the code too much in these examples.
-    originalAndUppercased.to("OriginalAndUppercased", new StringSerializer(), new StringSerializer());
-
-    Properties streamsConfiguration = new Properties();
-    streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "streams-map-function-example");
-    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
-    streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
-    streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
-    streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    streamsConfiguration.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
+    originalAndUppercased.to("OriginalAndUppercased", stringSerializer, stringSerializer);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();

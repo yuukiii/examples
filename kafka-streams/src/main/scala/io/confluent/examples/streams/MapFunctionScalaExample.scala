@@ -2,10 +2,10 @@ package io.confluent.examples.streams
 
 import java.util.Properties
 
-import io.confluent.examples.streams.utils.SystemTimestampExtractor
-import org.apache.kafka.common.serialization.{ByteArrayDeserializer, ByteArraySerializer, StringDeserializer, StringSerializer}
+import org.apache.kafka.common.serialization._
 import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder}
 import org.apache.kafka.streams._
+import org.apache.kafka.streams.processor.internals.WallclockTimestampExtractor
 
 /**
   * Demonstrates how to perform simple, state-less transformations via map functions.
@@ -21,19 +21,32 @@ class MapFunctionScalaExample {
   def main(args: Array[String]) {
     val builder: KStreamBuilder = new KStreamBuilder
 
+    val streamingConfig = {
+      val settings = new Properties
+      settings.put(StreamsConfig.JOB_ID_CONFIG, "map-function-scala-example")
+      settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
+      settings.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181")
+      settings.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[ByteArraySerializer])
+      settings.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[ByteArrayDeserializer])
+      settings.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
+      settings.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
+      settings.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, classOf[WallclockTimestampExtractor])
+      settings
+    }
+
+    val stringSerializer: Serializer[String] = new StringSerializer
+
+
     // Read the input Kafka topic into a KStream instance.
-    val textLines: KStream[Array[Byte], String] = builder.stream(new ByteArrayDeserializer, new StringDeserializer, "TextLinesTopic")
+    val textLines: KStream[Array[Byte], String] = builder.stream("TextLinesTopic")
 
     // Variant 1: using `mapValues`
     val uppercasedWithMapValues: KStream[Array[Byte], String] = textLines.mapValues(_.toUpperCase())
 
     // Write (i.e. persist) the results to a new Kafka topic called "UppercasedTextLinesTopic".
     //
-    // Alternatively you could also explicitly set the serializers instead of relying on the default
-    // serializers specified in the streaming configuration (see further down below):
-    //
-    //     uppercasedWithMapValues.to("UppercasedTextLinesTopic"), new ByteArraySerializer, new StringSerializer)
-    //
+    // In this case we can rely on the default serializers for keys and values because their data
+    // types did not change, i.e. we only need to provide the name of the output topic.
     uppercasedWithMapValues.to("UppercasedTextLinesTopic")
 
     // We are using implicit conversions to convert Scala's `Tuple2` into Kafka Streams' `KeyValue`.
@@ -61,23 +74,8 @@ class MapFunctionScalaExample {
     //
     // In this case we must explicitly set the correct serializers because the default serializers
     // (cf. streaming configuration) do not match the type of this particular KStream instance.
-    //
-    // Note: Normally you would use a single instance of StringSerializer and pass it around.
-    //       We are creating new instances purely for didactic reasons so that you do not need to
-    //       jump around in the code too much in these examples.
-    originalAndUppercased.to("OriginalAndUppercased", new StringSerializer, new StringSerializer)
+    originalAndUppercased.to("OriginalAndUppercased", stringSerializer, stringSerializer)
 
-    val streamingConfig = {
-      val settings = new Properties
-      settings.put(StreamsConfig.JOB_ID_CONFIG, "map-function-example")
-      settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
-      settings.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[ByteArraySerializer])
-      settings.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
-      settings.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[ByteArrayDeserializer])
-      settings.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
-      settings.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, classOf[SystemTimestampExtractor])
-      settings
-    }
     val stream: KafkaStreams = new KafkaStreams(builder, streamingConfig)
     stream.start()
   }

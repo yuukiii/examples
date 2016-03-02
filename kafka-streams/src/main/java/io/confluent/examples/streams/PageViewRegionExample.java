@@ -42,15 +42,18 @@ import java.io.File;
 import java.util.Properties;
 
 /**
- * Compute the number of pageviews by geo-region.
+ * Compute the number of page views by geo-region.
  *
- * NOTE: generic Avro binding is used for serdes, where schema files need to be located for each intermediate Avro classes.
+ * Note: The generic Avro binding is used for serialization/deserialization.  This means the
+ * appropriate Avro schema files must be provided for each of the "intermediate" Avro classes, i.e.
+ * whenever new types of Avro objects (in the form of GenericRecord) are being passed between
+ * processing steps.
  */
 public class PageViewRegionExample {
 
     public static void main(String[] args) throws Exception {
         Properties streamsConfiguration = new Properties();
-        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "streams-pageview-region-example");
+        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "pageview-region-example");
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
         streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);

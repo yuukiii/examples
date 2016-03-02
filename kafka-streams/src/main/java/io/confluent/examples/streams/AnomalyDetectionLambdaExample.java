@@ -27,23 +27,23 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
-import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.TumblingWindows;
 
 import java.util.Properties;
 
 /**
- * From the changelog stream of user profile data to compute the number of users
- * with complete profiles per region for regions having at least 10M users with
- * complete profiles. "Completeness" is defined as being at least 200 characters total.
+ * Detect users doing more than 40 page views per minute from the pageview stream
+ * and output a stream of blocked users (assuming a sliding window of 1 minute).
  *
- * NOTE: this program works with Java 8 with lambda expression only.
+ * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */
-public class UserRegionExample {
+public class AnomalyDetectionLambdaExample {
 
     public static void main(String[] args) throws Exception {
         Properties streamsConfiguration = new Properties();
-        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "streams-user-region-example");
+        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "anomaly-detection-lambda-example");
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
         streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -57,20 +57,22 @@ public class UserRegionExample {
         KStreamBuilder builder = new KStreamBuilder();
 
         // read the source stream
-        KTable<String, GenericRecord> profile = builder.table("UserProfile");
+        KStream<String, GenericRecord> views = builder.stream("PageViews");
 
-        // aggregate the user counts of by region
-        KTable<String, Long> regionCount = profile
-                // filter out incomplete profiles with less than 200 characters
-                .filter((userId, record) -> ((String) record.get("experience")).getBytes().length > 200)
-                // count by region, we can set null to all serdes to use defaults
-                .count((userId, record) ->  new KeyValue<>((String) record.get("region"), record),
-                    null, null, longSerializer, null, null, longDeserializer, "CountsByRegion")
-                // filter out regions with less than 10M users
-                .filter((regionName, count) -> count > 10 * 1000 * 1000);
+        KStream<String, Long> anomalyUsers = views
+                // map the user id as key
+                .map((dummy, record) -> new KeyValue<>((String) record.get("user"), record))
+                // count users on the one-minute tumbling window
+                .countByKey(TumblingWindows.of("PageViewCountWindow").with(60 * 1000L),
+                    null, longSerializer, null, longDeserializer)
+                // get users whose one-minute count is larger than 40
+                .filter((windowedUserId, count) -> count > 40)
+                // get rid of windows by transforming to a stream
+                .toStream()
+                .map((windowedUserId, count) -> new KeyValue<>(windowedUserId.value(), count));
 
-        // write to the result topic, we need to override the value serializer to for type long
-        regionCount.to("LargeCountsByRegion", null, longSerializer);
+        // write to the result topic
+        anomalyUsers.to("AnomalyUsers");
 
         KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
         streams.start();

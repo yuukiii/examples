@@ -1,8 +1,10 @@
 package io.confluent.examples.streams;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.Deserializer;
@@ -16,31 +18,30 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
-import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.UnlimitedWindows;
-import org.apache.kafka.streams.kstream.Windowed;
-import org.apache.kafka.streams.kstream.internals.WindowedSerializer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
 import kafka.utils.CoreUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class WordCountIntegrationTest {
+/**
+ * End-to-end integration test based on WordCountLambdaExample, using an embedded Kafka cluster.
+ *
+ * Note: This example uses lambda expressions and thus works with Java 8+ only.
+ */
+public class WordCountLambdaIntegrationTest {
 
   private static EmbeddedSingleNodeKafkaCluster cluster = null;
   private static String inputTopic = "inputTopic";
@@ -80,7 +81,7 @@ public class WordCountIntegrationTest {
     final Deserializer<Long> longDeserializer = new LongDeserializer();
 
     Properties streamsConfiguration = new Properties();
-    streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "wordcount-integration-test");
+    streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "wordcount-lambda-integration-test");
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, cluster.zookeeperConnect());
     streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -99,12 +100,8 @@ public class WordCountIntegrationTest {
     KStream<String, Long> counts = source
         .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
         .map((key, value) -> new KeyValue<>(value, value))
-        // The following countByKey().toStream().map() chain can be simplified to just
-        // countByKey() once https://github.com/apache/kafka/pull/870 is merged.
-        .countByKey(UnlimitedWindows.of("Counts").startOn(0L),
-            stringSerializer, longSerializer, stringDeserializer, longDeserializer)
-        .toStream()
-        .map((windowedKey, count) -> new KeyValue<>(windowedKey.value(), count));
+        .countByKey(stringSerializer, longSerializer, stringDeserializer, longDeserializer, "Counts")
+        .toStream();
 
     counts.to(outputTopic, stringSerializer, longSerializer);
 
@@ -119,11 +116,11 @@ public class WordCountIntegrationTest {
     // Step 2: Produce some input data to the input topic.
     //
     Properties producerConfig = new Properties();
-    producerConfig.put("bootstrap.servers", cluster.bootstrapServers());
-    producerConfig.put("acks", "all");
-    producerConfig.put("retries", 0);
-    producerConfig.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-    producerConfig.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+    producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    producerConfig.put(ProducerConfig.ACKS_CONFIG, "all");
+    producerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);
+    producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 
     Producer<String, String> producer = new KafkaProducer<>(producerConfig);
     for (String value : inputValues) {
@@ -141,23 +138,21 @@ public class WordCountIntegrationTest {
     // Step 3: Verify the job's output data.
     //
     Properties consumerConfig = new Properties();
-    consumerConfig.put("bootstrap.servers", cluster.bootstrapServers());
-    consumerConfig.put("group.id", "wordcount-integration-test-standard-consumer");
-    consumerConfig.put("auto.offset.reset", "earliest");
-    consumerConfig.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-    consumerConfig.put("value.deserializer", "org.apache.kafka.common.serialization.LongDeserializer");
+    consumerConfig.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    consumerConfig.put(ConsumerConfig.GROUP_ID_CONFIG, "wordcount-lambda-integration-test-standard-consumer");
+    consumerConfig.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
 
     KafkaConsumer<String, Long> consumer = new KafkaConsumer<>(consumerConfig);
     consumer.subscribe(Collections.singletonList(outputTopic));
     List<KeyValue<String, Long>> actualValues = IntegrationTestUtils.readKeyValues(consumer);
 
-    // Note: This assert statement will work once we have merged the PR for equality semantics of
-    //       `KeyValue`.  See https://github.com/apache/kafka/pull/872.
     assertThat(actualValues).containsExactlyElementsOf(expectedValues);
   }
 
-  private static void purgeLocalStreamsState(Properties streamingConfiguration) throws IOException {
-    String path = streamingConfiguration.getProperty(StreamsConfig.STATE_DIR_CONFIG);
+  private static void purgeLocalStreamsState(Properties streamsConfiguration) throws IOException {
+    String path = streamsConfiguration.getProperty(StreamsConfig.STATE_DIR_CONFIG);
     if (path != null) {
       File node = Paths.get(path).normalize().toFile();
       // Only purge state when it's under /tmp.  This is a safety net to prevent accidentally

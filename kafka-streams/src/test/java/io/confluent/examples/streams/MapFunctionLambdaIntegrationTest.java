@@ -1,8 +1,10 @@
 package io.confluent.examples.streams;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
@@ -29,7 +31,12 @@ import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class MapFunctionIntegrationTest {
+/**
+ * End-to-end integration test based on MapFunctionLambdaExample, using an embedded Kafka cluster.
+ *
+ * Note: This example uses lambda expressions and thus works with Java 8+ only.
+ */
+public class MapFunctionLambdaIntegrationTest {
 
   private static EmbeddedSingleNodeKafkaCluster cluster = null;
   private static String inputTopic = "inputTopic";
@@ -59,20 +66,20 @@ public class MapFunctionIntegrationTest {
     //
     KStreamBuilder builder = new KStreamBuilder();
 
-    // Write the input data as-is to the output topic.
-    KStream<byte[], String> input = builder.stream(inputTopic);
-
-    KStream<byte[], String> uppercased = input.mapValues(String::toUpperCase);
-    uppercased.to(outputTopic);
-
     Properties streamsConfiguration = new Properties();
-    streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "map-function-integration-test");
+    streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "map-function-lambda-integration-test");
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, cluster.zookeeperConnect());
     streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
     streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
     streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+
+    // Write the input data as-is to the output topic.
+    KStream<byte[], String> input = builder.stream(inputTopic);
+
+    KStream<byte[], String> uppercased = input.mapValues(String::toUpperCase);
+    uppercased.to(outputTopic);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();
@@ -85,11 +92,11 @@ public class MapFunctionIntegrationTest {
     // Step 2: Produce some input data to the input topic.
     //
     Properties producerConfig = new Properties();
-    producerConfig.put("bootstrap.servers", cluster.bootstrapServers());
-    producerConfig.put("acks", "all");
-    producerConfig.put("retries", 0);
-    producerConfig.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-    producerConfig.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+    producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    producerConfig.put(ProducerConfig.ACKS_CONFIG, "all");
+    producerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);
+    producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 
     Producer<String, String> producer = new KafkaProducer<>(producerConfig);
     for (String value : inputValues) {
@@ -107,11 +114,11 @@ public class MapFunctionIntegrationTest {
     // Step 3: Verify the job's output data.
     //
     Properties consumerConfig = new Properties();
-    consumerConfig.put("bootstrap.servers", cluster.bootstrapServers());
-    consumerConfig.put("group.id", "map-function-integration-test-standard-consumer");
-    consumerConfig.put("auto.offset.reset", "earliest");
-    consumerConfig.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-    consumerConfig.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+    consumerConfig.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    consumerConfig.put(ConsumerConfig.GROUP_ID_CONFIG, "map-function-lambda-integration-test-standard-consumer");
+    consumerConfig.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
     KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerConfig);
     consumer.subscribe(Collections.singletonList(outputTopic));
