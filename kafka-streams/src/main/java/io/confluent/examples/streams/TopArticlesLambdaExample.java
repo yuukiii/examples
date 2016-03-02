@@ -51,7 +51,7 @@ import java.util.Properties;
  *
  * NOTE: this program works with Java 8 with lambda expression only.
  */
-public class TopArticlesExample {
+public class TopArticlesLambdaExample {
 
     public static boolean isArticle(GenericRecord record) {
         String flags = (String) record.get("flags");
