@@ -39,7 +39,7 @@ import java.util.Properties;
  *
  * NOTE: this program works with Java 8 with lambda expression only.
  */
-public class UserRegionExample {
+public class UserRegionLambdaExample {
 
     public static void main(String[] args) throws Exception {
         Properties streamsConfiguration = new Properties();
