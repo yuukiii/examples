@@ -37,7 +37,7 @@ import kafka.utils.CoreUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * End-to-end integration test based on WordCountLambdaExample, using an in-memory Kafka cluster.
+ * End-to-end integration test based on WordCountLambdaExample, using an embedded Kafka cluster.
  *
  * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */

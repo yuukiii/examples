@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * End-to-end integration test that reads data from an input topic and writes the same data as-is to
- * a new output topic, using an in-memory Kafka cluster.
+ * a new output topic, using an embedded Kafka cluster.
  */
 public class PassThroughIntegrationTest {
 

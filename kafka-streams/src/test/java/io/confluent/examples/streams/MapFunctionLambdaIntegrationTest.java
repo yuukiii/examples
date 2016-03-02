@@ -32,7 +32,7 @@ import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * End-to-end integration test based on MapFunctionLambdaExample, using an in-memory Kafka cluster.
+ * End-to-end integration test based on MapFunctionLambdaExample, using an embedded Kafka cluster.
  *
  * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */
