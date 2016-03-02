@@ -1,8 +1,10 @@
 package io.confluent.examples.streams;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -89,11 +91,11 @@ public class PassThroughIntegrationTest {
     // Step 2: Produce some input data to the input topic.
     //
     Properties producerConfig = new Properties();
-    producerConfig.put("bootstrap.servers", cluster.bootstrapServers());
-    producerConfig.put("acks", "all");
-    producerConfig.put("retries", 0);
-    producerConfig.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-    producerConfig.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+    producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    producerConfig.put(ProducerConfig.ACKS_CONFIG, "all");
+    producerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);
+    producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 
     Producer<String, String> producer = new KafkaProducer<>(producerConfig);
     for (String value : inputValues) {
@@ -111,11 +113,11 @@ public class PassThroughIntegrationTest {
     // Step 3: Verify the job's output data.
     //
     Properties consumerConfig = new Properties();
-    consumerConfig.put("bootstrap.servers", cluster.bootstrapServers());
-    consumerConfig.put("group.id", "pass-through-integration-test-standard-consumer");
-    consumerConfig.put("auto.offset.reset", "earliest");
-    consumerConfig.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-    consumerConfig.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+    consumerConfig.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    consumerConfig.put(ConsumerConfig.GROUP_ID_CONFIG, "pass-through-integration-test-standard-consumer");
+    consumerConfig.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
     KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerConfig);
     consumer.subscribe(Collections.singletonList(outputTopic));
