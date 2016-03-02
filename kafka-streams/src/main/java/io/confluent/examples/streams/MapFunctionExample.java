@@ -24,10 +24,9 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
+import org.apache.kafka.streams.processor.internals.WallclockTimestampExtractor;
 
 import java.util.Properties;
-
-import io.confluent.examples.streams.utils.SystemTimestampExtractor;
 
 /**
  * Demonstrates how to perform simple, state-less transformations via map functions.
@@ -88,7 +87,7 @@ public class MapFunctionExample {
     streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
     streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    streamsConfiguration.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, SystemTimestampExtractor.class);
+    streamsConfiguration.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, WallclockTimestampExtractor.class);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();

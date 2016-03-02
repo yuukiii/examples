@@ -2,10 +2,10 @@ package io.confluent.examples.streams
 
 import java.util.Properties
 
-import io.confluent.examples.streams.utils.SystemTimestampExtractor
 import org.apache.kafka.common.serialization.{ByteArrayDeserializer, ByteArraySerializer, StringDeserializer, StringSerializer}
 import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder}
 import org.apache.kafka.streams._
+import org.apache.kafka.streams.processor.internals.WallclockTimestampExtractor
 
 /**
   * Demonstrates how to perform simple, state-less transformations via map functions.
@@ -75,7 +75,7 @@ class MapFunctionScalaExample {
       settings.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
       settings.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[ByteArrayDeserializer])
       settings.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
-      settings.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, classOf[SystemTimestampExtractor])
+      settings.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, classOf[WallclockTimestampExtractor])
       settings
     }
     val stream: KafkaStreams = new KafkaStreams(builder, streamingConfig)
