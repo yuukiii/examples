@@ -23,7 +23,7 @@ class MapFunctionScalaExample {
 
     val streamingConfig = {
       val settings = new Properties
-      settings.put(StreamsConfig.JOB_ID_CONFIG, "map-function-example")
+      settings.put(StreamsConfig.JOB_ID_CONFIG, "map-function-scala-example")
       settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
       settings.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181")
       settings.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[ByteArraySerializer])

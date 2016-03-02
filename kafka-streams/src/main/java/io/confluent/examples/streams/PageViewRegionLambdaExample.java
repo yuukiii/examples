@@ -39,16 +39,16 @@ import java.io.File;
 import java.util.Properties;
 
 /**
- * Compute the number of pageviews by geo-region.
+ * Compute the number of page views by geo-region.
  *
  * NOTE: this program has the same logic as PageViewRegionExample, but with lambda expression
- *       (and hence works with Java 8 only) to demonstrate its programming efficiency
+ *       (and hence works with Java 8+ only) to demonstrate its programming efficiency
  */
 public class PageViewRegionLambdaExample {
 
     public static void main(String[] args) throws Exception {
         Properties streamsConfiguration = new Properties();
-        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "streams-pageview-region-example");
+        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "pageview-region-lambda-example");
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
         streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);

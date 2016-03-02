@@ -61,7 +61,7 @@ public class TopArticlesExample {
 
     public static void main(String[] args) throws Exception {
         Properties streamsConfiguration = new Properties();
-        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "streams-top-articles-example");
+        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "top-articles-lambda-example");
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
         streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);

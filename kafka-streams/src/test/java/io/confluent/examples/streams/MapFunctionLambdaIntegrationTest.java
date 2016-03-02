@@ -62,7 +62,7 @@ public class MapFunctionLambdaIntegrationTest {
     KStreamBuilder builder = new KStreamBuilder();
 
     Properties streamsConfiguration = new Properties();
-    streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "map-function-integration-test");
+    streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "map-function-lambda-integration-test");
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, cluster.zookeeperConnect());
     streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
@@ -110,7 +110,7 @@ public class MapFunctionLambdaIntegrationTest {
     //
     Properties consumerConfig = new Properties();
     consumerConfig.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
-    consumerConfig.put(ConsumerConfig.GROUP_ID_CONFIG, "map-function-integration-test-standard-consumer");
+    consumerConfig.put(ConsumerConfig.GROUP_ID_CONFIG, "map-function-lambda-integration-test-standard-consumer");
     consumerConfig.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
