@@ -17,6 +17,10 @@ package io.confluent.examples.streams;
 
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
+import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.LongDeserializer;
+import org.apache.kafka.common.serialization.LongSerializer;
+import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
@@ -41,10 +45,14 @@ public class MapFunctionLambdaExample {
   public static void main(String[] args) throws Exception {
     KStreamBuilder builder = new KStreamBuilder();
 
+    final Serializer<String> stringSerializer = new StringSerializer();
+    final Deserializer<byte[]> byteArrayDeserializer = new ByteArrayDeserializer();
+    final Deserializer<String> stringDeserializer = new StringDeserializer();
+
     // Read the input Kafka topic into a KStream instance.
     KStream<byte[], String> textLines = builder.stream(
-        new ByteArrayDeserializer(),
-        new StringDeserializer(),
+        byteArrayDeserializer,
+        stringDeserializer,
         "TextLinesTopic");
 
     // Variant 1: using `mapValues`
@@ -52,11 +60,8 @@ public class MapFunctionLambdaExample {
 
     // Write (i.e. persist) the results to a new Kafka topic called "UppercasedTextLinesTopic".
     //
-    // Alternatively you could also explicitly set the serializers instead of relying on the default
-    // serializers specified in the streaming configuration (see further down below):
-    //
-    //     uppercasedWithMapValues.to("UppercasedTextLinesTopic", new ByteArraySerializer(), new StringSerializer());
-    //
+    // In this case we can rely on the default serializers for keys and values because their data
+    // types did not change, i.e. we only need to provide the name of the output topic.
     uppercasedWithMapValues.to("UppercasedTextLinesTopic");
 
     // Variant 2: using `map`, modify value only (equivalent to variant 1)
@@ -73,11 +78,7 @@ public class MapFunctionLambdaExample {
     //
     // In this case we must explicitly set the correct serializers because the default serializers
     // (cf. streaming configuration) do not match the type of this particular KStream instance.
-    //
-    // Note: Normally you would use a single instance of StringSerializer and pass it around.
-    //       We are creating new instances purely for didactic reasons so that you do not need to
-    //       jump around in the code too much in these examples.
-    originalAndUppercased.to("OriginalAndUppercased", new StringSerializer(), new StringSerializer());
+    originalAndUppercased.to("OriginalAndUppercased", stringSerializer, stringSerializer);
 
     Properties streamsConfiguration = new Properties();
     streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "streams-map-function-example");
