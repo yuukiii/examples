@@ -16,24 +16,18 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
-import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.UnlimitedWindows;
-import org.apache.kafka.streams.kstream.Windowed;
-import org.apache.kafka.streams.kstream.internals.WindowedSerializer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
 import kafka.utils.CoreUtils;
@@ -99,12 +93,8 @@ public class WordCountLambdaIntegrationTest {
     KStream<String, Long> counts = source
         .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
         .map((key, value) -> new KeyValue<>(value, value))
-        // The following countByKey().toStream().map() chain can be simplified to just
-        // countByKey() once https://github.com/apache/kafka/pull/870 is merged.
-        .countByKey(UnlimitedWindows.of("Counts").startOn(0L),
-            stringSerializer, longSerializer, stringDeserializer, longDeserializer)
-        .toStream()
-        .map((windowedKey, count) -> new KeyValue<>(windowedKey.value(), count));
+        .countByKey(stringSerializer, longSerializer, stringDeserializer, longDeserializer, "Counts")
+        .toStream();
 
     counts.to(outputTopic, stringSerializer, longSerializer);
 
