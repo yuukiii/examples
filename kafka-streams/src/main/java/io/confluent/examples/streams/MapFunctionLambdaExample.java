@@ -36,7 +36,7 @@ import java.util.Properties;
  *
  * NOTE: this program works with Java 8 with lambda expression only.
  */
-public class MapFunctionExample {
+public class MapFunctionLambdaExample {
 
   public static void main(String[] args) throws Exception {
     KStreamBuilder builder = new KStreamBuilder();
