@@ -15,8 +15,8 @@
  */
 package io.confluent.examples.streams;
 
-import io.confluent.examples.streams.utils.CollectionDeserializer;
-import io.confluent.examples.streams.utils.CollectionSerializer;
+import io.confluent.examples.streams.utils.PriorityQueueDeserializer;
+import io.confluent.examples.streams.utils.PriorityQueueSerializer;
 import io.confluent.examples.streams.utils.GenericAvroDeserializer;
 import io.confluent.examples.streams.utils.GenericAvroSerializer;
 import org.apache.avro.Schema;
@@ -31,7 +31,6 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.Aggregator;
 import org.apache.kafka.streams.kstream.HoppingWindows;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
@@ -42,17 +41,15 @@ import org.apache.kafka.streams.kstream.internals.WindowedSerializer;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Properties;
-import java.util.Set;
 
 /**
  * Create a feed of the top 100 news articles per industry ranked by
  * click-through-rate (assuming this is for the past week).
+ *
+ * NOTE: this program works with Java 8 with lambda expression only.
  */
 public class TopArticlesExample {
 
@@ -64,7 +61,7 @@ public class TopArticlesExample {
 
     public static void main(String[] args) throws Exception {
         Properties streamsConfiguration = new Properties();
-        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "top-articles-example");
+        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "streams-top-articles-example");
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
         streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -78,6 +75,8 @@ public class TopArticlesExample {
         final Deserializer<Long> longDeserializer = new LongDeserializer();
         final Serializer<GenericRecord> avroSerializer = new GenericAvroSerializer();
         final Deserializer<GenericRecord> avroDeserializer = new GenericAvroDeserializer();
+        final Serializer<Windowed<String>> windowedStringSerializer = new WindowedSerializer<>(stringSerializer);
+        final Deserializer<Windowed<String>> windowedDeserializer = new WindowedDeserializer<>(stringDeserializer);
 
         KStreamBuilder builder = new KStreamBuilder();
 
@@ -96,77 +95,72 @@ public class TopArticlesExample {
                 .countByKey(HoppingWindows.of("PageViewCountWindows").with(7 * 24 * 60 * 60 * 1000),
                     avroSerializer, longSerializer, avroDeserializer, longDeserializer);
 
-        int topN = 100;
-        KTable<Windowed<String>, Collection<GenericRecord>> topViewCounts = viewCounts
+        KTable<Windowed<String>, PriorityQueue<GenericRecord>> allViewCounts = viewCounts
                 .aggregate(
-                     // initial value
-                     Collections::<GenericRecord>emptySet,
-                     // the "add" aggregator
-                     new Aggregator<Windowed<String>, GenericRecord, Collection<GenericRecord>>() {
+                        // the initializer
+                        () -> {
+                            Comparator<GenericRecord> comparator = new Comparator<GenericRecord>() {
+                                @Override
+                                public int compare(GenericRecord o1, GenericRecord o2) {
+                                    return (int) ((Long) o1.get("count") - (Long) o2.get("count"));
+                                }
+                            };
 
-                         private final Map<Windowed<String>, PriorityQueue<GenericRecord>> sorted = new HashMap<>();
+                            return new PriorityQueue<>(comparator);
+                        },
 
-                         @Override
-                         public Collection<GenericRecord> apply(Windowed<String> aggKey, GenericRecord value, Collection<GenericRecord> aggregate) {
-                             PriorityQueue<GenericRecord> queue = sorted.get(aggKey);
+                        // the "add" aggregator
+                        (windowedIndustry, record, queue) -> {
+                            queue.add(record);
+                            return queue;
+                        },
 
-                             if (queue == null) {
-                                 queue = new PriorityQueue<>();
-                                 sorted.put(aggKey, queue);
-                             }
-                             queue.add(value);
+                        // the "remove" aggregator
+                        (windowedIndustry, record, queue) -> {
+                            queue.remove(record);
+                            return queue;
+                        },
 
-                             PriorityQueue<GenericRecord> copy = new PriorityQueue<>(queue);
-                             Set<GenericRecord> ret = new HashSet<>();
-                             for (int i = 1; i <= topN; i++) {
-                                 ret.add(copy.poll());
-                             }
-                            return ret;
-                         }
-                     },
-                     // the "remove" aggregator
-                     new Aggregator<Windowed<String>, GenericRecord, Collection<GenericRecord>>() {
+                        // the selector
+                        (windowedArticle, count) -> {
+                            // project on the industry field for key
+                            Windowed<String> windowedIndustry = new Windowed<>((String) windowedArticle.value().get("industry"), windowedArticle.window());
+                            // add the page into the value
+                            GenericRecord viewStats = new GenericData.Record(schema);
+                            viewStats.put("page", "pageId");
+                            viewStats.put("industry", "industryName");
+                            viewStats.put("count", count);
+                            return new KeyValue<>(windowedIndustry, viewStats);
+                        },
 
-                       // FIXME: `sorted` must be shared between the `add` (above) and the `remove` (= this) aggregator
-                       private final Map<Windowed<String>, PriorityQueue<GenericRecord>> sorted = new HashMap<>();
+                        windowedStringSerializer,
+                        avroSerializer,
+                        new PriorityQueueSerializer<>(),
+                        windowedDeserializer,
+                        avroDeserializer,
+                        new PriorityQueueDeserializer<>(),
 
-                       @Override
-                       public Collection<GenericRecord> apply(Windowed<String> aggKey, GenericRecord value, Collection<GenericRecord> aggregate) {
-                           PriorityQueue<GenericRecord> queue = sorted.get(aggKey);
+                        "AllArticles"
+                );
 
-                           if (queue == null) {
-                              throw new IllegalStateException("This should not happen.");
-                           }
-                           queue.remove(value);
+        int topN = 100;
+        KTable<Windowed<String>, String> topViewCounts = allViewCounts
+                .mapValues(queue -> {
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < topN; i++) {
+                        GenericRecord record = queue.poll();
 
-                           PriorityQueue<GenericRecord> copy = new PriorityQueue<>(queue);
-                           Set<GenericRecord> ret = new HashSet<>();
-                           for (int i = 1; i <= topN; i++) {
-                              ret.add(copy.poll());
-                           }
-                           return ret;
-                       }
-                     },
-                     // the selector
-                     (windowedArticle, count) -> {
-                         // project on the industry field for key
-                         Windowed<String> windowedIndustry = new Windowed<>((String) windowedArticle.value().get("industry"), windowedArticle.window());
-                         // add the page into the value
-                         GenericRecord viewStats = new GenericData.Record(schema);
-                         viewStats.put("page", "pageId");
-                         viewStats.put("industry", "industryName");
-                         viewStats.put("count", count);
-                         return new KeyValue<>(windowedIndustry, viewStats);
-                     },
-                     new WindowedSerializer<>(stringSerializer),
-                     null,
-                     new CollectionSerializer<>(),
-                     new WindowedDeserializer<>(stringDeserializer),
-                     null,
-                     new CollectionDeserializer<>(),
-                     "Top100Articles");
+                        if (record == null)
+                            break;
 
-        topViewCounts.to("TopNewsPerIndustry");
+                        sb.append((String) record.get("page"));
+                        sb.append("\n");
+                    }
+
+                    return sb.toString();
+                });
+
+        topViewCounts.to("TopNewsPerIndustry", windowedStringSerializer, stringSerializer);
 
         KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
         streams.start();

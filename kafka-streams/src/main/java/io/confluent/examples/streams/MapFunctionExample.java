@@ -34,6 +34,8 @@ import io.confluent.examples.streams.utils.SystemTimestampExtractor;
  *
  * Use cases include e.g. basic data sanitization, data anonymization by obfuscating sensitive data
  * fields (such as personally identifiable information aka PII).
+ *
+ * NOTE: this program works with Java 8 with lambda expression only.
  */
 public class MapFunctionExample {
 
@@ -79,7 +81,7 @@ public class MapFunctionExample {
     originalAndUppercased.to("OriginalAndUppercased", new StringSerializer(), new StringSerializer());
 
     Properties streamsConfiguration = new Properties();
-    streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "map-function-example");
+    streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "streams-map-function-example");
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
     streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);

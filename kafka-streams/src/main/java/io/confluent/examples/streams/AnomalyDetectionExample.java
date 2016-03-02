@@ -36,12 +36,14 @@ import java.util.Properties;
 /**
  * Detect users doing more than 40 page views per minute from the pageview stream
  * and output a stream of blocked users (assuming a sliding window of 1 minute).
+ *
+ * NOTE: this program works with Java 8 with lambda expression only.
  */
 public class AnomalyDetectionExample {
 
     public static void main(String[] args) throws Exception {
         Properties streamsConfiguration = new Properties();
-        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "anomaly-detection-example");
+        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "streams-anomaly-detection-example");
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
         streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);

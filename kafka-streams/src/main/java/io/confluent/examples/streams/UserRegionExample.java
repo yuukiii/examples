@@ -29,7 +29,6 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.processor.internals.WallclockTimestampExtractor;
 
 import java.util.Properties;
 
@@ -37,19 +36,20 @@ import java.util.Properties;
  * From the changelog stream of user profile data to compute the number of users
  * with complete profiles per region for regions having at least 10M users with
  * complete profiles. "Completeness" is defined as being at least 200 characters total.
+ *
+ * NOTE: this program works with Java 8 with lambda expression only.
  */
 public class UserRegionExample {
 
     public static void main(String[] args) throws Exception {
         Properties streamsConfiguration = new Properties();
-        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "user-region-example");
+        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "streams-user-region-example");
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
         streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, GenericAvroSerializer.class);
         streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GenericAvroDeserializer.class);
-        streamsConfiguration.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, WallclockTimestampExtractor.class);
 
         final Serializer<Long> longSerializer = new LongSerializer();
         final Deserializer<Long> longDeserializer = new LongDeserializer();
