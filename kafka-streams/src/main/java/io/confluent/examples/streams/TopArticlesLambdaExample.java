@@ -40,7 +40,6 @@ import org.apache.kafka.streams.kstream.internals.WindowedDeserializer;
 import org.apache.kafka.streams.kstream.internals.WindowedSerializer;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Properties;
