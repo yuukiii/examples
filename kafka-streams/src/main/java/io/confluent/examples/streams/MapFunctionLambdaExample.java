@@ -49,6 +49,16 @@ public class MapFunctionLambdaExample {
     final Deserializer<byte[]> byteArrayDeserializer = new ByteArrayDeserializer();
     final Deserializer<String> stringDeserializer = new StringDeserializer();
 
+    Properties streamsConfiguration = new Properties();
+    streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "streams-map-function-example");
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
+    streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
+    streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
+    streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    streamsConfiguration.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, WallclockTimestampExtractor.class);
+
     // Read the input Kafka topic into a KStream instance.
     KStream<byte[], String> textLines = builder.stream(
         byteArrayDeserializer,
@@ -79,16 +89,6 @@ public class MapFunctionLambdaExample {
     // In this case we must explicitly set the correct serializers because the default serializers
     // (cf. streaming configuration) do not match the type of this particular KStream instance.
     originalAndUppercased.to("OriginalAndUppercased", stringSerializer, stringSerializer);
-
-    Properties streamsConfiguration = new Properties();
-    streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "streams-map-function-example");
-    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
-    streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
-    streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
-    streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    streamsConfiguration.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, WallclockTimestampExtractor.class);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();

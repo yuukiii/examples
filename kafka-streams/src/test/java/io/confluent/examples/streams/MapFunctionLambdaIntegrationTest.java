@@ -59,12 +59,6 @@ public class MapFunctionLambdaIntegrationTest {
     //
     KStreamBuilder builder = new KStreamBuilder();
 
-    // Write the input data as-is to the output topic.
-    KStream<byte[], String> input = builder.stream(inputTopic);
-
-    KStream<byte[], String> uppercased = input.mapValues(String::toUpperCase);
-    uppercased.to(outputTopic);
-
     Properties streamsConfiguration = new Properties();
     streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "map-function-integration-test");
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
@@ -73,6 +67,12 @@ public class MapFunctionLambdaIntegrationTest {
     streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
     streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+
+    // Write the input data as-is to the output topic.
+    KStream<byte[], String> input = builder.stream(inputTopic);
+
+    KStream<byte[], String> uppercased = input.mapValues(String::toUpperCase);
+    uppercased.to(outputTopic);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();

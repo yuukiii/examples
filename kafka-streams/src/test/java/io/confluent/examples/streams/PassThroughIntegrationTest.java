@@ -63,9 +63,6 @@ public class PassThroughIntegrationTest {
     //
     KStreamBuilder builder = new KStreamBuilder();
 
-    // Write the input data as-is to the output topic.
-    builder.stream(inputTopic).to(outputTopic);
-
     Properties streamsConfiguration = new Properties();
     streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "pass-through-integration-test");
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
@@ -77,6 +74,9 @@ public class PassThroughIntegrationTest {
     streamsConfiguration.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, WallclockTimestampExtractor.class);
     // You can also define consumer configuration settings.
     //streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+    // Write the input data as-is to the output topic.
+    builder.stream(inputTopic).to(outputTopic);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();

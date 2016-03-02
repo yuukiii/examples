@@ -21,6 +21,19 @@ class MapFunctionScalaExample {
   def main(args: Array[String]) {
     val builder: KStreamBuilder = new KStreamBuilder
 
+    val streamingConfig = {
+      val settings = new Properties
+      settings.put(StreamsConfig.JOB_ID_CONFIG, "map-function-example")
+      settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
+      settings.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181")
+      settings.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[ByteArraySerializer])
+      settings.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
+      settings.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[ByteArrayDeserializer])
+      settings.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
+      settings.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, classOf[WallclockTimestampExtractor])
+      settings
+    }
+
     // Read the input Kafka topic into a KStream instance.
     val textLines: KStream[Array[Byte], String] = builder.stream(new ByteArrayDeserializer, new StringDeserializer, "TextLinesTopic")
 
@@ -67,18 +80,6 @@ class MapFunctionScalaExample {
     //       jump around in the code too much in these examples.
     originalAndUppercased.to("OriginalAndUppercased", new StringSerializer, new StringSerializer)
 
-    val streamingConfig = {
-      val settings = new Properties
-      settings.put(StreamsConfig.JOB_ID_CONFIG, "map-function-example")
-      settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
-      settings.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181")
-      settings.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[ByteArraySerializer])
-      settings.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
-      settings.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[ByteArrayDeserializer])
-      settings.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
-      settings.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, classOf[WallclockTimestampExtractor])
-      settings
-    }
     val stream: KafkaStreams = new KafkaStreams(builder, streamingConfig)
     stream.start()
   }
