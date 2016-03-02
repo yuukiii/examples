@@ -88,7 +88,7 @@ public class WordCountLambdaIntegrationTest {
     streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, "/tmp/kafka-streams");
+    streamsConfiguration.put(StreamsConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
     // Remove any state from previous test runs
     purgeLocalStreamsState(streamsConfiguration);
