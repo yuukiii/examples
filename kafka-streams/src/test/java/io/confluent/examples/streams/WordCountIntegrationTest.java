@@ -151,8 +151,6 @@ public class WordCountIntegrationTest {
     consumer.subscribe(Collections.singletonList(outputTopic));
     List<KeyValue<String, Long>> actualValues = IntegrationTestUtils.readKeyValues(consumer);
 
-    // Note: This assert statement will work once we have merged the PR for equality semantics of
-    //       `KeyValue`.  See https://github.com/apache/kafka/pull/872.
     assertThat(actualValues).containsExactlyElementsOf(expectedValues);
   }
 
