@@ -74,7 +74,6 @@ public class MapFunctionLambdaIntegrationTest {
     streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
     streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    streamsConfiguration.put(StreamsConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
     // Write the input data as-is to the output topic.
     KStream<byte[], String> input = builder.stream(inputTopic);

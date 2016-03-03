@@ -88,7 +88,6 @@ public class WordCountLambdaIntegrationTest {
     streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    streamsConfiguration.put(StreamsConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     // Explicitly place the state directory under /tmp so that we can remove it via
     // `purgeLocalStreamsState` below.  Once Streams is updated to expose the effective
     // StreamsConfig configuration (so we can retrieve whatever state directory Streams came up
