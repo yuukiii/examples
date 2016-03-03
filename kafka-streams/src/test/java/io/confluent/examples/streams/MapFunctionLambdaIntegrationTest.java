@@ -80,8 +80,6 @@ public class MapFunctionLambdaIntegrationTest {
 
     KStream<byte[], String> uppercased = input.mapValues(String::toUpperCase);
 
-    // String::toUpperCase
-
     uppercased.to(outputTopic);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
