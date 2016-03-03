@@ -64,7 +64,7 @@ public class UserRegionLambdaExample {
             // filter out incomplete profiles with less than 200 characters
             .filter((userId, record) -> ((String) record.get("experience")).getBytes().length > 200)
             // count by region, we can set null to all serdes to use defaults
-            .count((userId, record) ->  (String) record.get("region"),
+            .count((userId, record) ->  new KeyValue<>((String) record.get("region"), record),
                 null, null, longSerializer, null, null, longDeserializer, "CountsByRegion")
             // filter out regions with less than 10M users
             .filter((regionName, count) -> count > 10 * 1000 * 1000);
