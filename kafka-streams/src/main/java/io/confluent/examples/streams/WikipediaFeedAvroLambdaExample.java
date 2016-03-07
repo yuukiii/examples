@@ -36,12 +36,14 @@ import java.util.Properties;
 
 
 /**
- * From the wiki feed irc stream compute the number of new user feeds for every minute.  Same as
- * WordCountAvroExample but uses lambda expressions.
+ * Computes, for every minute the number of new user feeds from the Wikipedia feed irc stream.
+ * Same as WikipediaFeedAvroExample but uses lambda expressions and thus only works on Java 8+.
  *
- * Note: This example uses lambda expressions and thus works with Java 8+ only.
+ * Note: The specific Avro binding is used for serialization/deserialization, where the `WikiFeed`
+ * class is auto-generated from its Avro schema by the maven avro plugin.  See `wikifeed.avsc`
+ * under `src/main/avro/`.
  */
-public class WordCountAvroLambdaExample {
+public class WikipediaFeedAvroLambdaExample {
 
     public static void main(String[] args) throws Exception {
         Properties streamsConfiguration = new Properties();

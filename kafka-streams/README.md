@@ -19,16 +19,37 @@ _Kafka Streams Tech Preview_, which includes the latest Kafka Streams implementa
 
 ## Java
 
-* [MapFunctionExample.java](src/main/java/io/confluent/examples/streams/MapFunctionExample.java)
+> Note: We use the label "Lambda" to denote any examples that make use of lambda expressions and thus require Java 8+.
+
+* [WordCountLambdaExample](src/main/java/io/confluent/examples/streams/WordCountLambdaExample.java)
+  -- demonstrates, using the high-level KStream DSL, how to implement the WordCount program that computes a simple word
+  occurrence histogram from an input text.
+* [PageViewRegionLambdaExample](src/main/java/io/confluent/examples/streams/PageViewRegionLambdaExample.java)
+  -- demonstrates how to perform a join between a `KStream` and a `KTable`, i.e. an example of a stateful computation
+    * Variant: [PageViewRegionExample](src/main/java/io/confluent/examples/streams/PageViewRegionExample.java),
+      which implements the same example but without lambda expressions and thus works with Java 7+.
+* [MapFunctionLambdaExample](src/main/java/io/confluent/examples/streams/MapFunctionLambdaExample.java)
   -- demonstrates how to perform simple, state-less transformations via map functions, using the high-level KStream DSL
+  (see also the Scala variant
+  [MapFunctionScalaExample](src/main/scala/io/confluent/examples/streams/MapFunctionScalaExample.scala))
+* Working with data in Apache Avro format:
+    * Generic Avro:
+      [PageViewRegionLambdaExample](src/main/java/io/confluent/examples/streams/PageViewRegionLambdaExample.java)
+      (Java 8+) and
+      [PageViewRegionExample](src/main/java/io/confluent/examples/streams/PageViewRegionExample.java) (Java 7+)
+    * Specific Avro:
+      [WikipediaFeedAvroLambdaExample](src/main/java/io/confluent/examples/streams/WikipediaFeedAvroLambdaExample.java)
+      (Java 8+) and
+      [WikipediaFeedAvroExample](src/main/java/io/confluent/examples/streams/WikipediaFeedAvroExample.java) (Java 7+)
+* And [further examples](src/main/java/io/confluent/examples/streams/).
 
 There are also a few integration tests, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka
 clusters, feed input data to them, process the data using Kafka Streams, and finally verify the output results.
 
 > Tip: Run `mvn test` to launch the integration tests.
 
-* [WordCountIntegrationTest](src/test/java/io/confluent/examples/streams/WordCountIntegrationTest.java)
-* [MapFunctionIntegrationTest](src/test/java/io/confluent/examples/streams/MapFunctionIntegrationTest.java)
+* [WordCountLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/WordCountLambdaIntegrationTest.java)
+* [MapFunctionLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/MapFunctionLambdaIntegrationTest.java)
 * [PassThroughIntegrationTest](src/test/java/io/confluent/examples/streams/PassThroughIntegrationTest.java)
 
 
@@ -36,6 +57,8 @@ clusters, feed input data to them, process the data using Kafka Streams, and fin
 
 * [MapFunctionScalaExample](src/main/scala/io/confluent/examples/streams/MapFunctionScalaExample.scala)
   -- demonstrates how to perform simple, state-less transformations via map functions, using the high-level KStream DSL
+  (see also the Java variant
+  [MapFunctionLambdaExample](src/main/java/io/confluent/examples/streams/MapFunctionLambdaExample.java))
 
 
 # Requirements
@@ -86,7 +109,7 @@ library, sorted by ease-of-use (easiest first):
 
 ## Java 8
 
-The code examples require Java 8, primarily because of the usage of
+Some code examples require Java 8, primarily because of the usage of
 [lambda expressions](https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html).
 
 IntelliJ IDEA users:
