@@ -75,6 +75,10 @@ public class WordCountLambdaIntegrationTest {
     //
     // Step 1: Configure and start the Streams job.
     //
+    // This code is identical to what's shown in WordCountLambdaExample, with the exception of
+    // the call to `purgeLocalStreamsState()`, which we need only for cleaning up previous runs of
+    // this integration test.
+    //
     final Serializer<String> stringSerializer = new StringSerializer();
     final Deserializer<String> stringDeserializer = new StringDeserializer();
     final Serializer<Long> longSerializer = new LongSerializer();
@@ -85,8 +89,8 @@ public class WordCountLambdaIntegrationTest {
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, cluster.zookeeperConnect());
     streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     // Explicitly place the state directory under /tmp so that we can remove it via
     // `purgeLocalStreamsState` below.  Once Streams is updated to expose the effective
@@ -95,27 +99,27 @@ public class WordCountLambdaIntegrationTest {
     // accordingly.
     streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, "/tmp/kafka-streams");
 
-    // Remove any state from previous test runs
-    purgeLocalStreamsState(streamsConfiguration);
-
     KStreamBuilder builder = new KStreamBuilder();
 
-    KStream<String, String> source = builder.stream(inputTopic);
+    KStream<String, String> textLines = builder.stream(inputTopic);
 
-    KStream<String, Long> counts = source
+    KStream<String, Long> wordCounts = textLines
         .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
         .map((key, value) -> new KeyValue<>(value, value))
         .countByKey(stringSerializer, longSerializer, stringDeserializer, longDeserializer, "Counts")
         .toStream();
 
-    counts.to(outputTopic, stringSerializer, longSerializer);
+    wordCounts.to(outputTopic, stringSerializer, longSerializer);
+
+    // Remove any state from previous test runs
+    purgeLocalStreamsState(streamsConfiguration);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();
 
     // Wait briefly for the streaming job to be fully up and running (otherwise it might miss
     // some or all of the input data we produce below).
-    Thread.sleep(1000);
+    Thread.sleep(2000);
 
     //
     // Step 2: Produce some input data to the input topic.
@@ -136,7 +140,7 @@ public class WordCountLambdaIntegrationTest {
     producer.close();
 
     // Give the streaming job some time to do its work.
-    Thread.sleep(1000);
+    Thread.sleep(2000);
     streams.close();
 
     //

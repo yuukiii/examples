@@ -106,6 +106,36 @@ If you want to experiment with the Scala examples in this repository, you need a
 and SAM / Java lambda (e.g. Scala 2.11 with * `-Xexperimental` compiler flag, or 2.12).
 
 
+# Packaging and running the examples
+
+> Tip:  You can also run `mvn test`, which executes the included integration tests.  These tests spawn embedded Kafka
+> clusters to showcase the Kafka Streams functionality end-to-end.  The benefit of the integration tests is that you
+> don't need to install and run a Kafka cluster yourself.
+
+If you want to run the examples against a Kafka cluster, you may want to create a standalone jar ("fat jar") of the
+Kafka Streams examples via:
+
+```shell
+# Create a standalone jar
+$ mvn clean package
+
+# >>> Creates target/streams-examples-2.1.0-alpha1-standalone.jar
+```
+
+You can now run the example applications as follows:
+
+```shell
+# Run an example application from the standalone jar.
+# Here: `WordCountLambdaExample`
+$ java -cp target/streams-examples-2.1.0-alpha1-standalone.jar \
+  io.confluent.examples.streams.WordCountLambdaExample
+```
+
+Keep in mind that the machine on which you run the command above must have access to the Kafka/ZK clusters you
+configured in the code examples.  By default, the code examples assume the Kafka cluster is accessible via
+`localhost:9092` (Kafka broker) and the ZooKeeper ensemble via `localhost:2181`.
+
+
 # Development
 
 This project uses the standard maven lifecycle and commands such as:

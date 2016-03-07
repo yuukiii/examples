@@ -43,11 +43,11 @@ import java.util.Properties;
  * Note: The specific Avro binding is used for serialization/deserialization, where the `WikiFeed`
  * class is auto-generated from its Avro schema by the maven avro plugin.
  */
-public class WordCountExample {
+public class WordCountAvroExample {
 
     public static void main(String[] args) throws Exception {
         Properties streamsConfiguration = new Properties();
-        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "wordcount-example");
+        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "wordcount-avro-example");
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
         streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
