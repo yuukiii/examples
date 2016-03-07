@@ -19,16 +19,25 @@ _Kafka Streams Tech Preview_, which includes the latest Kafka Streams implementa
 
 ## Java
 
-* [MapFunctionExample.java](src/main/java/io/confluent/examples/streams/MapFunctionExample.java)
+* [WordCountLambdaExample.java](src/main/java/io/confluent/examples/streams/WordCountLambdaExample.java)
+  -- demonstrates, using the high-level KStream DSL, how to implement the WordCount program that computes a simple word
+  occurrence histogram from an input text.
+    * Variant 1: [WordCountAvroLambdaExample.java](src/main/java/io/confluent/examples/streams/WordCountAvroLambdaExample.java),
+      which implements a similar WordCount-like algorithm but demonstrates how to process data in Apache Avro format
+    * Variant 2: [WordCountAvroExample.java](src/main/java/io/confluent/examples/streams/WordCountAvroExample.java)
+      -- same as variant 1 but does not use lambda expressions, which means you can run this code on Java 7+.
+* [MapFunctionLambdaExample.java](src/main/java/io/confluent/examples/streams/MapFunctionLambdaExample.java)
   -- demonstrates how to perform simple, state-less transformations via map functions, using the high-level KStream DSL
+* [PageViewRegionLambdaExample.java](src/main/java/io/confluent/examples/streams/PageViewRegionLambdaExample.java)
+  -- computes the number of page views
 
 There are also a few integration tests, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka
 clusters, feed input data to them, process the data using Kafka Streams, and finally verify the output results.
 
 > Tip: Run `mvn test` to launch the integration tests.
 
-* [WordCountIntegrationTest](src/test/java/io/confluent/examples/streams/WordCountIntegrationTest.java)
-* [MapFunctionIntegrationTest](src/test/java/io/confluent/examples/streams/MapFunctionIntegrationTest.java)
+* [WordCountLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/WordCountLambdaIntegrationTest.java)
+* [MapFunctionLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/MapFunctionLambdaIntegrationTest.java)
 * [PassThroughIntegrationTest](src/test/java/io/confluent/examples/streams/PassThroughIntegrationTest.java)
 
 

@@ -42,6 +42,22 @@ import java.util.Properties;
  * Compute the number of page views by geo-region.  Same as PageViewRegionExample but uses lambda
  * expressions.
  *
+ * Demonstrates how to perform a join between a KStream and a KTable, i.e. an example of a stateful
+ * computation, using the generic Avro binding for serdes in Kafka Streams.
+ *
+ * In this example, we join a stream of page views (aka clickstreams) that reads from a topic named
+ * "PageViews" with a user profile table that reads from a topic named "UserProfiles" to compute the
+ * number of page views per user region.
+ *
+ * Before running this example you must create the source topics (e.g. via
+ * `kafka-topics --create ...`) and write some data to them (e.g. `kafka-avro-console-producer`).
+ * Otherwise you won't see any data arriving in the output topic.
+ *
+ * Note: The generic Avro binding is used for serialization/deserialization.  This means the
+ * appropriate Avro schema files must be provided for each of the "intermediate" Avro classes, i.e.
+ * whenever new types of Avro objects (in the form of GenericRecord) are being passed between
+ * processing steps.
+
  * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */
 public class PageViewRegionLambdaExample {
@@ -52,8 +68,8 @@ public class PageViewRegionLambdaExample {
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
         streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, GenericAvroSerializer.class);
         streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, GenericAvroSerializer.class);
         streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GenericAvroDeserializer.class);
 
         final Serializer<Long> longSerializer = new LongSerializer();
@@ -61,16 +77,19 @@ public class PageViewRegionLambdaExample {
 
         KStreamBuilder builder = new KStreamBuilder();
 
+        // See `pageview.avsc` under `src/main/avro/`.
         KStream<String, GenericRecord> views = builder.stream("PageViews");
 
         KStream<String, GenericRecord> viewsByUser = views.map((dummy, record) -> new KeyValue<>((String) record.get("user"), record));
 
+        // See `userprofile.avsc` under `src/main/avro/`.
         KTable<String, GenericRecord> users = builder.table("UserProfile");
 
         KTable<String, String> userRegions = users.mapValues(record -> (String) record.get("region"));
 
         // We must specify the Avro schemas for all intermediate (Avro) classes, if any.
-        // In this example, we want to create an intermediate GenericRecord to hold the view region (see below).
+        // In this example, we want to create an intermediate GenericRecord to hold the view region.
+        // See `pageviewregion.avsc` under `src/main/avro/`.
         Schema schema = new Schema.Parser().parse(new File("pageviewregion.avsc"));
 
         KTable<Windowed<String>, Long> regionCount = viewsByUser
