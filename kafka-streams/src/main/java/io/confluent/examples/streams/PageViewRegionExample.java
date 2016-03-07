@@ -42,10 +42,9 @@ import java.io.File;
 import java.util.Properties;
 
 /**
- * Compute the number of page views by geo-region.
- *
  * Demonstrates how to perform a join between a KStream and a KTable, i.e. an example of a stateful
- * computation, using the generic Avro binding for serdes in Kafka Streams.
+ * computation, using the generic Avro binding for serdes in Kafka Streams. Same as
+ * PageViewRegionLambdaExample but does not use lambda expressions and thus works on Java 7+.
  *
  * In this example, we join a stream of page views (aka clickstreams) that reads from a topic named
  * "PageViews" with a user profile table that reads from a topic named "UserProfiles" to compute the

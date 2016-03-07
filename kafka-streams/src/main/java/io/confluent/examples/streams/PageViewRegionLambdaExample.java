@@ -39,11 +39,9 @@ import java.io.File;
 import java.util.Properties;
 
 /**
- * Compute the number of page views by geo-region.  Same as PageViewRegionExample but uses lambda
- * expressions.
- *
  * Demonstrates how to perform a join between a KStream and a KTable, i.e. an example of a stateful
- * computation, using the generic Avro binding for serdes in Kafka Streams.
+ * computation, using the generic Avro binding for serdes in Kafka Streams.  Same as
+ * PageViewRegionExample but uses lambda expressions and thus only works on Java 8+.
  *
  * In this example, we join a stream of page views (aka clickstreams) that reads from a topic named
  * "PageViews" with a user profile table that reads from a topic named "UserProfiles" to compute the
@@ -57,8 +55,6 @@ import java.util.Properties;
  * appropriate Avro schema files must be provided for each of the "intermediate" Avro classes, i.e.
  * whenever new types of Avro objects (in the form of GenericRecord) are being passed between
  * processing steps.
-
- * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */
 public class PageViewRegionLambdaExample {
 

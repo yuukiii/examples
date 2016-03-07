@@ -37,7 +37,8 @@ import io.confluent.examples.streams.utils.SpecificAvroSerializer;
 
 /**
  * Demonstrates, using the high-level KStream DSL, how to implement the WordCount program that
- * computes a simple word occurrence histogram from an input text.
+ * computes a simple word occurrence histogram from an input text.  This example uses lambda
+ * expressions and thus works with Java 8+ only.
  *
  * In this example, the input stream reads from a topic named "TextLinesTopic", where the values of
  * messages represent lines of text; and the histogram output is written to topic
@@ -48,7 +49,7 @@ import io.confluent.examples.streams.utils.SpecificAvroSerializer;
  * `kafka-topics --create ...`) and write some data to it (e.g. via
  * `kafka-console-producer`). Otherwise you won't see any data arriving in the output topic.
  *
- * Note: This example uses lambda expressions and thus works with Java 8+ only.
+ * Note:
  */
 public class WordCountLambdaExample {
 
