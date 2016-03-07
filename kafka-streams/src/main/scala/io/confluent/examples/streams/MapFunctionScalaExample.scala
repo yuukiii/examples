@@ -9,6 +9,7 @@ import org.apache.kafka.streams.processor.internals.WallclockTimestampExtractor
 
 /**
   * Demonstrates how to perform simple, state-less transformations via map functions.
+  * Same as MapFunctionLambdaExample but in Scala.
   *
   * Use cases include e.g. basic data sanitization, data anonymization by obfuscating sensitive data
   * fields (such as personally identifiable information aka PII).
