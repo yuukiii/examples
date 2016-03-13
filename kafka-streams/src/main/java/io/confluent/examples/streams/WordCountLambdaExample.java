@@ -31,7 +31,6 @@ import org.apache.kafka.streams.kstream.KTable;
 import java.util.Arrays;
 import java.util.Properties;
 
-import io.confluent.examples.streams.avro.WikiFeed;
 import io.confluent.examples.streams.utils.SpecificAvroDeserializer;
 import io.confluent.examples.streams.utils.SpecificAvroSerializer;
 
