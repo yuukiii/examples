@@ -26,14 +26,9 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
-import org.apache.kafka.streams.kstream.KTable;
 
 import java.util.Arrays;
 import java.util.Properties;
-
-import io.confluent.examples.streams.avro.WikiFeed;
-import io.confluent.examples.streams.utils.SpecificAvroDeserializer;
-import io.confluent.examples.streams.utils.SpecificAvroSerializer;
 
 /**
  * Demonstrates, using the high-level KStream DSL, how to implement the WordCount program that
