@@ -87,7 +87,8 @@ public class MapFunctionLambdaIntegrationTest {
 
     // Wait briefly for the streaming job to be fully up and running (otherwise it might miss
     // some or all of the input data we produce below).
-    Thread.sleep(2000);
+    // Note: The sleep times are relatively high to support running the build on Travis CI.
+    Thread.sleep(5000);
 
     //
     // Step 2: Produce some input data to the input topic.
@@ -108,7 +109,8 @@ public class MapFunctionLambdaIntegrationTest {
     producer.close();
 
     // Give the streaming job some time to do its work.
-    Thread.sleep(2000);
+    // Note: The sleep times are relatively high to support running the build on Travis CI.
+    Thread.sleep(10000);
     streams.close();
 
     //
