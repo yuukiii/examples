@@ -109,7 +109,6 @@ public class TopArticlesLambdaExample {
                                     return (int) ((Long) o1.get("count") - (Long) o2.get("count"));
                                 }
                             };
-
                             return new PriorityQueue<>(comparator);
                         },
 
@@ -128,7 +127,8 @@ public class TopArticlesLambdaExample {
                         // the selector
                         (windowedArticle, count) -> {
                             // project on the industry field for key
-                            Windowed<String> windowedIndustry = new Windowed<>((String) windowedArticle.value().get("industry"), windowedArticle.window());
+                            Windowed<String> windowedIndustry =
+                                new Windowed<>((String) windowedArticle.value().get("industry"), windowedArticle.window());
                             // add the page into the value
                             GenericRecord viewStats = new GenericData.Record(schema);
                             viewStats.put("page", "pageId");
@@ -136,14 +136,12 @@ public class TopArticlesLambdaExample {
                             viewStats.put("count", count);
                             return new KeyValue<>(windowedIndustry, viewStats);
                         },
-
                         windowedStringSerializer,
                         avroSerializer,
                         new PriorityQueueSerializer<>(),
                         windowedDeserializer,
                         avroDeserializer,
                         new PriorityQueueDeserializer<>(),
-
                         "AllArticles"
                 );
 
@@ -153,14 +151,11 @@ public class TopArticlesLambdaExample {
                     StringBuilder sb = new StringBuilder();
                     for (int i = 0; i < topN; i++) {
                         GenericRecord record = queue.poll();
-
                         if (record == null)
                             break;
-
                         sb.append((String) record.get("page"));
                         sb.append("\n");
                     }
-
                     return sb.toString();
                 });
 
