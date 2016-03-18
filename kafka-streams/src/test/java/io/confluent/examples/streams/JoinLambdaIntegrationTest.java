@@ -1,0 +1,276 @@
+/**
+ * Copyright 2016 Confluent Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+package io.confluent.examples.streams;
+
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.LongDeserializer;
+import org.apache.kafka.common.serialization.LongSerializer;
+import org.apache.kafka.common.serialization.Serializer;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.KStreamBuilder;
+import org.apache.kafka.streams.kstream.KTable;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.Future;
+
+import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+/**
+ * End-to-end integration test that demonstrates how to perform a join between a KStream and a
+ * KTable, i.e. an example of a stateful computation.
+ *
+ * Note: This example uses lambda expressions and thus works with Java 8+ only.
+ */
+public class JoinLambdaIntegrationTest {
+
+  private static EmbeddedSingleNodeKafkaCluster cluster = null;
+  private static final String userClicksTopic = "user-clicks";
+  private static final String userRegionsTopic = "user-regions";
+  private static final String outputTopic = "output-topic";
+
+  @BeforeClass
+  public static void startKafkaCluster() throws Exception {
+    cluster = new EmbeddedSingleNodeKafkaCluster();
+    cluster.createTopic(userClicksTopic);
+    cluster.createTopic(userRegionsTopic);
+    cluster.createTopic(outputTopic);
+  }
+
+  @AfterClass
+  public static void stopKafkaCluster() throws IOException {
+    if (cluster != null) {
+      cluster.stop();
+    }
+  }
+
+  /**
+   * Tuple for a region and its associated number of clicks.
+   */
+  private static final class RegionWithClicks {
+
+    private final String region;
+    private final long clicks;
+
+    public RegionWithClicks(String region, long clicks) {
+      if (region == null || region.isEmpty()) {
+        throw new IllegalArgumentException("region must be set");
+      }
+      if (clicks < 0) {
+        throw new IllegalArgumentException("clicks must not be negative");
+      }
+      this.region = region;
+      this.clicks = clicks;
+    }
+
+    public String getRegion() {
+      return region;
+    }
+
+    public long getClicks() {
+      return clicks;
+    }
+
+  }
+
+  @Test
+  public void shouldCountClicksPerRegion() throws Exception {
+    // Input 1: Clicks per user (multiple records allowed per user).
+    List<KeyValue<String, Long>> userClicks = Arrays.asList(
+        new KeyValue<>("alice", 13L),
+        new KeyValue<>("bob", 4L),
+        new KeyValue<>("chao", 25L),
+        new KeyValue<>("bob", 19L),
+        new KeyValue<>("dave", 56L),
+        new KeyValue<>("eve", 78L),
+        new KeyValue<>("alice", 40L),
+        new KeyValue<>("fang", 99L)
+    );
+
+    // Input 2: Region per user (multiple records allowed per user).
+    List<KeyValue<String, String>> userRegions = Arrays.asList(
+        new KeyValue<>("alice", "asia"),   /* Alice lived in Asia originally... */
+        new KeyValue<>("bob", "americas"),
+        new KeyValue<>("chao", "asia"),
+        new KeyValue<>("dave", "europe"),
+        new KeyValue<>("alice", "europe"), /* ...but has moved to Europe some time later. */
+        new KeyValue<>("eve", "americas"),
+        new KeyValue<>("fang", "asia")
+    );
+
+    List<KeyValue<String, Long>> expectedClicksPerRegion = Arrays.asList(
+        new KeyValue<>("europe", 13L),
+        new KeyValue<>("americas", 4L),
+        new KeyValue<>("asia", 25L),
+        new KeyValue<>("americas", 23L),
+        new KeyValue<>("europe", 69L),
+        new KeyValue<>("americas", 101L),
+        new KeyValue<>("europe", 109L),
+        new KeyValue<>("asia", 124L)
+    );
+
+    //
+    // Step 1: Configure and start the processor topology.
+    //
+    final Serializer<String> stringSerializer = new StringSerializer();
+    final Deserializer<String> stringDeserializer = new StringDeserializer();
+    final Serializer<Long> longSerializer = new LongSerializer();
+    final Deserializer<Long> longDeserializer = new LongDeserializer();
+
+    Properties streamsConfiguration = new Properties();
+    streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "join-lambda-integration-test");
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, cluster.zookeeperConnect());
+    streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    // Explicitly place the state directory under /tmp so that we can remove it via
+    // `purgeLocalStreamsState` below.  Once Streams is updated to expose the effective
+    // StreamsConfig configuration (so we can retrieve whatever state directory Streams came up
+    // with automatically) we don't need to set this anymore and can update `purgeLocalStreamsState`
+    // accordingly.
+    streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, "/tmp/kafka-streams");
+
+    // Remove any state from previous test runs
+    IntegrationTestUtils.purgeLocalStreamsState(streamsConfiguration);
+
+    KStreamBuilder builder = new KStreamBuilder();
+
+    // This KStream contains information such as "alice" -> 13L.
+    //
+    // Because this is a KStream ("record stream"), multiple records for the same user will be
+    // considered as separate click-count events, each of which will be added to the total count.
+    KStream<String, Long> userClicksStream = builder.stream(stringDeserializer, longDeserializer, userClicksTopic);
+
+    // This KTable contains information such as "alice" -> "europe".
+    //
+    // Because this is a KTable ("changelog stream"), only the latest value (here: region) for a
+    // record key will be considered at the time when a new user-click record (see above) is
+    // received for the `leftJoin` below.  Any previous region values are being considered out of
+    // date.  This behavior is quite different to the KStream for user clicks above.
+    //
+    // For example, the user "alice" will be considered to live in "europe" (although originally she
+    // lived in "asia") because, at the time her first user-click record is being received and
+    // subsequently processed in the `leftJoin`, the latest region update for "alice" is "europe"
+    // (which overrides her previous region value of "asia").
+    KTable<String, String> userRegionsTable =
+        builder.table(stringSerializer, stringSerializer, stringDeserializer, stringDeserializer, userRegionsTopic);
+
+    // Compute the number of clicks per region, e.g. "europe" -> 13L.
+    //
+    // The resulting KTable is continuously being updated as new data records are arriving in the
+    // input KStream `userClicksStream` and input KTable `userRegionsTable`.
+    KTable<String, Long> clicksPerRegion = userClicksStream
+        .leftJoin(userRegionsTable, (clicks, region) -> new RegionWithClicks(region == null ? "UNKNOWN" : region, clicks))
+        .map((user, regionWithClicks) -> new KeyValue<>(regionWithClicks.getRegion(), regionWithClicks.getClicks()))
+        .reduceByKey(
+            (leftClicks, rightClicks) -> leftClicks + rightClicks,
+            stringSerializer, longSerializer, stringDeserializer, longDeserializer, "ClicksPerRegionUnwindowed");
+
+    clicksPerRegion.to(outputTopic, stringSerializer, longSerializer);
+
+    KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
+    streams.start();
+
+    // Wait briefly for the topology to be fully up and running (otherwise it might miss some or all
+    // of the input data we produce below).
+    // Note: The sleep times are relatively high to support running the build on Travis CI.
+    Thread.sleep(5000);
+
+    //
+    // Step 2: Publish user-region information.
+    //
+    // To keep this code example simple and easier to understand/reason about, we publish all
+    // user-region records before any user-click records (cf. step 3).  In practice though,
+    // data records would typically be arriving concurrently in both input streams/topics.
+    Properties userRegionsProducerConfig = new Properties();
+    userRegionsProducerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    userRegionsProducerConfig.put(ProducerConfig.ACKS_CONFIG, "all");
+    userRegionsProducerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);
+    userRegionsProducerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    userRegionsProducerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+
+    Producer<String, String> userRegionsProducer = new KafkaProducer<>(userRegionsProducerConfig);
+    for (KeyValue<String, String> userToRegion : userRegions) {
+      Future<RecordMetadata> f = userRegionsProducer.send(
+          new ProducerRecord<>(userRegionsTopic, userToRegion.key, userToRegion.value));
+      f.get();
+    }
+    userRegionsProducer.flush();
+    userRegionsProducer.close();
+
+    //
+    // Step 3: Publish some user click events.
+    //
+    Properties userClicksProducerConfig = new Properties();
+    userClicksProducerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    userClicksProducerConfig.put(ProducerConfig.ACKS_CONFIG, "all");
+    userClicksProducerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);
+    userClicksProducerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    userClicksProducerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
+
+    Producer<String, Long> userClicksProducer = new KafkaProducer<>(userClicksProducerConfig);
+    for (KeyValue<String, Long> userToNumClicks : userClicks) {
+      Future<RecordMetadata> f = userClicksProducer.send(
+          new ProducerRecord<>(userClicksTopic, userToNumClicks.key, userToNumClicks.value));
+      f.get();
+    }
+    userClicksProducer.flush();
+    userClicksProducer.close();
+
+    // Give the stream processing application some time to do its work.
+    // Note: The sleep times are relatively high to support running the build on Travis CI.
+    Thread.sleep(10000);
+    streams.close();
+
+    //
+    // Step 4: Verify the application's output data.
+    //
+    Properties consumerConfig = new Properties();
+    consumerConfig.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    consumerConfig.put(ConsumerConfig.GROUP_ID_CONFIG, "join-lambda-integration-test-standard-consumer");
+    consumerConfig.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
+
+    KafkaConsumer<String, Long> consumer = new KafkaConsumer<>(consumerConfig);
+    consumer.subscribe(Collections.singletonList(outputTopic));
+    List<KeyValue<String, Long>> actualValues = IntegrationTestUtils.readKeyValues(consumer);
+
+    assertThat(actualValues).containsExactlyElementsOf(expectedClicksPerRegion);
+  }
+
+}
