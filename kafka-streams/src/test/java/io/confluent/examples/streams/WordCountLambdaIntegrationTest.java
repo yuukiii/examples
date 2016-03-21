@@ -84,7 +84,7 @@ public class WordCountLambdaIntegrationTest {
     );
 
     //
-    // Step 1: Configure and start the Streams job.
+    // Step 1: Configure and start the processor topology.
     //
     // This code is identical to what's shown in WordCountLambdaExample, with the exception of
     // the call to `purgeLocalStreamsState()`, which we need only for cleaning up previous runs of
@@ -128,8 +128,8 @@ public class WordCountLambdaIntegrationTest {
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();
 
-    // Wait briefly for the streaming job to be fully up and running (otherwise it might miss
-    // some or all of the input data we produce below).
+    // Wait briefly for the topology to be fully up and running (otherwise it might miss some or all
+    // of the input data we produce below).
     // Note: The sleep times are relatively high to support running the build on Travis CI.
     Thread.sleep(5000);
 
@@ -151,13 +151,13 @@ public class WordCountLambdaIntegrationTest {
     producer.flush();
     producer.close();
 
-    // Give the streaming job some time to do its work.
+    // Give the stream processing application some time to do its work.
     // Note: The sleep times are relatively high to support running the build on Travis CI.
     Thread.sleep(10000);
     streams.close();
 
     //
-    // Step 3: Verify the job's output data.
+    // Step 3: Verify the application's output data.
     //
     Properties consumerConfig = new Properties();
     consumerConfig.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());

@@ -43,14 +43,13 @@ public class MapFunctionLambdaExample {
   public static void main(String[] args) throws Exception {
     Properties streamsConfiguration = new Properties();
     // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
-    // against which the application is run (because important housekeeping work is performed
-    // based on this job id).
+    // against which the application is run.
     streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "map-function-lambda-example");
     // Where to find Kafka broker(s).
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
     // Where to find the corresponding ZooKeeper ensemble.
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
-    // Specify default (de)serializers for messages keys and for message values.
+    // Specify default (de)serializers for record keys and for record values.
     streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
     streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
     streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);

@@ -60,9 +60,14 @@ public class PageViewRegionLambdaExample {
 
     public static void main(String[] args) throws Exception {
         Properties streamsConfiguration = new Properties();
+        // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
+        // against which the application is run.
         streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "pageview-region-lambda-example");
+        // Where to find Kafka broker(s).
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        // Where to find the corresponding ZooKeeper ensemble.
         streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
+        // Specify default (de)serializers for record keys and for record values.
         streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, GenericAvroSerializer.class);
