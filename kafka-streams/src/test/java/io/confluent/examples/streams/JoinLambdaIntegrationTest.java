@@ -125,7 +125,7 @@ public class JoinLambdaIntegrationTest {
         new KeyValue<>("bob", "americas"),
         new KeyValue<>("chao", "asia"),
         new KeyValue<>("dave", "europe"),
-        new KeyValue<>("alice", "europe"), /* ...but has moved to Europe some time later. */
+        new KeyValue<>("alice", "europe"), /* ...but moved to Europe some time later. */
         new KeyValue<>("eve", "americas"),
         new KeyValue<>("fang", "asia")
     );
