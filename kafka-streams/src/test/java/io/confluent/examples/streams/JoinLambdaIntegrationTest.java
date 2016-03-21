@@ -194,10 +194,17 @@ public class JoinLambdaIntegrationTest {
     // The resulting KTable is continuously being updated as new data records are arriving in the
     // input KStream `userClicksStream` and input KTable `userRegionsTable`.
     KTable<String, Long> clicksPerRegion = userClicksStream
-        // Join the stream against the table.  In general, null values are possible for region
-        // so we must guard against that (here: by setting the fallback region "UNKNOWN").  In this
-        // specific example this is not really needed as we know, based on the test setup, that all
-        // users have appropriate region entries at the time we perform the join.
+        // Join the stream against the table.
+        //
+        // Null values possible: In general, null values are possible for region (i.e. the value of
+        // the KTable we are joining against) so we must guard against that (here: by setting the
+        // fallback region "UNKNOWN").  In this specific example this is not really needed because
+        // we know, based on the test setup, that all users have appropriate region entries at the
+        // time we perform the join.
+        //
+        // Also, we need to return a tuple of (region, clicks) for each user.  But because Java does
+        // not support tuples out-of-the-box, we must use a custom class `RegionWithClicks` to
+        // achieve the same effect.
         .leftJoin(userRegionsTable, (clicks, region) -> new RegionWithClicks(region == null ? "UNKNOWN" : region, clicks))
         // Change the stream from <user> -> <region, clicks> to <region> -> <clicks>
         .map((user, regionWithClicks) -> new KeyValue<>(regionWithClicks.getRegion(), regionWithClicks.getClicks()))
