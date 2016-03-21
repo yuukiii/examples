@@ -194,12 +194,19 @@ public class JoinLambdaIntegrationTest {
     // The resulting KTable is continuously being updated as new data records are arriving in the
     // input KStream `userClicksStream` and input KTable `userRegionsTable`.
     KTable<String, Long> clicksPerRegion = userClicksStream
+        // Join the stream against the table.  In general, null values are possible for region
+        // so we must guard against that (here: by setting the fallback region "UNKNOWN").  In this
+        // specific example this is not really needed as we know, based on the test setup, that all
+        // users have appropriate region entries at the time we perform the join.
         .leftJoin(userRegionsTable, (clicks, region) -> new RegionWithClicks(region == null ? "UNKNOWN" : region, clicks))
+        // Change the stream from <user> -> <region, clicks> to <region> -> <clicks>
         .map((user, regionWithClicks) -> new KeyValue<>(regionWithClicks.getRegion(), regionWithClicks.getClicks()))
+        // Compute the total per region by summing the individual click counts per region.
         .reduceByKey(
             (leftClicks, rightClicks) -> leftClicks + rightClicks,
             stringSerializer, longSerializer, stringDeserializer, longDeserializer, "ClicksPerRegionUnwindowed");
 
+    // Write the (continuously updating) results to the output topic.
     clicksPerRegion.to(outputTopic, stringSerializer, longSerializer);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
