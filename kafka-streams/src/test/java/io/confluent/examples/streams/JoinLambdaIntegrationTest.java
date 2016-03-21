@@ -282,9 +282,9 @@ public class JoinLambdaIntegrationTest {
 
     KafkaConsumer<String, Long> consumer = new KafkaConsumer<>(consumerConfig);
     consumer.subscribe(Collections.singletonList(outputTopic));
-    List<KeyValue<String, Long>> actualValues = IntegrationTestUtils.readKeyValues(consumer);
+    List<KeyValue<String, Long>> actualClicksPerRegion = IntegrationTestUtils.readKeyValues(consumer);
 
-    assertThat(actualValues).containsExactlyElementsOf(expectedClicksPerRegion);
+    assertThat(actualClicksPerRegion).containsExactlyElementsOf(expectedClicksPerRegion);
   }
 
 }

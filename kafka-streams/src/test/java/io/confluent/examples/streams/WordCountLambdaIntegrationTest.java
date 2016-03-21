@@ -75,7 +75,7 @@ public class WordCountLambdaIntegrationTest {
   @Test
   public void shouldCountWords() throws Exception {
     List<String> inputValues = Arrays.asList("hello", "world", "world", "hello world");
-    List<KeyValue<String, Long>> expectedValues = Arrays.asList(
+    List<KeyValue<String, Long>> expectedWordCounts = Arrays.asList(
         new KeyValue<>("hello", 1L),
         new KeyValue<>("world", 1L),
         new KeyValue<>("world", 2L),
@@ -168,9 +168,9 @@ public class WordCountLambdaIntegrationTest {
 
     KafkaConsumer<String, Long> consumer = new KafkaConsumer<>(consumerConfig);
     consumer.subscribe(Collections.singletonList(outputTopic));
-    List<KeyValue<String, Long>> actualValues = IntegrationTestUtils.readKeyValues(consumer);
+    List<KeyValue<String, Long>> actualWordCounts = IntegrationTestUtils.readKeyValues(consumer);
 
-    assertThat(actualValues).containsExactlyElementsOf(expectedValues);
+    assertThat(actualWordCounts).containsExactlyElementsOf(expectedWordCounts);
   }
 
 }
