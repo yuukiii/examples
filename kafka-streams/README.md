@@ -49,6 +49,7 @@ clusters, feed input data to them, process the data using Kafka Streams, and fin
 > Tip: Run `mvn test` to launch the integration tests.
 
 * [WordCountLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/WordCountLambdaIntegrationTest.java)
+* [JoinLambdaIntegrationTest](kafka-streams/src/test/java/io/confluent/examples/streams/JoinLambdaIntegrationTest.java)
 * [MapFunctionLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/MapFunctionLambdaIntegrationTest.java)
 * [PassThroughIntegrationTest](src/test/java/io/confluent/examples/streams/PassThroughIntegrationTest.java)
 
