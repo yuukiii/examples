@@ -22,14 +22,14 @@ _Kafka Streams Tech Preview_, which includes the latest Kafka Streams implementa
 > Note: We use the label "Lambda" to denote any examples that make use of lambda expressions and thus require Java 8+.
 
 * [WordCountLambdaExample](src/main/java/io/confluent/examples/streams/WordCountLambdaExample.java)
-  -- demonstrates, using the high-level KStream DSL, how to implement the WordCount program that computes a simple word
+  -- demonstrates, using the Kafka Streams DSL, how to implement the WordCount program that computes a simple word
   occurrence histogram from an input text.
 * [PageViewRegionLambdaExample](src/main/java/io/confluent/examples/streams/PageViewRegionLambdaExample.java)
   -- demonstrates how to perform a join between a `KStream` and a `KTable`, i.e. an example of a stateful computation
     * Variant: [PageViewRegionExample](src/main/java/io/confluent/examples/streams/PageViewRegionExample.java),
       which implements the same example but without lambda expressions and thus works with Java 7+.
 * [MapFunctionLambdaExample](src/main/java/io/confluent/examples/streams/MapFunctionLambdaExample.java)
-  -- demonstrates how to perform simple, state-less transformations via map functions, using the high-level KStream DSL
+  -- demonstrates how to perform simple, state-less transformations via map functions, using the Kafka Streams DSL
   (see also the Scala variant
   [MapFunctionScalaExample](src/main/scala/io/confluent/examples/streams/MapFunctionScalaExample.scala))
 * Working with data in Apache Avro format:
@@ -57,7 +57,7 @@ clusters, feed input data to them, process the data using Kafka Streams, and fin
 ## Scala
 
 * [MapFunctionScalaExample](src/main/scala/io/confluent/examples/streams/MapFunctionScalaExample.scala)
-  -- demonstrates how to perform simple, state-less transformations via map functions, using the high-level KStream DSL
+  -- demonstrates how to perform simple, state-less transformations via map functions, using the Kafka Streams DSL
   (see also the Java variant
   [MapFunctionLambdaExample](src/main/java/io/confluent/examples/streams/MapFunctionLambdaExample.java))
 
