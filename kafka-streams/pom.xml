@@ -45,6 +45,7 @@
         <kafka.scala.version>2.11</kafka.scala.version>
         <scala.version>${kafka.scala.version}.7</scala.version>
         <confluent.version>2.1.0-alpha1</confluent.version>
+        <scalatest.version>2.2.6</scalatest.version>
         <avro.version>1.7.7</avro.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -115,6 +116,23 @@
             <version>2.9.0</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- The following dependencies on ScalaTest are only required for the Scala tests
+             under src/test/scala/.  They are not required for Java code/tests.
+        -->
+        <dependency>
+            <!-- This is a compile-time dependency but included only for scalatest below,
+                 so still list it under test dependencies. -->
+            <groupId>org.scalactic</groupId>
+            <artifactId>scalactic_${kafka.scala.version}</artifactId>
+            <version>${scalatest.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scalatest</groupId>
+          <artifactId>scalatest_${kafka.scala.version}</artifactId>
+          <version>${scalatest.version}</version>
+          <scope>test</scope>
+      </dependency>
     </dependencies>
 
     <build>

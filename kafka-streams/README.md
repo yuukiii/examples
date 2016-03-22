@@ -61,6 +61,13 @@ clusters, feed input data to them, process the data using Kafka Streams, and fin
   (see also the Java variant
   [MapFunctionLambdaExample](src/main/java/io/confluent/examples/streams/MapFunctionLambdaExample.java))
 
+There is also an integration test, which demonstrates end-to-end data pipelines.  Here, we spawn embedded Kafka
+clusters, feed input data to them, process the data using Kafka Streams, and finally verify the output results.
+
+> Tip: Run `mvn test` to launch the integration tests.
+
+* [JoinScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/JoinScalaIntegrationTest.scala)
+
 
 # Requirements
 
