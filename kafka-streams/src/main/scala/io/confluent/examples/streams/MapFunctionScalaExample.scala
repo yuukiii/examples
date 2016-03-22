@@ -20,7 +20,6 @@ import java.util.Properties
 import org.apache.kafka.common.serialization._
 import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder}
 import org.apache.kafka.streams._
-import org.apache.kafka.streams.processor.internals.WallclockTimestampExtractor
 
 /**
   * Demonstrates how to perform simple, state-less transformations via map functions.
