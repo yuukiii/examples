@@ -61,11 +61,6 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     }
   }
 
-  /**
-    * Tuple for a region and its associated number of clicks.
-    */
-  case class RegionClicks(region: String, clicks: JLong)
-
   @Test
   def shouldCountClicksPerRegion() {
 
