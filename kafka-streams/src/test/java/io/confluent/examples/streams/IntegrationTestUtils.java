@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -40,7 +41,7 @@ public class IntegrationTestUtils {
   /**
    * Returns up to `maxMessages` by reading via the provided consumer (the topic(s) to read from are
    * already configured in the consumer).
-   * @param consumer
+   * @param consumer Kafka consumer instance
    * @param maxMessages Maximum number of messages to read via the consumer.
    * @return The values retrieved via the consumer.
    */
@@ -52,7 +53,7 @@ public class IntegrationTestUtils {
   /**
    * Reading as many messages as possible via the provided consumer (the topic(s) to read from are
    * already configured in the consumer) until a (currently hardcoded) timeout is reached.
-   * @param consumer
+   * @param consumer Kafka consumer instance
    * @return The KeyValue elements retrieved via the consumer.
    */
   public static <K, V> List<KeyValue<K, V>> readKeyValues(KafkaConsumer<K, V> consumer) {
@@ -62,7 +63,7 @@ public class IntegrationTestUtils {
   /**
    * Returns up to `maxMessages` by reading via the provided consumer (the topic(s) to read from are
    * already configured in the consumer).
-   * @param consumer
+   * @param consumer Kafka consumer instance
    * @param maxMessages Maximum number of messages to read via the consumer.
    * @return The KeyValue elements retrieved via the consumer.
    */
@@ -82,16 +83,12 @@ public class IntegrationTestUtils {
   }
 
   private static boolean continueConsuming(int messagesConsumed, int maxMessages) {
-    if (maxMessages <= 0) {
-      return true;
-    } else {
-      return messagesConsumed < maxMessages;
-    }
+    return maxMessages <= 0 || messagesConsumed < maxMessages;
   }
 
   /**
    * Removes local state stores.  Useful to reset state in-between integration test runs.
-   * @param streamsConfiguration
+   * @param streamsConfiguration Streams configuration settings
    * @throws IOException
    */
   public static void purgeLocalStreamsState(Properties streamsConfiguration) throws IOException {
@@ -101,7 +98,8 @@ public class IntegrationTestUtils {
       // Only purge state when it's under /tmp.  This is a safety net to prevent accidentally
       // deleting important local directory trees.
       if (node.getAbsolutePath().startsWith("/tmp")) {
-        CoreUtils.rm(node);
+        List<String> nodes = Collections.singletonList(node.getAbsolutePath());
+        CoreUtils.delete(scala.collection.JavaConversions.asScalaBuffer(nodes).seq());
       }
     }
   }

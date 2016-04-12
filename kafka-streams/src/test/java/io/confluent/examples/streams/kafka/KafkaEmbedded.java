@@ -7,10 +7,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 
 import kafka.admin.AdminUtils;
+import kafka.admin.RackAwareMode;
 import kafka.server.KafkaConfig;
 import kafka.server.KafkaServerStartable;
 import kafka.utils.CoreUtils;
@@ -101,7 +104,8 @@ public class KafkaEmbedded {
     kafka.shutdown();
     kafka.awaitShutdown();
     log.debug("Removing logs.dir at {} ...", logDir);
-    CoreUtils.rm(logDir);
+    List<String> logDirs = Collections.singletonList(logDir.getAbsolutePath());
+    CoreUtils.delete(scala.collection.JavaConversions.asScalaBuffer(logDirs).seq());
     log.debug("Shutdown of embedded Kafka broker at {} completed (with ZK ensemble at {}) ...",
         brokerList(), zookeeperConnect());
   }
@@ -153,7 +157,7 @@ public class KafkaEmbedded {
         ZKStringSerializer$.MODULE$);
     boolean isSecure = false;
     ZkUtils zkUtils = new ZkUtils(zkClient, new ZkConnection(zookeeperConnect()), isSecure);
-    AdminUtils.createTopic(zkUtils, topic, partitions, replication, topicConfig);
+    AdminUtils.createTopic(zkUtils, topic, partitions, replication, topicConfig, RackAwareMode.Enforced$.MODULE$);
     zkClient.close();
   }
 

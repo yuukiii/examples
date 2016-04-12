@@ -20,7 +20,7 @@ import java.util.{Collections, Properties}
 import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster
 import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
 import org.apache.kafka.clients.producer.{KafkaProducer, Producer, ProducerConfig, ProducerRecord}
-import org.apache.kafka.common.serialization.{Deserializer, LongDeserializer, LongSerializer, Serializer, StringDeserializer, StringSerializer}
+import org.apache.kafka.common.serialization._
 import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder, KTable}
 import org.apache.kafka.streams.{KafkaStreams, KeyValue, StreamsConfig}
 import org.assertj.core.api.Assertions.assertThat
@@ -101,20 +101,16 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     //
     // Step 1: Configure and start the processor topology.
     //
-    val stringSerializer: Serializer[String] = new StringSerializer()
-    val stringDeserializer: Deserializer[String] = new StringDeserializer()
-    val longSerializer: Serializer[JLong] = new LongSerializer()
-    val longDeserializer: Deserializer[JLong] = new LongDeserializer()
+    val stringSerde: Serde[String] = Serdes.String()
+    val longSerde: Serde[JLong] = Serdes.Long()
 
     val streamsConfiguration: Properties = {
       val p = new Properties()
-      p.put(StreamsConfig.JOB_ID_CONFIG, "join-scala-integration-test")
+      p.put(StreamsConfig.APPLICATION_ID_CONFIG, "join-scala-integration-test")
       p.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers())
       p.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, cluster.zookeeperConnect())
-      p.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
-      p.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
-      p.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
-      p.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
+      p.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
+      p.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       // Explicitly place the state directory under /tmp so that we can remove it via
       // `purgeLocalStreamsState` below.  Once Streams is updated to expose the effective
       // StreamsConfig configuration (so we can retrieve whatever state directory Streams came up
@@ -133,7 +129,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     //
     // Because this is a KStream ("record stream"), multiple records for the same user will be
     // considered as separate click-count events, each of which will be added to the total count.
-    val userClicksStream: KStream[String, JLong] = builder.stream(stringDeserializer, longDeserializer, userClicksTopic)
+    val userClicksStream: KStream[String, JLong] = builder.stream(stringSerde, longSerde, userClicksTopic)
 
     // This KTable contains information such as "alice" -> "europe".
     //
@@ -146,8 +142,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     // lived in "asia") because, at the time her first user-click record is being received and
     // subsequently processed in the `leftJoin`, the latest region update for "alice" is "europe"
     // (which overrides her previous region value of "asia").
-    val userRegionsTable: KTable[String, String] =
-      builder.table(stringSerializer, stringSerializer, stringDeserializer, stringDeserializer, userRegionsTopic)
+    val userRegionsTable: KTable[String, String] = builder.table(stringSerde, stringSerde, userRegionsTopic)
 
     // Compute the number of clicks per region, e.g. "europe" -> 13L.
     //
@@ -167,11 +162,11 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
         // Compute the total per region by summing the individual click counts per region.
         .reduceByKey(
           (firstClicks: JLong, secondClicks: JLong) => firstClicks + secondClicks,
-          stringSerializer, longSerializer, stringDeserializer, longDeserializer, "ClicksPerRegionUnwindowedScala"
+          stringSerde, longSerde, "ClicksPerRegionUnwindowedScala"
         )
 
     // Write the (continuously updating) results to the output topic.
-    clicksPerRegion.to(outputTopic, stringSerializer, longSerializer)
+    clicksPerRegion.to(stringSerde, longSerde, outputTopic)
 
     val streams: KafkaStreams = new KafkaStreams(builder, streamsConfiguration)
     streams.start()

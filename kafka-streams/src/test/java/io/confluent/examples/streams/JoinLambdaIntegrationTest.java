@@ -21,10 +21,10 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.LongSerializer;
-import org.apache.kafka.common.serialization.Serializer;
+import org.apache.kafka.common.serialization.Serde;
+import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
@@ -146,19 +146,15 @@ public class JoinLambdaIntegrationTest {
     //
     // Step 1: Configure and start the processor topology.
     //
-    final Serializer<String> stringSerializer = new StringSerializer();
-    final Deserializer<String> stringDeserializer = new StringDeserializer();
-    final Serializer<Long> longSerializer = new LongSerializer();
-    final Deserializer<Long> longDeserializer = new LongDeserializer();
+    final Serde<String> stringSerde = Serdes.String();
+    final Serde<Long> longSerde = Serdes.Long();
 
     Properties streamsConfiguration = new Properties();
-    streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "join-lambda-integration-test");
+    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "join-lambda-integration-test");
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, cluster.zookeeperConnect());
-    streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+    streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     // Explicitly place the state directory under /tmp so that we can remove it via
     // `purgeLocalStreamsState` below.  Once Streams is updated to expose the effective
     // StreamsConfig configuration (so we can retrieve whatever state directory Streams came up
@@ -175,7 +171,7 @@ public class JoinLambdaIntegrationTest {
     //
     // Because this is a KStream ("record stream"), multiple records for the same user will be
     // considered as separate click-count events, each of which will be added to the total count.
-    KStream<String, Long> userClicksStream = builder.stream(stringDeserializer, longDeserializer, userClicksTopic);
+    KStream<String, Long> userClicksStream = builder.stream(stringSerde, longSerde, userClicksTopic);
 
     // This KTable contains information such as "alice" -> "europe".
     //
@@ -189,7 +185,7 @@ public class JoinLambdaIntegrationTest {
     // subsequently processed in the `leftJoin`, the latest region update for "alice" is "europe"
     // (which overrides her previous region value of "asia").
     KTable<String, String> userRegionsTable =
-        builder.table(stringSerializer, stringSerializer, stringDeserializer, stringDeserializer, userRegionsTopic);
+        builder.table(stringSerde, stringSerde, userRegionsTopic);
 
     // Compute the number of clicks per region, e.g. "europe" -> 13L.
     //
@@ -213,10 +209,10 @@ public class JoinLambdaIntegrationTest {
         // Compute the total per region by summing the individual click counts per region.
         .reduceByKey(
             (firstClicks, secondClicks) -> firstClicks + secondClicks,
-            stringSerializer, longSerializer, stringDeserializer, longDeserializer, "ClicksPerRegionUnwindowed");
+            stringSerde, longSerde, "ClicksPerRegionUnwindowed");
 
     // Write the (continuously updating) results to the output topic.
-    clicksPerRegion.to(outputTopic, stringSerializer, longSerializer);
+    clicksPerRegion.to(stringSerde, longSerde, outputTopic);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();

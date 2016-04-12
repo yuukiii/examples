@@ -21,10 +21,9 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.LongDeserializer;
-import org.apache.kafka.common.serialization.LongSerializer;
-import org.apache.kafka.common.serialization.Serializer;
+import org.apache.kafka.common.serialization.Serde;
+import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
@@ -90,19 +89,15 @@ public class WordCountLambdaIntegrationTest {
     // the call to `purgeLocalStreamsState()`, which we need only for cleaning up previous runs of
     // this integration test.
     //
-    final Serializer<String> stringSerializer = new StringSerializer();
-    final Deserializer<String> stringDeserializer = new StringDeserializer();
-    final Serializer<Long> longSerializer = new LongSerializer();
-    final Deserializer<Long> longDeserializer = new LongDeserializer();
+    final Serde<String> stringSerde = Serdes.String();
+    final Serde<Long> longSerde = Serdes.Long();
 
     Properties streamsConfiguration = new Properties();
-    streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "wordcount-lambda-integration-test");
+    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "wordcount-lambda-integration-test");
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, cluster.zookeeperConnect());
-    streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+    streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     // Explicitly place the state directory under /tmp so that we can remove it via
     // `purgeLocalStreamsState` below.  Once Streams is updated to expose the effective
     // StreamsConfig configuration (so we can retrieve whatever state directory Streams came up
@@ -117,10 +112,10 @@ public class WordCountLambdaIntegrationTest {
     KStream<String, Long> wordCounts = textLines
         .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
         .map((key, value) -> new KeyValue<>(value, value))
-        .countByKey(stringSerializer, longSerializer, stringDeserializer, longDeserializer, "Counts")
+        .countByKey(stringSerde, "Counts")
         .toStream();
 
-    wordCounts.to(outputTopic, stringSerializer, longSerializer);
+    wordCounts.to(stringSerde, longSerde, outputTopic);
 
     // Remove any state from previous test runs
     IntegrationTestUtils.purgeLocalStreamsState(streamsConfiguration);

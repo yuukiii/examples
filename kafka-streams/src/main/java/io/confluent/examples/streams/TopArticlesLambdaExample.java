@@ -15,19 +15,15 @@
  */
 package io.confluent.examples.streams;
 
-import io.confluent.examples.streams.utils.PriorityQueueDeserializer;
-import io.confluent.examples.streams.utils.PriorityQueueSerializer;
-import io.confluent.examples.streams.utils.GenericAvroDeserializer;
-import io.confluent.examples.streams.utils.GenericAvroSerializer;
+import io.confluent.examples.streams.utils.GenericAvroSerde;
+import io.confluent.examples.streams.utils.PriorityQueueSerde;
+import io.confluent.examples.streams.utils.WindowedSerde;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.kafka.common.serialization.Deserializer;
-import org.apache.kafka.common.serialization.LongDeserializer;
-import org.apache.kafka.common.serialization.LongSerializer;
-import org.apache.kafka.common.serialization.Serializer;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.common.serialization.Serde;
+import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
@@ -36,8 +32,6 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Windowed;
-import org.apache.kafka.streams.kstream.internals.WindowedDeserializer;
-import org.apache.kafka.streams.kstream.internals.WindowedSerializer;
 
 import java.io.File;
 import java.util.Comparator;
@@ -67,25 +61,18 @@ public class TopArticlesLambdaExample {
         Properties streamsConfiguration = new Properties();
         // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
         // against which the application is run.
-        streamsConfiguration.put(StreamsConfig.JOB_ID_CONFIG, "top-articles-lambda-example");
+        streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "top-articles-lambda-example");
         // Where to find Kafka broker(s).
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         // Where to find the corresponding ZooKeeper ensemble.
         streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
         // Specify default (de)serializers for record keys and for record values.
-        streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        streamsConfiguration.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, GenericAvroSerializer.class);
-        streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        streamsConfiguration.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GenericAvroDeserializer.class);
+        streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class);
 
-        final StringSerializer stringSerializer = new StringSerializer();
-        final StringDeserializer stringDeserializer = new StringDeserializer();
-        final Serializer<Long> longSerializer = new LongSerializer();
-        final Deserializer<Long> longDeserializer = new LongDeserializer();
-        final Serializer<GenericRecord> avroSerializer = new GenericAvroSerializer();
-        final Deserializer<GenericRecord> avroDeserializer = new GenericAvroDeserializer();
-        final Serializer<Windowed<String>> windowedStringSerializer = new WindowedSerializer<>(stringSerializer);
-        final Deserializer<Windowed<String>> windowedDeserializer = new WindowedDeserializer<>(stringDeserializer);
+        final Serde<String> stringSerde = Serdes.String();
+        final Serde<GenericRecord> avroSerde = new GenericAvroSerde();
+        final Serde<Windowed<String>> windowedStringSerde = new WindowedSerde<>(stringSerde);
 
         KStreamBuilder builder = new KStreamBuilder();
 
@@ -101,19 +88,14 @@ public class TopArticlesLambdaExample {
 
         KTable<Windowed<GenericRecord>, Long> viewCounts = articleViews
                 // count the clicks within one week
-                .countByKey(HoppingWindows.of("PageViewCountWindows").with(7 * 24 * 60 * 60 * 1000),
-                    avroSerializer, longSerializer, avroDeserializer, longDeserializer);
+                .countByKey(HoppingWindows.of("PageViewCountWindows").with(7 * 24 * 60 * 60 * 1000), avroSerde);
 
         KTable<Windowed<String>, PriorityQueue<GenericRecord>> allViewCounts = viewCounts
                 .aggregate(
                         // the initializer
                         () -> {
-                            Comparator<GenericRecord> comparator = new Comparator<GenericRecord>() {
-                                @Override
-                                public int compare(GenericRecord o1, GenericRecord o2) {
-                                    return (int) ((Long) o1.get("count") - (Long) o2.get("count"));
-                                }
-                            };
+                            Comparator<GenericRecord> comparator =
+                                (o1, o2) -> (int) ((Long) o1.get("count") - (Long) o2.get("count"));
                             return new PriorityQueue<>(comparator);
                         },
 
@@ -141,12 +123,9 @@ public class TopArticlesLambdaExample {
                             viewStats.put("count", count);
                             return new KeyValue<>(windowedIndustry, viewStats);
                         },
-                        windowedStringSerializer,
-                        avroSerializer,
-                        new PriorityQueueSerializer<>(),
-                        windowedDeserializer,
-                        avroDeserializer,
-                        new PriorityQueueDeserializer<>(),
+                        windowedStringSerde,
+                        avroSerde,
+                        new PriorityQueueSerde<>(),
                         "AllArticles"
                 );
 
@@ -164,9 +143,10 @@ public class TopArticlesLambdaExample {
                     return sb.toString();
                 });
 
-        topViewCounts.to("TopNewsPerIndustry", windowedStringSerializer, stringSerializer);
+        topViewCounts.to(windowedStringSerde, stringSerde, "TopNewsPerIndustry");
 
         KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
         streams.start();
     }
+
 }

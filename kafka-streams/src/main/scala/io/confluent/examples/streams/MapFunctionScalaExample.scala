@@ -38,18 +38,15 @@ class MapFunctionScalaExample {
 
     val streamingConfig = {
       val settings = new Properties
-      settings.put(StreamsConfig.JOB_ID_CONFIG, "map-function-scala-example")
+      settings.put(StreamsConfig.APPLICATION_ID_CONFIG, "map-function-scala-example")
       settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
       settings.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181")
-      settings.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[ByteArraySerializer])
-      settings.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[ByteArrayDeserializer])
-      settings.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
-      settings.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
+      settings.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.ByteArray.getClass.getName)
+      settings.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       settings
     }
 
-    val stringSerializer: Serializer[String] = new StringSerializer
-
+    val stringSerde: Serde[String] = Serdes.String()
 
     // Read the input Kafka topic into a KStream instance.
     val textLines: KStream[Array[Byte], String] = builder.stream("TextLinesTopic")
@@ -88,7 +85,7 @@ class MapFunctionScalaExample {
     //
     // In this case we must explicitly set the correct serializers because the default serializers
     // (cf. streaming configuration) do not match the type of this particular KStream instance.
-    originalAndUppercased.to("OriginalAndUppercased", stringSerializer, stringSerializer)
+    originalAndUppercased.to(stringSerde, stringSerde, "OriginalAndUppercased")
 
     val stream: KafkaStreams = new KafkaStreams(builder, streamingConfig)
     stream.start()
