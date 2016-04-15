@@ -30,7 +30,7 @@ public class GenericAvroDeserializer implements Deserializer<GenericRecord> {
      * Constructor used by Kafka Streams.
      */
     public GenericAvroDeserializer() {
-
+        inner = new KafkaAvroDeserializer();
     }
 
     public GenericAvroDeserializer(SchemaRegistryClient client) {
