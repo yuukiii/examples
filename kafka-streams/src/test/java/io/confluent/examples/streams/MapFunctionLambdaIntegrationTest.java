@@ -15,12 +15,7 @@
 package io.confluent.examples.streams;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -34,10 +29,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
@@ -110,14 +103,7 @@ public class MapFunctionLambdaIntegrationTest {
     producerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);
     producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-
-    Producer<String, String> producer = new KafkaProducer<>(producerConfig);
-    for (String value : inputValues) {
-      Future<RecordMetadata> f = producer.send(new ProducerRecord<>(inputTopic, value));
-      f.get();
-    }
-    producer.flush();
-    producer.close();
+    IntegrationTestUtils.produceValuesSynchronously(inputTopic, inputValues, producerConfig);
 
     // Give the stream processing application some time to do its work.
     // Note: The sleep times are relatively high to support running the build on Travis CI.
@@ -133,10 +119,7 @@ public class MapFunctionLambdaIntegrationTest {
     consumerConfig.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-
-    KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerConfig);
-    consumer.subscribe(Collections.singletonList(outputTopic));
-    List<String> actualValues = IntegrationTestUtils.readValues(consumer, inputValues.size());
+    List<String> actualValues = IntegrationTestUtils.readValues(outputTopic, consumerConfig, inputValues.size());
     assertThat(actualValues).isEqualTo(expectedValues);
   }
 

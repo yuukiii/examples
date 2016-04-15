@@ -15,12 +15,7 @@
 package io.confluent.examples.streams;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.Serde;
@@ -39,10 +34,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.Future;
 
 import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
 
@@ -234,15 +227,7 @@ public class JoinLambdaIntegrationTest {
     userRegionsProducerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);
     userRegionsProducerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     userRegionsProducerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-
-    Producer<String, String> userRegionsProducer = new KafkaProducer<>(userRegionsProducerConfig);
-    for (KeyValue<String, String> userToRegion : userRegions) {
-      Future<RecordMetadata> f = userRegionsProducer.send(
-          new ProducerRecord<>(userRegionsTopic, userToRegion.key, userToRegion.value));
-      f.get();
-    }
-    userRegionsProducer.flush();
-    userRegionsProducer.close();
+    IntegrationTestUtils.produceKeyValuesSynchronously(userRegionsTopic, userRegions, userRegionsProducerConfig);
 
     //
     // Step 3: Publish some user click events.
@@ -253,15 +238,7 @@ public class JoinLambdaIntegrationTest {
     userClicksProducerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);
     userClicksProducerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     userClicksProducerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
-
-    Producer<String, Long> userClicksProducer = new KafkaProducer<>(userClicksProducerConfig);
-    for (KeyValue<String, Long> userToNumClicks : userClicks) {
-      Future<RecordMetadata> f = userClicksProducer.send(
-          new ProducerRecord<>(userClicksTopic, userToNumClicks.key, userToNumClicks.value));
-      f.get();
-    }
-    userClicksProducer.flush();
-    userClicksProducer.close();
+    IntegrationTestUtils.produceKeyValuesSynchronously(userClicksTopic, userClicks, userClicksProducerConfig);
 
     // Give the stream processing application some time to do its work.
     // Note: The sleep times are relatively high to support running the build on Travis CI.
@@ -277,11 +254,7 @@ public class JoinLambdaIntegrationTest {
     consumerConfig.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
-
-    KafkaConsumer<String, Long> consumer = new KafkaConsumer<>(consumerConfig);
-    consumer.subscribe(Collections.singletonList(outputTopic));
-    List<KeyValue<String, Long>> actualClicksPerRegion = IntegrationTestUtils.readKeyValues(consumer);
-
+    List<KeyValue<String, Long>> actualClicksPerRegion = IntegrationTestUtils.readKeyValues(outputTopic, consumerConfig);
     assertThat(actualClicksPerRegion).containsExactlyElementsOf(expectedClicksPerRegion);
   }
 

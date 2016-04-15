@@ -15,12 +15,7 @@
 package io.confluent.examples.streams;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -37,10 +32,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.Future;
 
 import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
 
@@ -137,14 +130,7 @@ public class WordCountLambdaIntegrationTest {
     producerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);
     producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-
-    Producer<String, String> producer = new KafkaProducer<>(producerConfig);
-    for (String value : inputValues) {
-      Future<RecordMetadata> f = producer.send(new ProducerRecord<>(inputTopic, value));
-      f.get();
-    }
-    producer.flush();
-    producer.close();
+    IntegrationTestUtils.produceValuesSynchronously(inputTopic, inputValues, producerConfig);
 
     // Give the stream processing application some time to do its work.
     // Note: The sleep times are relatively high to support running the build on Travis CI.
@@ -160,11 +146,7 @@ public class WordCountLambdaIntegrationTest {
     consumerConfig.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
-
-    KafkaConsumer<String, Long> consumer = new KafkaConsumer<>(consumerConfig);
-    consumer.subscribe(Collections.singletonList(outputTopic));
-    List<KeyValue<String, Long>> actualWordCounts = IntegrationTestUtils.readKeyValues(consumer);
-
+    List<KeyValue<String, Long>> actualWordCounts = IntegrationTestUtils.readKeyValues(outputTopic, consumerConfig);
     assertThat(actualWordCounts).containsExactlyElementsOf(expectedWordCounts);
   }
 

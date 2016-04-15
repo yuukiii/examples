@@ -15,11 +15,11 @@
 package io.confluent.examples.streams
 
 import java.lang.{Long => JLong}
-import java.util.{Collections, Properties}
+import java.util.Properties
 
 import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster
-import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
-import org.apache.kafka.clients.producer.{KafkaProducer, Producer, ProducerConfig, ProducerRecord}
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization._
 import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder, KTable}
 import org.apache.kafka.streams.{KafkaStreams, KeyValue, StreamsConfig}
@@ -63,9 +63,11 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
 
   @Test
   def shouldCountClicksPerRegion() {
+    // To convert between Scala's `Tuple2` and Streams' `KeyValue`.
+    import KeyValueImplicits._
 
     // Input 1: Clicks per user (multiple records allowed per user).
-    val userClicks: Seq[(String, Long)] = Seq(
+    val userClicks: Seq[KeyValue[String, Long]] = Seq(
       ("alice", 13L),
       ("bob", 4L),
       ("chao", 25L),
@@ -77,7 +79,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     )
 
     // Input 2: Region per user (multiple records allowed per user).
-    val userRegions: Seq[(String, String)] = Seq(
+    val userRegions: Seq[KeyValue[String, String]] = Seq(
       ("alice", "asia"), /* Alice lived in Asia originally... */
       ("bob", "americas"),
       ("chao", "asia"),
@@ -87,7 +89,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
       ("fang", "asia")
     )
 
-    val expectedClicksPerRegion: Seq[(String, Long)] = Seq(
+    val expectedClicksPerRegion: Seq[KeyValue[String, Long]] = Seq(
       ("europe", 13L),
       ("americas", 4L),
       ("asia", 25L),
@@ -161,9 +163,9 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
         .map((user: String, regionWithClicks: (String, JLong)) => new KeyValue[String, JLong](regionWithClicks._1, regionWithClicks._2))
         // Compute the total per region by summing the individual click counts per region.
         .reduceByKey(
-          (firstClicks: JLong, secondClicks: JLong) => firstClicks + secondClicks,
-          stringSerde, longSerde, "ClicksPerRegionUnwindowedScala"
-        )
+      (firstClicks: JLong, secondClicks: JLong) => firstClicks + secondClicks,
+      stringSerde, longSerde, "ClicksPerRegionUnwindowedScala"
+    )
 
     // Write the (continuously updating) results to the output topic.
     clicksPerRegion.to(stringSerde, longSerde, outputTopic)
@@ -191,12 +193,12 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
       p.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
       p
     }
-
-    val userRegionsProducer: Producer[String, String] = new KafkaProducer[String, String](userRegionsProducerConfig)
-    userRegions.foreach(x =>
-      userRegionsProducer.send(new ProducerRecord[String, String](userRegionsTopic, x._1, x._2)).get())
-    userRegionsProducer.flush()
-    userRegionsProducer.close()
+    // We need to convert `userRegions, `userClicks`, `expectedClicksPerRegion` (which have type
+    // `Seq`) to the appropriate Java collections, which we achieve via this import.
+    // (We wouldn't need to convert if we modified the Java-focused `IntegrationTestUtils` to be
+    // more Scala friendly or if we provided Scala-focused test utilities.)
+    import scala.collection.convert.wrapAsJava._
+    IntegrationTestUtils.produceKeyValuesSynchronously(userRegionsTopic, userRegions, userRegionsProducerConfig)
 
     //
     // Step 3: Publish some user click events.
@@ -210,12 +212,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
       p.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[LongSerializer])
       p
     }
-
-    val userClicksProducer: Producer[String, Long] = new KafkaProducer[String, Long](userClicksProducerConfig)
-    userClicks.foreach(x =>
-      userClicksProducer.send(new ProducerRecord[String, Long](userClicksTopic, x._1, x._2)).get())
-    userClicksProducer.flush()
-    userClicksProducer.close()
+    IntegrationTestUtils.produceKeyValuesSynchronously(userClicksTopic, userClicks, userClicksProducerConfig)
 
     // Give the stream processing application some time to do its work.
     // Note: The sleep times are relatively high to support running the build on Travis CI.
@@ -234,17 +231,8 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
       p.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[LongDeserializer])
       p
     }
-    val consumer: KafkaConsumer[String, Long] = new KafkaConsumer[String, Long](consumerConfig)
-    consumer.subscribe(Collections.singletonList(outputTopic))
-
-    val actualClicksPerRegion: java.util.List[KeyValue[String, Long]] = IntegrationTestUtils.readKeyValues(consumer)
-
-    // We need to convert `expectedClicksPerRegion` so that we can compare it with `actualClicksPerRegion`.
-    // (We wouldn't need to convert if we modified the Java-focused `IntegrationTestUtils` to be
-    // more Scala friendly.)
-    val exp = expectedClicksPerRegion.map { case (region, clicks) => new KeyValue(region, clicks) }
-    import scala.collection.convert.wrapAsJava._
-    assertThat(actualClicksPerRegion).containsExactlyElementsOf(exp)
+    val actualClicksPerRegion: java.util.List[KeyValue[String, Long]] = IntegrationTestUtils.readKeyValues(outputTopic, consumerConfig)
+    assertThat(actualClicksPerRegion).containsExactlyElementsOf(expectedClicksPerRegion)
   }
 
 }

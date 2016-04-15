@@ -17,6 +17,10 @@ package io.confluent.examples.streams;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 
@@ -24,9 +28,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import kafka.utils.CoreUtils;
@@ -39,35 +46,42 @@ public class IntegrationTestUtils {
   private static final int UNLIMITED_MESSAGES = -1;
 
   /**
-   * Returns up to `maxMessages` by reading via the provided consumer (the topic(s) to read from are
-   * already configured in the consumer).
-   * @param consumer Kafka consumer instance
-   * @param maxMessages Maximum number of messages to read via the consumer.
+   * Returns up to `maxMessages` message-values from the topic.
+   *
+   * @param topic          Kafka topic to read messages from
+   * @param consumerConfig Kafka consumer configuration
+   * @param maxMessages    Maximum number of messages to read via the consumer.
    * @return The values retrieved via the consumer.
    */
-  public static <K, V> List<V> readValues(KafkaConsumer<K, V> consumer, int maxMessages) {
-    List<KeyValue<K, V>> kvs = readKeyValues(consumer, maxMessages);
+  public static <K, V> List<V> readValues(String topic, Properties consumerConfig, int maxMessages) {
+    List<KeyValue<K, V>> kvs = readKeyValues(topic, consumerConfig, maxMessages);
     return kvs.stream().map(kv -> kv.value).collect(Collectors.toList());
   }
 
   /**
-   * Reading as many messages as possible via the provided consumer (the topic(s) to read from are
-   * already configured in the consumer) until a (currently hardcoded) timeout is reached.
-   * @param consumer Kafka consumer instance
+   * Returns as many messages as possible from the topic until a (currently hardcoded) timeout is
+   * reached.
+   *
+   * @param topic          Kafka topic to read messages from
+   * @param consumerConfig Kafka consumer configuration
    * @return The KeyValue elements retrieved via the consumer.
    */
-  public static <K, V> List<KeyValue<K, V>> readKeyValues(KafkaConsumer<K, V> consumer) {
-    return readKeyValues(consumer, UNLIMITED_MESSAGES);
+  public static <K, V> List<KeyValue<K, V>> readKeyValues(String topic, Properties consumerConfig) {
+    return readKeyValues(topic, consumerConfig, UNLIMITED_MESSAGES);
   }
 
   /**
    * Returns up to `maxMessages` by reading via the provided consumer (the topic(s) to read from are
    * already configured in the consumer).
-   * @param consumer Kafka consumer instance
-   * @param maxMessages Maximum number of messages to read via the consumer.
-   * @return The KeyValue elements retrieved via the consumer.
+   *
+   * @param topic          Kafka topic to read messages from
+   * @param consumerConfig Kafka consumer configuration
+   * @param maxMessages    Maximum number of messages to read via the consumer
+   * @return The KeyValue elements retrieved via the consumer
    */
-  public static <K, V> List<KeyValue<K, V>> readKeyValues(KafkaConsumer<K, V> consumer, int maxMessages) {
+  public static <K, V> List<KeyValue<K, V>> readKeyValues(String topic, Properties consumerConfig, int maxMessages) {
+    KafkaConsumer<K, V> consumer = new KafkaConsumer<>(consumerConfig);
+    consumer.subscribe(Collections.singletonList(topic));
     int pollIntervalMs = 100;
     int maxTotalPollTimeMs = 2000;
     int totalPollTimeMs = 0;
@@ -79,6 +93,7 @@ public class IntegrationTestUtils {
         consumedValues.add(new KeyValue<>(record.key(), record.value()));
       }
     }
+    consumer.close();
     return consumedValues;
   }
 
@@ -88,8 +103,8 @@ public class IntegrationTestUtils {
 
   /**
    * Removes local state stores.  Useful to reset state in-between integration test runs.
+   *
    * @param streamsConfiguration Streams configuration settings
-   * @throws IOException
    */
   public static void purgeLocalStreamsState(Properties streamsConfiguration) throws IOException {
     String path = streamsConfiguration.getProperty(StreamsConfig.STATE_DIR_CONFIG);
@@ -102,6 +117,34 @@ public class IntegrationTestUtils {
         CoreUtils.delete(scala.collection.JavaConversions.asScalaBuffer(nodes).seq());
       }
     }
+  }
+
+  /**
+   * @param topic          Kafka topic to write the data records to
+   * @param records        Data records to write to Kafka
+   * @param producerConfig Kafka producer configuration
+   * @param <K>            Key type of the data records
+   * @param <V>            Value type of the data records
+   */
+  public static <K, V> void produceKeyValuesSynchronously(
+      String topic, Collection<KeyValue<K, V>> records, Properties producerConfig)
+      throws ExecutionException, InterruptedException {
+    Producer<K, V> producer = new KafkaProducer<>(producerConfig);
+    for (KeyValue<K, V> record : records) {
+      Future<RecordMetadata> f = producer.send(
+          new ProducerRecord<>(topic, record.key, record.value));
+      f.get();
+    }
+    producer.flush();
+    producer.close();
+  }
+
+  public static <V> void produceValuesSynchronously(
+      String topic, Collection<V> records, Properties producerConfig)
+      throws ExecutionException, InterruptedException {
+    Collection<KeyValue<Object, V>> keyedRecords =
+        records.stream().map(record -> new KeyValue<>(null, record)).collect(Collectors.toList());
+    produceKeyValuesSynchronously(topic, keyedRecords, producerConfig);
   }
 
 }
