@@ -30,7 +30,7 @@ public class SpecificAvroSerializer<T extends  org.apache.avro.specific.Specific
      * Constructor used by Kafka Streams.
      */
     public SpecificAvroSerializer() {
-
+        inner = new KafkaAvroSerializer();
     }
 
     public SpecificAvroSerializer(SchemaRegistryClient client) {

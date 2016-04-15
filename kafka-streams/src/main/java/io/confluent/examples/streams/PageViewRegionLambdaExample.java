@@ -17,6 +17,8 @@ package io.confluent.examples.streams;
 
 import io.confluent.examples.streams.utils.GenericAvroDeserializer;
 import io.confluent.examples.streams.utils.GenericAvroSerializer;
+import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -67,6 +69,8 @@ public class PageViewRegionLambdaExample {
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         // Where to find the corresponding ZooKeeper ensemble.
         streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
+        // Where to find the Confluent schema registry instance(s)
+      streamsConfiguration.put(KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
         // Specify default (de)serializers for record keys and for record values.
         streamsConfiguration.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         streamsConfiguration.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
