@@ -112,12 +112,7 @@ public class TopArticlesLambdaExample {
                 .aggregate(
                         // the initializer
                         () -> {
-                            Comparator<GenericRecord> comparator = new Comparator<GenericRecord>() {
-                                @Override
-                                public int compare(GenericRecord o1, GenericRecord o2) {
-                                    return (int) ((Long) o1.get("count") - (Long) o2.get("count"));
-                                }
-                            };
+                            Comparator<GenericRecord> comparator = (o1, o2) -> (int) ((Long) o1.get("count") - (Long) o2.get("count"));
                             return new PriorityQueue<>(comparator);
                         },
 
