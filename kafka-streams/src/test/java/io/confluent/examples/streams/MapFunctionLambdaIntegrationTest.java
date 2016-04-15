@@ -79,11 +79,8 @@ public class MapFunctionLambdaIntegrationTest {
     streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass().getName());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
 
-    // Write the input data as-is to the output topic.
     KStream<byte[], String> input = builder.stream(inputTopic);
-
     KStream<byte[], String> uppercased = input.mapValues(String::toUpperCase);
-
     uppercased.to(outputTopic);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
