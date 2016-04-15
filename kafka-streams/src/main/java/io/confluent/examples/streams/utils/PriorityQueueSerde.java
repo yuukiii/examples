@@ -7,6 +7,10 @@ import org.apache.kafka.common.serialization.Serializer;
 
 import java.util.PriorityQueue;
 
+/**
+ * Note: This serde is not functional yet because `PriorityQueueSerializer` and
+ * `PriorityQueueDeserializer` are not functional in turn.
+ */
 public class PriorityQueueSerde<T> implements Serde<PriorityQueue<T>> {
 
   private final Serde<PriorityQueue<T>> inner;
