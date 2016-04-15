@@ -45,8 +45,9 @@ public class MapFunctionLambdaExample {
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
     // Where to find the corresponding ZooKeeper ensemble.
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
-    // Specify default (de)serializers for record keys and for record values.
-    streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass().getName());
+    // Specify the default serde for record values (and, for record keys, not explicitly setting a
+    // default serde in our application/topology means we'll automatically use Streams' default
+    // setting which is the serde for byte[]).
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
 
     // Set up serializers and deserializers, which we will use for overriding the default serdes
