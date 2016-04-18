@@ -40,4 +40,16 @@ public class GenericAvroSerde implements Serde<GenericRecord> {
     return inner.deserializer();
   }
 
+  @Override
+  public void configure(Map<String, ?> configs, boolean isKey) {
+    inner.serializer().configure(configs, isKey);
+    inner.deserializer().configure(configs, isKey);
+  }
+
+  @Override
+  public void close() {
+    inner.serializer().close();
+    inner.deserializer().close();
+  }
+
 }

@@ -26,7 +26,7 @@ public class SpecificAvroSerde<T extends  org.apache.avro.specific.SpecificRecor
   }
 
   public SpecificAvroSerde(SchemaRegistryClient client, Map<String, ?> props) {
-    inner = Serdes.serdeFrom(new SpecificAvroSerializer<>(client), new SpecificAvroDeserializer<>(client, props));
+    inner = Serdes.serdeFrom(new SpecificAvroSerializer<>(client, props), new SpecificAvroDeserializer<>(client, props));
   }
 
   @Override
@@ -37,6 +37,18 @@ public class SpecificAvroSerde<T extends  org.apache.avro.specific.SpecificRecor
   @Override
   public Deserializer<T> deserializer() {
     return inner.deserializer();
+  }
+
+  @Override
+  public void configure(Map<String, ?> configs, boolean isKey) {
+    inner.serializer().configure(configs, isKey);
+    inner.deserializer().configure(configs, isKey);
+  }
+
+  @Override
+  public void close() {
+    inner.serializer().close();
+    inner.deserializer().close();
   }
 
 }

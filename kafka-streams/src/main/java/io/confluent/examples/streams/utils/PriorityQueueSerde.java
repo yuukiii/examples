@@ -5,6 +5,7 @@ import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.Serializer;
 
+import java.util.Map;
 import java.util.PriorityQueue;
 
 /**
@@ -30,6 +31,18 @@ public class PriorityQueueSerde<T> implements Serde<PriorityQueue<T>> {
   @Override
   public Deserializer<PriorityQueue<T>> deserializer() {
     return inner.deserializer();
+  }
+
+  @Override
+  public void configure(Map<String, ?> configs, boolean isKey) {
+    inner.serializer().configure(configs, isKey);
+    inner.deserializer().configure(configs, isKey);
+  }
+
+  @Override
+  public void close() {
+    inner.serializer().close();
+    inner.deserializer().close();
   }
 
 }
