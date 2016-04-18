@@ -16,6 +16,8 @@
 package io.confluent.examples.streams;
 
 import io.confluent.examples.streams.utils.GenericAvroSerde;
+import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -44,6 +46,8 @@ public class UserRegionLambdaExample {
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         // Where to find the corresponding ZooKeeper ensemble.
         streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
+        // Where to find the Confluent schema registry instance(s)
+        streamsConfiguration.put(KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
         // Specify default (de)serializers for record keys and for record values.
         streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class);

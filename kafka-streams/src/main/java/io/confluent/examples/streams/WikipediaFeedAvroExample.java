@@ -16,8 +16,8 @@
 package io.confluent.examples.streams;
 
 import io.confluent.examples.streams.avro.WikiFeed;
-import io.confluent.examples.streams.utils.SpecificAvroDeserializer;
 import io.confluent.examples.streams.utils.SpecificAvroSerde;
+import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
 
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -53,6 +53,8 @@ public class WikipediaFeedAvroExample {
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         // Where to find the corresponding ZooKeeper ensemble.
         streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
+        // Where to find the Confluent schema registry instance(s)
+        streamsConfiguration.put(KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
         // Specify default (de)serializers for record keys and for record values.
         streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
@@ -68,7 +70,7 @@ public class WikipediaFeedAvroExample {
         // aggregate the new feed counts of by user
         KTable<String, Long> aggregated = feeds
                 // filter out old feeds
-                .filter(new Predicate<String, WikiFeed> () {
+                .filter(new Predicate<String, WikiFeed>() {
                     @Override
                     public boolean test(String dummy, WikiFeed value) {
                         return value.getIsNew();
