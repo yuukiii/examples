@@ -41,9 +41,8 @@ class MapFunctionScalaExample {
       settings.put(StreamsConfig.APPLICATION_ID_CONFIG, "map-function-scala-example")
       settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
       settings.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181")
-      // Specify the default serde for record values (and, for record keys, not explicitly setting a
-      // default serde in our application/topology means we'll automatically use Streams' default
-      // setting which is the serde for byte[]).
+      // Specify default (de)serializers for record keys and for record values.
+      settings.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.ByteArray.getClass.getName)
       settings.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       settings
     }
