@@ -200,12 +200,12 @@ public class SimpleConsumerExample {
   }
 
   public static void main(String args[]) {
-    if (args.length != 4) {
-      System.out.println("Please provide command line arguments: maxReads partitionId broker port");
+    if (args.length != 5) {
+      System.out.println("Please provide command line arguments: maxReads topic partitionId broker port");
       System.exit(-1);
     }
 
-    long maxReads = Long.parseLong(args[0]);
+    long maxReads = Long.parseLong(args[0]); 
     String topic = args[1];
     int partition = Integer.parseInt(args[2]);
     List<String> seeds = new ArrayList<>();
