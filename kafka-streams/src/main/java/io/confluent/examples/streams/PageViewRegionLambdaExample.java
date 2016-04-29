@@ -25,10 +25,10 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.HoppingWindows;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.kstream.Windowed;
 
 import java.io.File;
@@ -95,7 +95,8 @@ public class PageViewRegionLambdaExample {
                     return viewRegion;
                 })
                 .map((user, viewRegion) -> new KeyValue<>((String) viewRegion.get("region"), viewRegion))
-                .countByKey(HoppingWindows.of("GeoPageViewsWindow").with(7 * 24 * 60 * 60 * 1000));
+                // count views by user, using hopping windows of size 5 minutes that advance every 1 minute
+                .countByKey(TimeWindows.of("GeoPageViewsWindow", 5 * 60 * 1000L).advanceBy(60 * 1000L));
 
         // write to the result topic
         regionCount.to("PageViewsByRegion");

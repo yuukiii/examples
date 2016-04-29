@@ -25,7 +25,7 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
-import org.apache.kafka.streams.kstream.TumblingWindows;
+import org.apache.kafka.streams.kstream.TimeWindows;
 
 import java.util.Properties;
 
@@ -60,13 +60,13 @@ public class AnomalyDetectionLambdaExample {
         KStream<String, Long> anomalyUsers = views
                 // map the user id as key
                 .map((dummy, record) -> new KeyValue<>((String) record.get("user"), record))
-                // count users on the one-minute tumbling window
-                .countByKey(TumblingWindows.of("PageViewCountWindow").with(60 * 1000L))
+                // count users, using one-minute tumbling windows
+                .countByKey(TimeWindows.of("PageViewCountWindow", 60 * 1000L))
                 // get users whose one-minute count is larger than 40
                 .filter((windowedUserId, count) -> count > 40)
                 // get rid of windows by transforming to a stream
                 .toStream()
-                .map((windowedUserId, count) -> new KeyValue<>(windowedUserId.value(), count));
+                .map((windowedUserId, count) -> new KeyValue<>(windowedUserId.key(), count));
 
         // write to the result topic
         anomalyUsers.to("AnomalyUsers");

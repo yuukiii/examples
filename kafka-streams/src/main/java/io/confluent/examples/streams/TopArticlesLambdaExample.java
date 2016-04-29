@@ -28,10 +28,10 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.HoppingWindows;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.kstream.Windowed;
 
 import java.io.File;
@@ -41,7 +41,7 @@ import java.util.Properties;
 
 /**
  * Create a data feed of the top 100 news articles per industry, ranked by click-through-rate
- * (assuming this is for the past week).
+ * (assuming this is for the past hour).
  *
  * Note: The generic Avro binding is used for serialization/deserialization.  This means the
  * appropriate Avro schema files must be provided for each of the "intermediate" Avro classes, i.e.
@@ -90,11 +90,26 @@ public class TopArticlesLambdaExample {
         Schema schema = new Schema.Parser().parse(new File("pageviewstats.avsc"));
 
         KTable<Windowed<GenericRecord>, Long> viewCounts = articleViews
-                // count the clicks within one week
-                .countByKey(HoppingWindows.of("PageViewCountWindows").with(7 * 24 * 60 * 60 * 1000), avroSerde);
+                // count the clicks per hour, using tumbling windows with a size of one hour
+                .countByKey(TimeWindows.of("PageViewCountWindows", 60 * 60 * 1000L), avroSerde);
 
         KTable<Windowed<String>, PriorityQueue<GenericRecord>> allViewCounts = viewCounts
-                .aggregate(
+            .groupBy(
+                // the selector
+                (windowedArticle, count) -> {
+                  // project on the industry field for key
+                  Windowed<String> windowedIndustry =
+                      new Windowed<>((String) windowedArticle.key().get("industry"), windowedArticle.window());
+                  // add the page into the value
+                  GenericRecord viewStats = new GenericData.Record(schema);
+                  viewStats.put("page", "pageId");
+                  viewStats.put("industry", "industryName");
+                  viewStats.put("count", count);
+                  return new KeyValue<>(windowedIndustry, viewStats);
+                },
+                windowedStringSerde,
+                avroSerde
+            ).aggregate(
                         // the initializer
                         () -> {
                             Comparator<GenericRecord> comparator =
@@ -114,20 +129,6 @@ public class TopArticlesLambdaExample {
                             return queue;
                         },
 
-                        // the selector
-                        (windowedArticle, count) -> {
-                            // project on the industry field for key
-                            Windowed<String> windowedIndustry =
-                                new Windowed<>((String) windowedArticle.value().get("industry"), windowedArticle.window());
-                            // add the page into the value
-                            GenericRecord viewStats = new GenericData.Record(schema);
-                            viewStats.put("page", "pageId");
-                            viewStats.put("industry", "industryName");
-                            viewStats.put("count", count);
-                            return new KeyValue<>(windowedIndustry, viewStats);
-                        },
-                        windowedStringSerde,
-                        avroSerde,
                         new PriorityQueueSerde<>(),
                         "AllArticles"
                 );

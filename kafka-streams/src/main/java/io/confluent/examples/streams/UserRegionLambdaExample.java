@@ -22,6 +22,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
@@ -57,15 +58,17 @@ public class UserRegionLambdaExample {
 
         KStreamBuilder builder = new KStreamBuilder();
 
-        // read the source stream
+        // Read the source stream
         KTable<String, GenericRecord> profile = builder.table("UserProfile");
 
-        // aggregate the user counts of by region
+        // Aggregate the user counts of by region
         KTable<String, Long> regionCount = profile
-            // filter out incomplete profiles with less than 200 characters
+            // Filter out incomplete profiles with less than 200 characters
             .filter((userId, record) -> ((String) record.get("experience")).getBytes().length > 200)
-            // count by region, we can set null to all serdes to use defaults
-            .count((userId, record) -> (String) record.get("region"), "CountsByRegion")
+            // Count by region
+            // We do not need to specify any explict serdes because the key and value types do not change
+            .groupBy((userId, record) -> KeyValue.pair((String) record.get("region"), record))
+            .count("CountsByRegion)")
             // filter out regions with less than 10M users
             .filter((regionName, count) -> count > 10 * 1000 * 1000);
 

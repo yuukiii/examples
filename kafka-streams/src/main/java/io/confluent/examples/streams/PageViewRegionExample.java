@@ -29,8 +29,10 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.KeyValueMapper;
+import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.kstream.ValueJoiner;
 import org.apache.kafka.streams.kstream.ValueMapper;
+import org.apache.kafka.streams.kstream.Windowed;
 
 import java.io.File;
 import java.util.Properties;
@@ -97,7 +99,7 @@ public class PageViewRegionExample {
         // (see below).
         Schema schema = new Schema.Parser().parse(new File("pageviewregion.avsc"));
 
-        KTable<String, Long> regionCount = viewsByUser
+        KTable<Windowed<String>, Long> regionCount = viewsByUser
                 .leftJoin(userRegions, new ValueJoiner<GenericRecord, String, GenericRecord>() {
                     @Override
                     public GenericRecord apply(GenericRecord view, String region) {
@@ -114,7 +116,8 @@ public class PageViewRegionExample {
                         return new KeyValue<>((String) viewRegion.get("region"), viewRegion);
                     }
                 })
-                .countByKey("GeoPageViewsWindow");
+            // count views by user, using hopping windows of size 5 minutes that advance every 1 minute
+            .countByKey(TimeWindows.of("GeoPageViewsWindow", 5 * 60 * 1000L).advanceBy(60 * 1000L));
 
         // write to the result topic
         regionCount.to("PageViewsByRegion");
