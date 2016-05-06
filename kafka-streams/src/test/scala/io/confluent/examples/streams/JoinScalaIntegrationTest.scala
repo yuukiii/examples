@@ -35,30 +35,25 @@ import org.scalatest.junit.AssertionsForJUnit
   *
   * Note: We intentionally use JUnit4 (wrapped by ScalaTest) for implementing this Scala integration
   * test so it is easier to compare this Scala code with the equivalent Java code at
-  * JoinLambdaIntegrationTest.  One difference is that we switched from
-  * BeforeClass/AfterClass (which must be `static`) to Before/After in this Scala example
-  * to simplify the Scala/JUnit integration.
+  * JoinLambdaIntegrationTest.  One difference is that, to simplify the Scala/Junit integration, we
+  * switched from BeforeClass (which must be `static`) to Before as well as from @ClassRule (which
+  * must be `static` and `public`) to a workaround combination of `@Rule def` and a `private val`.
   */
 class JoinScalaIntegrationTest extends AssertionsForJUnit {
 
-  private var cluster: EmbeddedSingleNodeKafkaCluster = _
+  // Note: `@Rule def CLUSTER` does not work (will result in a NullPointerException).
+  private val privateCluster: EmbeddedSingleNodeKafkaCluster = new EmbeddedSingleNodeKafkaCluster
+  @Rule def CLUSTER = privateCluster
+
   private val userClicksTopic = "user-clicks"
   private val userRegionsTopic = "user-regions"
   private val outputTopic = "output-topic"
 
   @Before
   def startKafkaCluster() = {
-    cluster = new EmbeddedSingleNodeKafkaCluster()
-    cluster.createTopic(userClicksTopic)
-    cluster.createTopic(userRegionsTopic)
-    cluster.createTopic(outputTopic)
-  }
-
-  @After
-  def stopKafkaCluster() = {
-    if (cluster != null) {
-      cluster.stop()
-    }
+    CLUSTER.createTopic(userClicksTopic)
+    CLUSTER.createTopic(userRegionsTopic)
+    CLUSTER.createTopic(outputTopic)
   }
 
   @Test
@@ -109,8 +104,8 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     val streamsConfiguration: Properties = {
       val p = new Properties()
       p.put(StreamsConfig.APPLICATION_ID_CONFIG, "join-scala-integration-test")
-      p.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers())
-      p.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, cluster.zookeeperConnect())
+      p.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers())
+      p.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zookeeperConnect())
       p.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       p.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       // Explicitly place the state directory under /tmp so that we can remove it via
@@ -186,7 +181,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     // data records would typically be arriving concurrently in both input streams/topics.
     val userRegionsProducerConfig: Properties = {
       val p = new Properties()
-      p.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers())
+      p.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers())
       p.put(ProducerConfig.ACKS_CONFIG, "all")
       p.put(ProducerConfig.RETRIES_CONFIG, "0")
       p.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
@@ -205,7 +200,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     //
     val userClicksProducerConfig: Properties = {
       val p = new Properties()
-      p.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers())
+      p.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers())
       p.put(ProducerConfig.ACKS_CONFIG, "all")
       p.put(ProducerConfig.RETRIES_CONFIG, "0")
       p.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
@@ -224,7 +219,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     //
     val consumerConfig = {
       val p = new Properties()
-      p.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers())
+      p.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers())
       p.put(ConsumerConfig.GROUP_ID_CONFIG, "join-scala-integration-test-standard-consumer")
       p.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
       p.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])

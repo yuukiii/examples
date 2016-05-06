@@ -25,8 +25,8 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -61,24 +61,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class FanoutLambdaIntegrationTest {
 
-  private static EmbeddedSingleNodeKafkaCluster cluster = null;
+  @ClassRule
+  public static final EmbeddedSingleNodeKafkaCluster CLUSTER = new EmbeddedSingleNodeKafkaCluster();
+
   private static String inputTopicA = "A";
   private static String outputTopicB = "B";
   private static String outputTopicC = "C";
 
   @BeforeClass
   public static void startKafkaCluster() throws Exception {
-    cluster = new EmbeddedSingleNodeKafkaCluster();
-    cluster.createTopic(inputTopicA);
-    cluster.createTopic(outputTopicB);
-    cluster.createTopic(outputTopicC);
-  }
-
-  @AfterClass
-  public static void stopKafkaCluster() throws Exception {
-    if (cluster != null) {
-      cluster.stop();
-    }
+    CLUSTER.createTopic(inputTopicA);
+    CLUSTER.createTopic(outputTopicB);
+    CLUSTER.createTopic(outputTopicC);
   }
 
   @Test
@@ -94,8 +88,8 @@ public class FanoutLambdaIntegrationTest {
 
     Properties streamsConfiguration = new Properties();
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "fanout-lambda-integration-test");
-    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
-    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, cluster.zookeeperConnect());
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
+    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zookeeperConnect());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
 
     KStream<byte[], String> stream1 = builder.stream(inputTopicA);
@@ -116,7 +110,7 @@ public class FanoutLambdaIntegrationTest {
     // Step 2: Produce some input data to the input topic.
     //
     Properties producerConfig = new Properties();
-    producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
     producerConfig.put(ProducerConfig.ACKS_CONFIG, "all");
     producerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);
     producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
@@ -134,7 +128,7 @@ public class FanoutLambdaIntegrationTest {
 
     // Verify output topic B
     Properties consumerConfigB = new Properties();
-    consumerConfigB.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    consumerConfigB.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
     consumerConfigB.put(ConsumerConfig.GROUP_ID_CONFIG, "fanout-lambda-integration-test-standard-consumer-topicB");
     consumerConfigB.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     consumerConfigB.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
@@ -144,7 +138,7 @@ public class FanoutLambdaIntegrationTest {
 
     // Verify output topic C
     Properties consumerConfigC = new Properties();
-    consumerConfigC.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    consumerConfigC.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
     consumerConfigC.put(ConsumerConfig.GROUP_ID_CONFIG, "fanout-lambda-integration-test-standard-consumer-topicC");
     consumerConfigC.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     consumerConfigC.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);

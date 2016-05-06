@@ -1,6 +1,7 @@
 package io.confluent.examples.streams.kafka;
 
 import org.apache.curator.test.InstanceSpec;
+import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,24 +11,27 @@ import java.util.Properties;
 import io.confluent.examples.streams.RestApp;
 import io.confluent.examples.streams.zookeeper.ZooKeeperEmbedded;
 import io.confluent.kafka.schemaregistry.avro.AvroCompatibilityLevel;
+import kafka.server.KafkaConfig$;
 
 /**
  * Runs an in-memory, "embedded" Kafka cluster with 1 ZooKeeper instance and 1 Kafka broker.
  */
-public class EmbeddedSingleNodeKafkaCluster {
+public class EmbeddedSingleNodeKafkaCluster extends ExternalResource {
 
   private static final Logger log = LoggerFactory.getLogger(EmbeddedSingleNodeKafkaCluster.class);
-  private static final String KAFKASTORE_TOPIC = "_schemas";
+  private static final int DEFAULT_BROKER_PORT = 0; // 0 results in a random port being selected
+  private static final String KAFKA_SCHEMAS_TOPIC = "_schemas";
   private static final String AVRO_COMPATIBILITY_TYPE = AvroCompatibilityLevel.NONE.name;
 
-  private final ZooKeeperEmbedded zookeeper;
-  private final KafkaEmbedded broker;
-  private final RestApp schemaRegistry;
+  private ZooKeeperEmbedded zookeeper;
+  private KafkaEmbedded broker;
+  private RestApp schemaRegistry;
+  private final Properties brokerConfig;
 
   /**
    * Creates and starts a Kafka cluster.
    */
-  public EmbeddedSingleNodeKafkaCluster() throws Exception {
+  public EmbeddedSingleNodeKafkaCluster() {
     this(new Properties());
   }
 
@@ -36,7 +40,15 @@ public class EmbeddedSingleNodeKafkaCluster {
    *
    * @param brokerConfig Additional broker configuration settings.
    */
-  public EmbeddedSingleNodeKafkaCluster(Properties brokerConfig) throws Exception {
+  public EmbeddedSingleNodeKafkaCluster(Properties brokerConfig) {
+    this.brokerConfig = new Properties();
+    this.brokerConfig.putAll(brokerConfig);
+  }
+
+  /**
+   * Creates and starts a Kafka cluster.
+   */
+  public void start() throws Exception {
     log.debug("Initiating embedded Kafka cluster startup");
     int zkPort = InstanceSpec.getRandomPort();
     log.debug("Starting a ZooKeeper instance on port {} ...", zkPort);
@@ -44,32 +56,51 @@ public class EmbeddedSingleNodeKafkaCluster {
     log.debug("ZooKeeper instance is running at {}", zookeeper.connectString());
 
     Properties effectiveBrokerConfig = effectiveBrokerConfigFrom(brokerConfig, zookeeper);
-    log.debug("Starting a Kafka instance on port {} ...", effectiveBrokerConfig.getProperty("port"));
+    log.debug("Starting a Kafka instance on port {} ...",
+        effectiveBrokerConfig.getProperty(KafkaConfig$.MODULE$.PortProp()));
     broker = new KafkaEmbedded(effectiveBrokerConfig);
     broker.start();
     log.debug("Kafka instance is running at {}, connected to ZooKeeper at {}",
         broker.brokerList(), broker.zookeeperConnect());
 
-    schemaRegistry = new RestApp(InstanceSpec.getRandomPort(), zookeeperConnect(), KAFKASTORE_TOPIC, AVRO_COMPATIBILITY_TYPE);
+    schemaRegistry = new RestApp(
+        InstanceSpec.getRandomPort(),
+        zookeeperConnect(),
+        KAFKA_SCHEMAS_TOPIC, AVRO_COMPATIBILITY_TYPE);
     schemaRegistry.start();
   }
 
   private Properties effectiveBrokerConfigFrom(Properties brokerConfig, ZooKeeperEmbedded zookeeper) {
     Properties effectiveConfig = new Properties();
-    effectiveConfig.put("zookeeper.connect", zookeeper.connectString());
-    int brokerPort = InstanceSpec.getRandomPort();
-    effectiveConfig.put("port", String.valueOf(brokerPort));
+    effectiveConfig.put(KafkaConfig$.MODULE$.ZkConnectProp(), zookeeper.connectString());
+    effectiveConfig.put(KafkaConfig$.MODULE$.PortProp(), DEFAULT_BROKER_PORT);
     effectiveConfig.putAll(brokerConfig);
     return effectiveConfig;
+  }
+
+  protected void before() throws Exception {
+    start();
+  }
+
+  protected void after() {
+    stop();
   }
 
   /**
    * Stop the Kafka cluster.
    */
-  public void stop() throws Exception {
-    schemaRegistry.stop();
+  public void stop() {
+    try {
+      schemaRegistry.stop();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
     broker.stop();
-    zookeeper.stop();
+    try {
+      zookeeper.stop();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**

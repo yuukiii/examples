@@ -28,8 +28,8 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -50,24 +50,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class JoinLambdaIntegrationTest {
 
-  private static EmbeddedSingleNodeKafkaCluster cluster = null;
+  @ClassRule
+  public static final EmbeddedSingleNodeKafkaCluster CLUSTER = new EmbeddedSingleNodeKafkaCluster();
+
   private static final String userClicksTopic = "user-clicks";
   private static final String userRegionsTopic = "user-regions";
   private static final String outputTopic = "output-topic";
 
   @BeforeClass
   public static void startKafkaCluster() throws Exception {
-    cluster = new EmbeddedSingleNodeKafkaCluster();
-    cluster.createTopic(userClicksTopic);
-    cluster.createTopic(userRegionsTopic);
-    cluster.createTopic(outputTopic);
-  }
-
-  @AfterClass
-  public static void stopKafkaCluster() throws Exception {
-    if (cluster != null) {
-      cluster.stop();
-    }
+    CLUSTER.createTopic(userClicksTopic);
+    CLUSTER.createTopic(userRegionsTopic);
+    CLUSTER.createTopic(outputTopic);
   }
 
   /**
@@ -143,8 +137,8 @@ public class JoinLambdaIntegrationTest {
 
     Properties streamsConfiguration = new Properties();
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "join-lambda-integration-test");
-    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
-    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, cluster.zookeeperConnect());
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
+    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zookeeperConnect());
     streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     // Explicitly place the state directory under /tmp so that we can remove it via
@@ -221,7 +215,7 @@ public class JoinLambdaIntegrationTest {
     // user-region records before any user-click records (cf. step 3).  In practice though,
     // data records would typically be arriving concurrently in both input streams/topics.
     Properties userRegionsProducerConfig = new Properties();
-    userRegionsProducerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    userRegionsProducerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
     userRegionsProducerConfig.put(ProducerConfig.ACKS_CONFIG, "all");
     userRegionsProducerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);
     userRegionsProducerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -232,7 +226,7 @@ public class JoinLambdaIntegrationTest {
     // Step 3: Publish some user click events.
     //
     Properties userClicksProducerConfig = new Properties();
-    userClicksProducerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    userClicksProducerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
     userClicksProducerConfig.put(ProducerConfig.ACKS_CONFIG, "all");
     userClicksProducerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);
     userClicksProducerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -248,7 +242,7 @@ public class JoinLambdaIntegrationTest {
     // Step 4: Verify the application's output data.
     //
     Properties consumerConfig = new Properties();
-    consumerConfig.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers());
+    consumerConfig.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
     consumerConfig.put(ConsumerConfig.GROUP_ID_CONFIG, "join-lambda-integration-test-standard-consumer");
     consumerConfig.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
