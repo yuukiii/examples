@@ -43,6 +43,8 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * End-to-end integration test that demonstrates how to work on Generic Avro data.
+ *
+ * See {@link SpecificAvroIntegrationTest} for the equivalent Specific Avro integration test.
  */
 public class GenericAvroIntegrationTest {
 
