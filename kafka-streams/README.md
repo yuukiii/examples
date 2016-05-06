@@ -32,7 +32,7 @@ _Kafka Streams Tech Preview_, which includes the latest Kafka Streams implementa
   -- demonstrates how to perform simple, state-less transformations via map functions, using the Kafka Streams DSL
   (see also the Scala variant
   [MapFunctionScalaExample](src/main/scala/io/confluent/examples/streams/MapFunctionScalaExample.scala))
-* Working with data in Apache Avro format:
+* Working with data in Apache Avro format (see also the end-to-end demos under integration tests below):
     * Generic Avro:
       [PageViewRegionLambdaExample](src/main/java/io/confluent/examples/streams/PageViewRegionLambdaExample.java)
       (Java 8+) and
@@ -43,7 +43,7 @@ _Kafka Streams Tech Preview_, which includes the latest Kafka Streams implementa
       [WikipediaFeedAvroExample](src/main/java/io/confluent/examples/streams/WikipediaFeedAvroExample.java) (Java 7+)
 * And [further examples](src/main/java/io/confluent/examples/streams/).
 
-There are also a few integration tests, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka
+There are also a few **integration tests**, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka
 clusters, feed input data to them, process the data using Kafka Streams, and finally verify the output results.
 
 > Tip: Run `mvn test` to launch the integration tests.
@@ -52,6 +52,8 @@ clusters, feed input data to them, process the data using Kafka Streams, and fin
 * [JoinLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/JoinLambdaIntegrationTest.java)
 * [MapFunctionLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/MapFunctionLambdaIntegrationTest.java)
 * [PassThroughIntegrationTest](src/test/java/io/confluent/examples/streams/PassThroughIntegrationTest.java)
+* [GenericAvroIntegrationTest.java](src/test/java/io/confluent/examples/streams/GenericAvroIntegrationTest.java)
+* [SpecificAvroIntegrationTest.java](src/test/java/io/confluent/examples/streams/SpecificAvroIntegrationTest.java)
 
 
 ## Scala
