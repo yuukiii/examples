@@ -1,4 +1,4 @@
-package io.confluent.examples.streams;
+package io.confluent.examples.streams.schemaregistry;
 
 import org.eclipse.jetty.server.Server;
 
