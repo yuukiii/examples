@@ -82,7 +82,7 @@ public class WordCountLambdaExample {
             .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
             // We will subsequently invoke `countByKey` to count the occurrences of words, so we use
             // `map` to ensure the words are available as record keys, too.
-            .map((key, value) -> new KeyValue<>(value, value))
+            .map((key, word) -> new KeyValue<>(word, word))
             // Count the occurrences of each word (record key).
             //
             // This will change the stream type from `KStream<String, String>` to
