@@ -76,14 +76,14 @@ public class WordCountLambdaExample {
         KStream<String, String> textLines = builder.stream(stringSerde, stringSerde, "TextLinesTopic");
 
         KStream<String, Long> wordCounts = textLines
-            // Split each text line, by whitespace, into words.  The text lines are the message
-            // values, i.e. we can ignore whatever data is in the message keys and thus invoke
+            // Split each text line, by whitespace, into words.  The text lines are the record
+            // values, i.e. we can ignore whatever data is in the record keys and thus invoke
             // `flatMapValues` instead of the more generic `flatMap`.
             .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
             // We will subsequently invoke `countByKey` to count the occurrences of words, so we use
-            // `map` to ensure the words are available as message keys, too.
+            // `map` to ensure the words are available as record keys, too.
             .map((key, value) -> new KeyValue<>(value, value))
-            // Count the occurrences of each word (message key).
+            // Count the occurrences of each word (record key).
             //
             // This will change the stream type from `KStream<String, String>` to
             // `KTable<String, Long>` (word -> count).
