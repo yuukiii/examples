@@ -86,10 +86,8 @@ public class WordCountLambdaExample {
             // Count the occurrences of each word (message key).
             //
             // This will change the stream type from `KStream<String, String>` to
-            // `KTable<String, Long>` (word -> count), hence we must provide serdes for `String`
-            // and `Long`.
-            //
-            .countByKey(stringSerde, "Counts")
+            // `KTable<String, Long>` (word -> count).
+            .countByKey("Counts")
             // Convert the `KTable<String, Long>` into a `KStream<String, Long>`.
             .toStream();
 
