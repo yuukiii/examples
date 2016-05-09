@@ -16,12 +16,13 @@
 package io.confluent.examples.streams;
 
 import io.confluent.examples.streams.utils.GenericAvroSerde;
+import io.confluent.examples.streams.utils.WindowedSerde;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
@@ -70,6 +71,10 @@ public class PageViewRegionLambdaExample {
         streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class);
 
+        final Serde<String> stringSerde = Serdes.String();
+        final Serde<Long> longSerde = Serdes.Long();
+        final Serde<Windowed<String>> windowedStringSerde = new WindowedSerde<>(stringSerde);
+
         KStreamBuilder builder = new KStreamBuilder();
 
         // See `pageview.avsc` under `src/main/avro/`.
@@ -100,7 +105,7 @@ public class PageViewRegionLambdaExample {
                 .countByKey(TimeWindows.of("GeoPageViewsWindow", 5 * 60 * 1000L).advanceBy(60 * 1000L));
 
         // write to the result topic
-        regionCount.to("PageViewsByRegion");
+        regionCount.to(windowedStringSerde, longSerde, "PageViewsByRegion");
 
         KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
         streams.start();
