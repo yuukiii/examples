@@ -1,25 +1,25 @@
 /**
- * Copyright 2016 Confluent Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+  * Copyright 2016 Confluent Inc.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+  *
+  * http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
 package io.confluent.examples.streams
 
 import java.util.Properties
 
 import org.apache.kafka.common.serialization._
-import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder}
 import org.apache.kafka.streams._
+import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder}
 
 /**
   * Demonstrates how to perform simple, state-less transformations via map functions.
@@ -38,18 +38,16 @@ class MapFunctionScalaExample {
 
     val streamingConfig = {
       val settings = new Properties
-      settings.put(StreamsConfig.JOB_ID_CONFIG, "map-function-scala-example")
+      settings.put(StreamsConfig.APPLICATION_ID_CONFIG, "map-function-scala-example")
       settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
       settings.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181")
-      settings.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[ByteArraySerializer])
-      settings.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[ByteArrayDeserializer])
-      settings.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
-      settings.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
+      // Specify default (de)serializers for record keys and for record values.
+      settings.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.ByteArray.getClass.getName)
+      settings.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       settings
     }
 
-    val stringSerializer: Serializer[String] = new StringSerializer
-
+    val stringSerde: Serde[String] = Serdes.String()
 
     // Read the input Kafka topic into a KStream instance.
     val textLines: KStream[Array[Byte], String] = builder.stream("TextLinesTopic")
@@ -88,19 +86,10 @@ class MapFunctionScalaExample {
     //
     // In this case we must explicitly set the correct serializers because the default serializers
     // (cf. streaming configuration) do not match the type of this particular KStream instance.
-    originalAndUppercased.to("OriginalAndUppercased", stringSerializer, stringSerializer)
+    originalAndUppercased.to(stringSerde, stringSerde, "OriginalAndUppercased")
 
     val stream: KafkaStreams = new KafkaStreams(builder, streamingConfig)
     stream.start()
   }
-
-}
-
-/**
-  * Implicit conversions that provide us with some syntactic sugar when writing stream transformations.
-  */
-object KeyValueImplicits {
-
-  implicit def Tuple2ToKeyValue[K, V](tuple: (K, V)): KeyValue[K, V] = new KeyValue(tuple._1, tuple._2)
 
 }

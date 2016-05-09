@@ -15,12 +15,12 @@
 package io.confluent.examples.streams
 
 import java.lang.{Long => JLong}
-import java.util.{Collections, Properties}
+import java.util.Properties
 
 import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster
-import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
-import org.apache.kafka.clients.producer.{KafkaProducer, Producer, ProducerConfig, ProducerRecord}
-import org.apache.kafka.common.serialization.{Deserializer, LongDeserializer, LongSerializer, Serializer, StringDeserializer, StringSerializer}
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.producer.ProducerConfig
+import org.apache.kafka.common.serialization._
 import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder, KTable}
 import org.apache.kafka.streams.{KafkaStreams, KeyValue, StreamsConfig}
 import org.assertj.core.api.Assertions.assertThat
@@ -35,37 +35,34 @@ import org.scalatest.junit.AssertionsForJUnit
   *
   * Note: We intentionally use JUnit4 (wrapped by ScalaTest) for implementing this Scala integration
   * test so it is easier to compare this Scala code with the equivalent Java code at
-  * JoinLambdaIntegrationTest.  One difference is that we switched from
-  * BeforeClass/AfterClass (which must be `static`) to Before/After in this Scala example
-  * to simplify the Scala/JUnit integration.
+  * JoinLambdaIntegrationTest.  One difference is that, to simplify the Scala/Junit integration, we
+  * switched from BeforeClass (which must be `static`) to Before as well as from @ClassRule (which
+  * must be `static` and `public`) to a workaround combination of `@Rule def` and a `private val`.
   */
 class JoinScalaIntegrationTest extends AssertionsForJUnit {
 
-  private var cluster: EmbeddedSingleNodeKafkaCluster = _
+  // Note: `@Rule def CLUSTER` does not work (will result in a NullPointerException).
+  private val privateCluster: EmbeddedSingleNodeKafkaCluster = new EmbeddedSingleNodeKafkaCluster
+  @Rule def CLUSTER = privateCluster
+
   private val userClicksTopic = "user-clicks"
   private val userRegionsTopic = "user-regions"
   private val outputTopic = "output-topic"
 
   @Before
   def startKafkaCluster() = {
-    cluster = new EmbeddedSingleNodeKafkaCluster()
-    cluster.createTopic(userClicksTopic)
-    cluster.createTopic(userRegionsTopic)
-    cluster.createTopic(outputTopic)
-  }
-
-  @After
-  def stopKafkaCluster() = {
-    if (cluster != null) {
-      cluster.stop()
-    }
+    CLUSTER.createTopic(userClicksTopic)
+    CLUSTER.createTopic(userRegionsTopic)
+    CLUSTER.createTopic(outputTopic)
   }
 
   @Test
   def shouldCountClicksPerRegion() {
+    // To convert between Scala's `Tuple2` and Streams' `KeyValue`.
+    import KeyValueImplicits._
 
     // Input 1: Clicks per user (multiple records allowed per user).
-    val userClicks: Seq[(String, Long)] = Seq(
+    val userClicks: Seq[KeyValue[String, Long]] = Seq(
       ("alice", 13L),
       ("bob", 4L),
       ("chao", 25L),
@@ -77,7 +74,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     )
 
     // Input 2: Region per user (multiple records allowed per user).
-    val userRegions: Seq[(String, String)] = Seq(
+    val userRegions: Seq[KeyValue[String, String]] = Seq(
       ("alice", "asia"), /* Alice lived in Asia originally... */
       ("bob", "americas"),
       ("chao", "asia"),
@@ -87,7 +84,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
       ("fang", "asia")
     )
 
-    val expectedClicksPerRegion: Seq[(String, Long)] = Seq(
+    val expectedClicksPerRegion: Seq[KeyValue[String, Long]] = Seq(
       ("europe", 13L),
       ("americas", 4L),
       ("asia", 25L),
@@ -101,20 +98,16 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     //
     // Step 1: Configure and start the processor topology.
     //
-    val stringSerializer: Serializer[String] = new StringSerializer()
-    val stringDeserializer: Deserializer[String] = new StringDeserializer()
-    val longSerializer: Serializer[JLong] = new LongSerializer()
-    val longDeserializer: Deserializer[JLong] = new LongDeserializer()
+    val stringSerde: Serde[String] = Serdes.String()
+    val longSerde: Serde[JLong] = Serdes.Long()
 
     val streamsConfiguration: Properties = {
       val p = new Properties()
-      p.put(StreamsConfig.JOB_ID_CONFIG, "join-scala-integration-test")
-      p.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers())
-      p.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, cluster.zookeeperConnect())
-      p.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
-      p.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
-      p.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
-      p.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
+      p.put(StreamsConfig.APPLICATION_ID_CONFIG, "join-scala-integration-test")
+      p.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers())
+      p.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zookeeperConnect())
+      p.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
+      p.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       // Explicitly place the state directory under /tmp so that we can remove it via
       // `purgeLocalStreamsState` below.  Once Streams is updated to expose the effective
       // StreamsConfig configuration (so we can retrieve whatever state directory Streams came up
@@ -133,7 +126,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     //
     // Because this is a KStream ("record stream"), multiple records for the same user will be
     // considered as separate click-count events, each of which will be added to the total count.
-    val userClicksStream: KStream[String, JLong] = builder.stream(stringDeserializer, longDeserializer, userClicksTopic)
+    val userClicksStream: KStream[String, JLong] = builder.stream(stringSerde, longSerde, userClicksTopic)
 
     // This KTable contains information such as "alice" -> "europe".
     //
@@ -146,8 +139,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     // lived in "asia") because, at the time her first user-click record is being received and
     // subsequently processed in the `leftJoin`, the latest region update for "alice" is "europe"
     // (which overrides her previous region value of "asia").
-    val userRegionsTable: KTable[String, String] =
-      builder.table(stringSerializer, stringSerializer, stringDeserializer, stringDeserializer, userRegionsTopic)
+    val userRegionsTable: KTable[String, String] = builder.table(stringSerde, stringSerde, userRegionsTopic)
 
     // Compute the number of clicks per region, e.g. "europe" -> 13L.
     //
@@ -166,12 +158,12 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
         .map((user: String, regionWithClicks: (String, JLong)) => new KeyValue[String, JLong](regionWithClicks._1, regionWithClicks._2))
         // Compute the total per region by summing the individual click counts per region.
         .reduceByKey(
-          (firstClicks: JLong, secondClicks: JLong) => firstClicks + secondClicks,
-          stringSerializer, longSerializer, stringDeserializer, longDeserializer, "ClicksPerRegionUnwindowedScala"
-        )
+      (firstClicks: JLong, secondClicks: JLong) => firstClicks + secondClicks,
+      stringSerde, longSerde, "ClicksPerRegionUnwindowedScala"
+    )
 
     // Write the (continuously updating) results to the output topic.
-    clicksPerRegion.to(outputTopic, stringSerializer, longSerializer)
+    clicksPerRegion.to(stringSerde, longSerde, outputTopic)
 
     val streams: KafkaStreams = new KafkaStreams(builder, streamsConfiguration)
     streams.start()
@@ -189,38 +181,33 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     // data records would typically be arriving concurrently in both input streams/topics.
     val userRegionsProducerConfig: Properties = {
       val p = new Properties()
-      p.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers())
+      p.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers())
       p.put(ProducerConfig.ACKS_CONFIG, "all")
       p.put(ProducerConfig.RETRIES_CONFIG, "0")
       p.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
       p.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
       p
     }
-
-    val userRegionsProducer: Producer[String, String] = new KafkaProducer[String, String](userRegionsProducerConfig)
-    userRegions.foreach(x =>
-      userRegionsProducer.send(new ProducerRecord[String, String](userRegionsTopic, x._1, x._2)).get())
-    userRegionsProducer.flush()
-    userRegionsProducer.close()
+    // We need to convert `userRegions, `userClicks`, `expectedClicksPerRegion` (which have type
+    // `Seq`) to the appropriate Java collections, which we achieve via this import.
+    // (We wouldn't need to convert if we modified the Java-focused `IntegrationTestUtils` to be
+    // more Scala friendly or if we provided Scala-focused test utilities.)
+    import scala.collection.convert.wrapAsJava._
+    IntegrationTestUtils.produceKeyValuesSynchronously(userRegionsTopic, userRegions, userRegionsProducerConfig)
 
     //
     // Step 3: Publish some user click events.
     //
     val userClicksProducerConfig: Properties = {
       val p = new Properties()
-      p.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers())
+      p.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers())
       p.put(ProducerConfig.ACKS_CONFIG, "all")
       p.put(ProducerConfig.RETRIES_CONFIG, "0")
       p.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
       p.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[LongSerializer])
       p
     }
-
-    val userClicksProducer: Producer[String, Long] = new KafkaProducer[String, Long](userClicksProducerConfig)
-    userClicks.foreach(x =>
-      userClicksProducer.send(new ProducerRecord[String, Long](userClicksTopic, x._1, x._2)).get())
-    userClicksProducer.flush()
-    userClicksProducer.close()
+    IntegrationTestUtils.produceKeyValuesSynchronously(userClicksTopic, userClicks, userClicksProducerConfig)
 
     // Give the stream processing application some time to do its work.
     // Note: The sleep times are relatively high to support running the build on Travis CI.
@@ -232,24 +219,15 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     //
     val consumerConfig = {
       val p = new Properties()
-      p.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers())
+      p.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers())
       p.put(ConsumerConfig.GROUP_ID_CONFIG, "join-scala-integration-test-standard-consumer")
       p.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
       p.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
       p.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[LongDeserializer])
       p
     }
-    val consumer: KafkaConsumer[String, Long] = new KafkaConsumer[String, Long](consumerConfig)
-    consumer.subscribe(Collections.singletonList(outputTopic))
-
-    val actualClicksPerRegion: java.util.List[KeyValue[String, Long]] = IntegrationTestUtils.readKeyValues(consumer)
-
-    // We need to convert `expectedClicksPerRegion` so that we can compare it with `actualClicksPerRegion`.
-    // (We wouldn't need to convert if we modified the Java-focused `IntegrationTestUtils` to be
-    // more Scala friendly.)
-    val exp = expectedClicksPerRegion.map { case (region, clicks) => new KeyValue(region, clicks) }
-    import scala.collection.convert.wrapAsJava._
-    assertThat(actualClicksPerRegion).containsExactlyElementsOf(exp)
+    val actualClicksPerRegion: java.util.List[KeyValue[String, Long]] = IntegrationTestUtils.readKeyValues(outputTopic, consumerConfig)
+    assertThat(actualClicksPerRegion).containsExactlyElementsOf(expectedClicksPerRegion)
   }
 
 }

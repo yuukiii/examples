@@ -7,7 +7,7 @@
     <groupId>io.confluent</groupId>
     <artifactId>streams-examples</artifactId>
     <packaging>jar</packaging>
-    <version>2.1.0-alpha1</version>
+    <version>3.0.0-SNAPSHOT</version>
 
     <organization>
         <name>Confluent, Inc.</name>
@@ -41,10 +41,10 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <kafka.version>0.9.1.0-cp1</kafka.version>
+        <kafka.version>0.10.0.0-SNAPSHOT</kafka.version>
         <kafka.scala.version>2.11</kafka.scala.version>
-        <scala.version>${kafka.scala.version}.7</scala.version>
-        <confluent.version>2.1.0-alpha1</confluent.version>
+        <scala.version>${kafka.scala.version}.8</scala.version>
+        <confluent.version>3.0.0-SNAPSHOT</confluent.version>
         <scalatest.version>2.2.6</scalatest.version>
         <avro.version>1.7.7</avro.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -54,6 +54,11 @@
         <dependency>
             <groupId>io.confluent</groupId>
             <artifactId>kafka-avro-serializer</artifactId>
+            <version>${confluent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-schema-registry-client</artifactId>
             <version>${confluent.version}</version>
         </dependency>
         <dependency>
@@ -108,12 +113,27 @@
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka_${kafka.scala.version}</artifactId>
             <version>${kafka.version}</version>
+            <classifier>test</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-test</artifactId>
             <version>2.9.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-schema-registry</artifactId>
+            <version>${confluent.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-schema-registry</artifactId>
+            <version>${confluent.version}</version>
+            <!-- Required for e.g. schema registry's RestApp -->
+            <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
 
@@ -232,7 +252,7 @@
                             <goal>schema</goal>
                         </goals>
                         <configuration>
-                            <sourceDirectory>${project.basedir}/src/main/avro/io/confluent/examples/streams</sourceDirectory>
+                            <sourceDirectory>src/main/resources/avro/io/confluent/examples/streams</sourceDirectory>
                             <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
                             <stringType>String</stringType>
                         </configuration>

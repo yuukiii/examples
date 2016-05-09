@@ -39,28 +39,47 @@ import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * End-to-end integration test based on MapFunctionLambdaExample, using an embedded Kafka cluster.
+ * End-to-end integration test that demonstrates "fan-out", using an embedded Kafka cluster.
+ *
+ * This example shows how you can read from one input topic/stream, transform the data (here:
+ * trivially) in two different ways via two intermediate streams, and then write the respective
+ * results to two output topics.
+ *
+ * <pre>
+ * {@code
+ *
+ *                                         +---map()---> stream2 ---to()---> Kafka topic B
+ *                                         |
+ * Kafka topic A ---stream()--> stream1 ---+
+ *                                         |
+ *                                         +---map()---> stream3 ---to()---> Kafka topic C
+ *
+ * }
+ * </pre>
  *
  * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */
-public class MapFunctionLambdaIntegrationTest {
+public class FanoutLambdaIntegrationTest {
 
   @ClassRule
   public static final EmbeddedSingleNodeKafkaCluster CLUSTER = new EmbeddedSingleNodeKafkaCluster();
 
-  private static String inputTopic = "inputTopic";
-  private static String outputTopic = "outputTopic";
+  private static String inputTopicA = "A";
+  private static String outputTopicB = "B";
+  private static String outputTopicC = "C";
 
   @BeforeClass
   public static void startKafkaCluster() throws Exception {
-    CLUSTER.createTopic(inputTopic);
-    CLUSTER.createTopic(outputTopic);
+    CLUSTER.createTopic(inputTopicA);
+    CLUSTER.createTopic(outputTopicB);
+    CLUSTER.createTopic(outputTopicC);
   }
 
   @Test
-  public void shouldUppercaseTheInput() throws Exception {
-    List<String> inputValues = Arrays.asList("hello", "world");
-    List<String> expectedValues = inputValues.stream().map(String::toUpperCase).collect(Collectors.toList());
+  public void shouldFanoutTheInput() throws Exception {
+    List<String> inputValues = Arrays.asList("Hello", "World");
+    List<String> expectedValuesForB = inputValues.stream().map(String::toUpperCase).collect(Collectors.toList());
+    List<String> expectedValuesForC = inputValues.stream().map(String::toLowerCase).collect(Collectors.toList());
 
     //
     // Step 1: Configure and start the processor topology.
@@ -68,15 +87,16 @@ public class MapFunctionLambdaIntegrationTest {
     KStreamBuilder builder = new KStreamBuilder();
 
     Properties streamsConfiguration = new Properties();
-    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "map-function-lambda-integration-test");
+    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "fanout-lambda-integration-test");
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zookeeperConnect());
-    streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass().getName());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
 
-    KStream<byte[], String> input = builder.stream(inputTopic);
-    KStream<byte[], String> uppercased = input.mapValues(String::toUpperCase);
-    uppercased.to(outputTopic);
+    KStream<byte[], String> stream1 = builder.stream(inputTopicA);
+    KStream<byte[], String> stream2 = stream1.mapValues(String::toUpperCase);
+    KStream<byte[], String> stream3 = stream1.mapValues(String::toLowerCase);
+    stream2.to(outputTopicB);
+    stream3.to(outputTopicC);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();
@@ -95,7 +115,7 @@ public class MapFunctionLambdaIntegrationTest {
     producerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);
     producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
     producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    IntegrationTestUtils.produceValuesSynchronously(inputTopic, inputValues, producerConfig);
+    IntegrationTestUtils.produceValuesSynchronously(inputTopicA, inputValues, producerConfig);
 
     // Give the stream processing application some time to do its work.
     // Note: The sleep times are relatively high to support running the build on Travis CI.
@@ -105,14 +125,26 @@ public class MapFunctionLambdaIntegrationTest {
     //
     // Step 3: Verify the application's output data.
     //
-    Properties consumerConfig = new Properties();
-    consumerConfig.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
-    consumerConfig.put(ConsumerConfig.GROUP_ID_CONFIG, "map-function-lambda-integration-test-standard-consumer");
-    consumerConfig.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-    consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
-    consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    List<String> actualValues = IntegrationTestUtils.readValues(outputTopic, consumerConfig, inputValues.size());
-    assertThat(actualValues).isEqualTo(expectedValues);
+
+    // Verify output topic B
+    Properties consumerConfigB = new Properties();
+    consumerConfigB.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
+    consumerConfigB.put(ConsumerConfig.GROUP_ID_CONFIG, "fanout-lambda-integration-test-standard-consumer-topicB");
+    consumerConfigB.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    consumerConfigB.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
+    consumerConfigB.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    List<String> actualValuesForB = IntegrationTestUtils.readValues(outputTopicB, consumerConfigB, inputValues.size());
+    assertThat(actualValuesForB).isEqualTo(expectedValuesForB);
+
+    // Verify output topic C
+    Properties consumerConfigC = new Properties();
+    consumerConfigC.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
+    consumerConfigC.put(ConsumerConfig.GROUP_ID_CONFIG, "fanout-lambda-integration-test-standard-consumer-topicC");
+    consumerConfigC.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    consumerConfigC.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
+    consumerConfigC.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    List<String> actualValuesForC = IntegrationTestUtils.readValues(outputTopicC, consumerConfigC, inputValues.size());
+    assertThat(actualValuesForC).isEqualTo(expectedValuesForC);
   }
 
 }
