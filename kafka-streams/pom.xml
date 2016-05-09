@@ -128,6 +128,14 @@
             <version>${confluent.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-schema-registry</artifactId>
+            <version>${confluent.version}</version>
+            <!-- Required for e.g. schema registry's RestApp -->
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
 
         <!-- The following dependencies on ScalaTest are only required for the Scala tests
              under src/test/scala/.  They are not required for Java code/tests.

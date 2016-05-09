@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Properties;
 
-import io.confluent.examples.streams.schemaregistry.RestApp;
+import io.confluent.kafka.schemaregistry.RestApp;
 import io.confluent.examples.streams.zookeeper.ZooKeeperEmbedded;
 import io.confluent.kafka.schemaregistry.avro.AvroCompatibilityLevel;
 import kafka.server.KafkaConfig$;
