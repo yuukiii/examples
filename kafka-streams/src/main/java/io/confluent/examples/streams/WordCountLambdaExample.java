@@ -57,8 +57,7 @@ public class WordCountLambdaExample {
         // Specify default (de)serializers for record keys and for record values.
         streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
+       
         // Set up serializers and deserializers, which we will use for overriding the default serdes
         // specified above.
         final Serde<String> stringSerde = Serdes.String();
