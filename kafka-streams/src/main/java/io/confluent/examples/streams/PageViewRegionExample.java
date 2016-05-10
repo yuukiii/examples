@@ -48,9 +48,10 @@ import java.util.Properties;
  * "PageViews" with a user profile table that reads from a topic named "UserProfiles" to compute the
  * number of page views per user region.
  *
- * Before running this example you must create the source topics (e.g. via
- * `kafka-topics --create ...`) and write some data to them (e.g. `kafka-avro-console-producer`).
- * Otherwise you won't see any data arriving in the output topic.
+ * Note: Before running this example you must 1) create the source topic (e.g. via
+ * `kafka-topics --create ...`), then 2) start this example and 3) write some data to
+ * the source topic (e.g. via `kafka-avro-console-producer`). Otherwise you won't see any data
+ * arriving in the output topic.
  *
  * Note: The generic Avro binding is used for serialization/deserialization.  This means the
  * appropriate Avro schema files must be provided for each of the "intermediate" Avro classes, i.e.
