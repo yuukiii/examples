@@ -36,11 +36,11 @@ import java.util.Properties;
  * "WordsWithCountsTopic", where each record is an updated count of a single word, i.e.
  * `word (String) -> currentCount (Long)`.
  *
- * Before running this example you must create the source topic (e.g. via
- * `kafka-topics --create ...`) and write some data to it (e.g. via
- * `kafka-console-producer`). Otherwise you won't see any data arriving in the output topic.
+ * Note: Before running this example you must 1) create the source topic (e.g. via
+ * `kafka-topics --create ...`), then 2) start this example and 3) write some data to
+ * the source topic (e.g. via `kafka-console-producer`). Otherwise you won't see any data
+ * arriving in the output topic.
  *
- * Note:
  */
 public class WordCountLambdaExample {
 
