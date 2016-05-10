@@ -19,7 +19,6 @@ import io.confluent.examples.streams.utils.GenericAvroSerde;
 import io.confluent.examples.streams.utils.PriorityQueueSerde;
 import io.confluent.examples.streams.utils.WindowedSerde;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
