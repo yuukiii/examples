@@ -7,13 +7,19 @@ project.
 
 # Apache Kafka and Kafka Streams
 
-The Kafka Streams library is a component of the [Apache Kafka](http://kafka.apache.org/) project.
+The Kafka Streams library is a component of the [Apache Kafka](http://kafka.apache.org/) project that is available from Kafka version 0.10.0.0 onwards.
 
-As of March 2016 the Apache Kafka project does not yet provide an official release that includes the new Kafka Streams
-library (Kafka Streams is expected to be released with upcoming Kafka 0.10).  For this reason the code examples in this
-directory depend on the [Confluent Platform 2.1.0-alpha1 release](http://www.confluent.io/developer) aka the
-_Kafka Streams Tech Preview_, which includes the latest Kafka Streams implementation backported to Kafka 0.9.
-
+> Note: Until Kafka 0.10.0.0 is officially released (ETA is May 2016) you must manually build Kafka 0.10.0.0.
+>
+> ```shell
+> $ git clone git@github.com:apache/kafka.git && cd kafka
+> $ git checkout 0.10.0
+> # Perhaps you need to bootstrap `gradlew` first, see Kafka's top-level README:
+> #     $ gradle
+> $ ./gradlew clean installAll
+> ```
+>
+> Sorry for this temporary inconvenience!
 
 # List of examples
 
@@ -114,7 +120,7 @@ Kafka Streams examples via:
 # Create a standalone jar
 $ mvn clean package
 
-# >>> Creates target/streams-examples-2.1.0-alpha1-standalone.jar
+# >>> Creates target/streams-examples-3.0.0-SNAPSHOT-standalone.jar
 ```
 
 You can now run the example applications as follows:
@@ -122,7 +128,7 @@ You can now run the example applications as follows:
 ```shell
 # Run an example application from the standalone jar.
 # Here: `WordCountLambdaExample`
-$ java -cp target/streams-examples-2.1.0-alpha1-standalone.jar \
+$ java -cp target/streams-examples-3.0.0-SNAPSHOT-standalone.jar \
   io.confluent.examples.streams.WordCountLambdaExample
 ```
 
