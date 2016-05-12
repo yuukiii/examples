@@ -12,7 +12,7 @@ Table of Contents
     * [Java](#examples-java)
     * [Scala](#examples-scala)
 * [Requirements](#requirements)
-    * [Kafka](#requirements-kafka)
+    * [Apache Kafka](#requirements-kafka)
     * [Java](#requirements-java)
     * [Scala](#requirements-scala)
 * [Packaging and running the examples](#packaging-and-running)
