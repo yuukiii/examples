@@ -4,6 +4,23 @@ This sub-folder contains code examples that demonstrate how to implement real-ti
 Streams, which is a new stream processing library included with the [Apache Kafka](http://kafka.apache.org/) open source
 project.
 
+---
+Table of Contents
+
+* [Apache Kafka and Kafka Streams](#kafka-and-streams)
+* [List of Examples](#list-of-examples)
+    * [Java](#examples-java)
+    * [Scala](#examples-scala)
+* [Requirements](#requirements)
+    * [Kafka](#requirements-kafka)
+    * [Java](#requirements-java)
+    * [Scala](#requirements-scala)
+* [Packaging and running the examples](#packaging-and-running)
+* [Development](#development)
+
+---
+
+<a name="kafka-and-streams"/>
 
 # Apache Kafka and Kafka Streams
 
@@ -35,7 +52,13 @@ The Kafka Streams library is a component of the [Apache Kafka](http://kafka.apac
 > You won't need to do that anymore once Kafka 0.10.0.0 and the next version of the Confluent Platform
 > are released.
 
+
+<a name="list-of-examples"/>
+
 # List of examples
+
+
+<a name="examples-java"/>
 
 ## Java
 
@@ -76,6 +99,8 @@ clusters and the [Confluent Schema Registry](https://github.com/confluentinc/sch
 * [SpecificAvroIntegrationTest.java](src/test/java/io/confluent/examples/streams/SpecificAvroIntegrationTest.java)
 
 
+<a name="examples-scala"/>
+
 ## Scala
 
 * [MapFunctionScalaExample](src/main/scala/io/confluent/examples/streams/MapFunctionScalaExample.scala)
@@ -91,13 +116,19 @@ clusters, feed input data to them, process the data using Kafka Streams, and fin
 * [JoinScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/JoinScalaIntegrationTest.scala)
 
 
+<a name="requirements"/>
+
 # Requirements
 
-## Apache Kafka with Kafka Streams included
+<a name="requirements-kafka"/>
+
+## Apache Kafka
 
 The code in this repository requires a version of Apache Kafka that already includes its
 [Kafka Streams](https://github.com/apache/kafka/tree/trunk/streams) library.
 
+
+<a name="requirements-java"/>
 
 ## Java 8
 
@@ -112,6 +143,8 @@ IntelliJ IDEA users:
     * Set "Project language level" to "8 - Lambdas, type annotations, etc."
 
 
+<a name="requirements-scala"/>
+
 ## Scala
 
 > Scala is required only for the Scala examples in this repository.  If you are a Java developer you can safely ignore
@@ -120,6 +153,8 @@ IntelliJ IDEA users:
 If you want to experiment with the Scala examples in this repository, you need a version of Scala that supports Java 8
 and SAM / Java lambda (e.g. Scala 2.11 with * `-Xexperimental` compiler flag, or 2.12).
 
+
+<a name="packaging-and-running"/>
 
 # Packaging and running the examples
 
@@ -150,6 +185,8 @@ Keep in mind that the machine on which you run the command above must have acces
 configured in the code examples.  By default, the code examples assume the Kafka cluster is accessible via
 `localhost:9092` (Kafka broker) and the ZooKeeper ensemble via `localhost:2181`.
 
+
+<a name="development"/>
 
 # Development
 
