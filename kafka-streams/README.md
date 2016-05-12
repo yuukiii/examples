@@ -31,7 +31,9 @@ The Kafka Streams library is a component of the [Apache Kafka](http://kafka.apac
 > - https://github.com/confluentinc/schema-registry
 >
 >
-> Sorry for this temporary inconvenience!
+> Sorry for this temporary inconvenience of needing to build Kafka and the three Confluent repos manually.
+> You won't need to do that anymore once Kafka 0.10.0.0 and the next version of the Confluent Platform
+> are released.
 
 # List of examples
 
