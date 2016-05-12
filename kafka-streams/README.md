@@ -12,6 +12,7 @@ Table of Contents
     * [Scala](#examples-scala)
 * [Requirements](#requirements)
     * [Apache Kafka](#requirements-kafka)
+    * [Confluent Platform](#requirements-confluent-platform)
     * [Java](#requirements-java)
     * [Scala](#requirements-scala)
 * [Packaging and running the examples](#packaging-and-running)
