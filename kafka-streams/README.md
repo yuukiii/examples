@@ -26,31 +26,6 @@ Table of Contents
 
 The Kafka Streams library is a component of the [Apache Kafka](http://kafka.apache.org/) project that is available from Kafka version 0.10.0.0 onwards.
 
-> Note: Until Kafka 0.10.0.0 is officially released (ETA is May 2016) you must manually build Kafka 0.10.0.0.
->
-> ```shell
-> $ git clone git@github.com:apache/kafka.git && cd kafka
-> $ git checkout 0.10.0
-> # Perhaps you need to bootstrap `gradlew` first, see Kafka's top-level README:
-> #     $ gradle
-> $ ./gradlew clean installAll
-> ```
->
-> And you also need the latest Confluent Avro serdes from https://github.com/confluentinc/schema-registry,
-> which is currently versioned as 3.0.0-SNAPSHOT. You need to install this to your local maven repo via
-> `mvn install`. Note that schema-registry has dependencies on a few other `confluentinc/*` projects, for
-> which you must also build their latest `master` versions and install them locally.
->
-> You must build these repos, in the following order, by running `mvn install` on their `master` branch:
->
-> - https://github.com/confluentinc/common
-> - https://github.com/confluentinc/rest-utils
-> - https://github.com/confluentinc/schema-registry
->
->
-> Sorry for this temporary inconvenience of needing to build Kafka and the three Confluent repos manually.
-> You won't need to do that anymore once Kafka 0.10.0.0 and the next version of the Confluent Platform
-> are released.
 
 
 <a name="list-of-examples"/>
@@ -124,8 +99,39 @@ clusters, feed input data to them, process the data using Kafka Streams, and fin
 
 ## Apache Kafka
 
-The code in this repository requires a version of Apache Kafka that already includes its
+The code in this repository requires Apache Kafka 0.10.0+ because from this point onwards Kafka includes its
 [Kafka Streams](https://github.com/apache/kafka/tree/trunk/streams) library.
+
+> Note: Until Kafka 0.10.0.0 is officially released (ETA is May 2016) you must manually build Kafka 0.10.0.0.
+>
+> ```shell
+> $ git clone git@github.com:apache/kafka.git && cd kafka
+> $ git checkout 0.10.0
+> # Perhaps you need to bootstrap `gradlew` first, see Kafka's top-level README:
+> #     $ gradle
+> $ ./gradlew clean installAll
+> ```
+>
+> Sorry for this temporary inconvenience of needing to build Kafka manually.
+> You won't need to do that anymore once Kafka 0.10.0.0 is released.
+
+
+<a name="requirements-confluent-platform"/>
+
+## Confluent Platform
+
+The code in this repository requires Confluent Platform 3.0.x.
+
+> Note: Until Confluent Platform 3.0.0 is officially released you must manually build some CP projects.
+>
+> You must build the following repos, in the specified order, by running `mvn install` on their `master` branch:
+>
+> 1. https://github.com/confluentinc/common
+> 2. https://github.com/confluentinc/rest-utils
+> 3. https://github.com/confluentinc/schema-registry
+>
+> Sorry for this temporary inconvenience of needing to build the three Confluent projects manually.
+> You won't need to do that anymore once the next version of the Confluent Platform is released.
 
 
 <a name="requirements-java"/>
