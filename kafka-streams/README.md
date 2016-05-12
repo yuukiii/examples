@@ -7,8 +7,7 @@ project.
 ---
 Table of Contents
 
-* [Apache Kafka and Kafka Streams](#kafka-and-streams)
-* [List of Examples](#list-of-examples)
+* [Available examples](#available-examples)
     * [Java](#examples-java)
     * [Scala](#examples-scala)
 * [Requirements](#requirements)
@@ -20,17 +19,10 @@ Table of Contents
 
 ---
 
-<a name="kafka-and-streams"/>
 
-# Apache Kafka and Kafka Streams
+<a name="available-examples"/>
 
-The Kafka Streams library is a component of the [Apache Kafka](http://kafka.apache.org/) project that is available from Kafka version 0.10.0.0 onwards.
-
-
-
-<a name="list-of-examples"/>
-
-# List of examples
+# Available examples
 
 
 <a name="examples-java"/>
