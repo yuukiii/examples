@@ -19,6 +19,18 @@ The Kafka Streams library is a component of the [Apache Kafka](http://kafka.apac
 > $ ./gradlew clean installAll
 > ```
 >
+> And you also need the latest Confluent Avro serdes from https://github.com/confluentinc/schema-registry,
+> which is currently versioned as 3.0.0-SNAPSHOT. You need to install this to your local maven repo via
+> `mvn install`. Note that schema-registry has dependencies on a few other `confluentinc/*` projects, for
+> which you must also build their latest `master` versions and install them locally.
+>
+> You must build these repos, in the following order, by running `mvn install` on their `master` branch:
+>
+> - https://github.com/confluentinc/common
+> - https://github.com/confluentinc/rest-utils
+> - https://github.com/confluentinc/schema-registry
+>
+>
 > Sorry for this temporary inconvenience!
 
 # List of examples
