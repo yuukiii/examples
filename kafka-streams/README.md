@@ -29,7 +29,7 @@ Table of Contents
 
 ## Java
 
-> Note: We use the label "Lambda" to denote any examples that make use of lambda expressions and thus require Java 8+.
+> Note: We use the label "Lambda" to denote examples that make use of lambda expressions and thus require Java 8+.
 
 * [WordCountLambdaExample](src/main/java/io/confluent/examples/streams/WordCountLambdaExample.java)
   -- demonstrates, using the Kafka Streams DSL, how to implement the WordCount program that computes a simple word
