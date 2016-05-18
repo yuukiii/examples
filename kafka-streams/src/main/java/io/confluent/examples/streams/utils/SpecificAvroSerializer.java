@@ -22,10 +22,11 @@ import java.util.Map;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 
+import static io.confluent.kafka.serializers.KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG;
+
 public class SpecificAvroSerializer<T extends  org.apache.avro.specific.SpecificRecord> implements Serializer<T> {
 
     KafkaAvroSerializer inner;
-    private static final String SPECIFIC_AVRO_READER_CONFIG = "specific.avro.reader";
 
     /**
      * Constructor used by Kafka Streams.
