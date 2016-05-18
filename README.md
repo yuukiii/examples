@@ -7,4 +7,4 @@ This repository contains code examples for [Apache Kafka](http://kafka.apache.or
   (for writing data to Kafka) and a Java consumer application (for reading data from Kafka)
 * [kafka-streams](kafka-streams/): examples that demonstrate how to implement real-time processing applications using
    Kafka Streams, which is a new stream processing library included with the [Apache Kafka](http://kafka.apache.org/)
-   open source project.
+   open source project
