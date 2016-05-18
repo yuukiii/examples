@@ -15,15 +15,17 @@
  */
 package io.confluent.examples.streams.utils;
 
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
-import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.util.Map;
 
+import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
+
 public class SpecificAvroSerializer<T extends  org.apache.avro.specific.SpecificRecord> implements Serializer<T> {
 
     KafkaAvroSerializer inner;
+    private static final String SPECIFIC_AVRO_READER_CONFIG = "specific.avro.reader";
 
     /**
      * Constructor used by Kafka Streams.
@@ -41,7 +43,9 @@ public class SpecificAvroSerializer<T extends  org.apache.avro.specific.Specific
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void configure(Map<String, ?> configs, boolean isKey) {
+        ((Map<String, Object>) configs).put(SPECIFIC_AVRO_READER_CONFIG, true);
         inner.configure(configs, isKey);
     }
 
