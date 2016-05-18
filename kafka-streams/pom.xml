@@ -31,12 +31,6 @@
             <id>confluent</id>
             <url>http://packages.confluent.io/maven/</url>
         </repository>
-
-        <!-- This is Confluent's staging maven repository; not needed for public releases. -->
-        <repository>
-            <id>confluent-staging</id>
-            <url>http://staging-confluent-packages-maven-3.0.0.s3.amazonaws.com/maven/</url>
-        </repository>
     </repositories>
 
     <properties>
