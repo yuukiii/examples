@@ -181,8 +181,8 @@ $ mvn test    # But no tests yet!
 
 # Version Compatibility Matrix
 
-| Branch                                                                                                         | Apache Kafka | Confluent Platform |
-| ---------------------------------------------------------------------------------------------------------------|--------------|--------------------|
+| Branch                                                                         | Apache Kafka | Confluent Platform |
+| -------------------------------------------------------------------------------|--------------|--------------------|
 | [kafka-0.10.0.0-cp-3.0.0](../../../tree/kafka-0.10.0.0-cp-3.0.0/kafka-streams) | 0.10.0.0     | 3.0.0              |
 
 The `master` branch of this repository represents active development, and may require additional steps on your side to
