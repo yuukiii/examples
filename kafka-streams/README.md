@@ -95,36 +95,12 @@ clusters, feed input data to them, process the data using Kafka Streams, and fin
 The code in this repository requires Apache Kafka 0.10.0+ because from this point onwards Kafka includes its
 [Kafka Streams](https://github.com/apache/kafka/tree/trunk/streams) library.
 
-> Note: Until Kafka 0.10.0.0 is officially released (ETA is May 2016) you must manually build Kafka 0.10.0.0.
->
-> ```shell
-> $ git clone git@github.com:apache/kafka.git && cd kafka
-> $ git checkout 0.10.0
-> # Perhaps you need to bootstrap `gradlew` first, see Kafka's top-level README:
-> #     $ gradle
-> $ ./gradlew clean installAll
-> ```
->
-> Sorry for this temporary inconvenience of needing to build Kafka manually.
-> You won't need to do that anymore once Kafka 0.10.0.0 is released.
-
 
 <a name="requirements-confluent-platform"/>
 
 ## Confluent Platform
 
 The code in this repository requires Confluent Platform 3.0.x.
-
-> Note: Until Confluent Platform 3.0.0 is officially released you must manually build some CP projects.
->
-> You must build the following repos, in the specified order, by running `mvn install` on their `master` branch:
->
-> 1. https://github.com/confluentinc/common
-> 2. https://github.com/confluentinc/rest-utils
-> 3. https://github.com/confluentinc/schema-registry
->
-> Sorry for this temporary inconvenience of needing to build the three Confluent projects manually.
-> You won't need to do that anymore once the next version of the Confluent Platform is released.
 
 
 <a name="requirements-java"/>
@@ -168,7 +144,7 @@ Kafka Streams examples via:
 # Create a standalone jar
 $ mvn clean package
 
-# >>> Creates target/streams-examples-3.0.0-SNAPSHOT-standalone.jar
+# >>> Creates target/streams-examples-3.0.0-standalone.jar
 ```
 
 You can now run the example applications as follows:
@@ -176,7 +152,7 @@ You can now run the example applications as follows:
 ```shell
 # Run an example application from the standalone jar.
 # Here: `WordCountLambdaExample`
-$ java -cp target/streams-examples-3.0.0-SNAPSHOT-standalone.jar \
+$ java -cp target/streams-examples-3.0.0-standalone.jar \
   io.confluent.examples.streams.WordCountLambdaExample
 ```
 
