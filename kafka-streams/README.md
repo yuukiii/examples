@@ -17,6 +17,7 @@ Table of Contents
     * [Scala](#requirements-scala)
 * [Packaging and running the examples](#packaging-and-running)
 * [Development](#development)
+* [Version Compatibility Matrix](#version-compatibility)
 
 ---
 
@@ -24,6 +25,9 @@ Table of Contents
 <a name="available-examples"/>
 
 # Available examples
+
+> Note: See [Version Compatibility Matrix](#version-compatibility) below for an overview of
+> which examples are available for which versions of Apache Kafka and Confluent Platform.
 
 
 <a name="examples-java"/>
@@ -171,3 +175,15 @@ This project uses the standard maven lifecycle and commands such as:
 $ mvn compile # This also generates Java classes from the Avro schemas
 $ mvn test    # But no tests yet!
 ```
+
+
+<a name="version-compatibility"/>
+
+# Version Compatibility Matrix
+
+| Branch                                                                         | Apache Kafka | Confluent Platform |
+| -------------------------------------------------------------------------------|--------------|--------------------|
+| [kafka-0.10.0.0-cp-3.0.0](../../../tree/kafka-0.10.0.0-cp-3.0.0/kafka-streams) | 0.10.0.0     | 3.0.0              |
+
+The `master` branch of this repository represents active development, and may require additional steps on your side to
+make it compile.  Check this README as well as [pom.xml](pom.xml) for any such information.
