@@ -82,17 +82,13 @@ public class GenericAvroIntegrationTest {
     streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass().getName());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class);
     streamsConfiguration.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, CLUSTER.schemaRegistryUrl());
+    streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
     // Write the input data as-is to the output topic.
     builder.stream(inputTopic).to(outputTopic);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();
-
-    // Wait briefly for the topology to be fully up and running (otherwise it might miss some or all
-    // of the input data we produce below).
-    // Note: The sleep times are relatively high to support running the build on Travis CI.
-    Thread.sleep(5000);
 
     //
     // Step 2: Produce some input data to the input topic.
@@ -106,11 +102,6 @@ public class GenericAvroIntegrationTest {
     producerConfig.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, CLUSTER.schemaRegistryUrl());
     IntegrationTestUtils.produceValuesSynchronously(inputTopic, inputValues, producerConfig);
 
-    // Give the stream processing application some time to do its work.
-    // Note: The sleep times are relatively high to support running the build on Travis CI.
-    Thread.sleep(10000);
-    streams.close();
-
     //
     // Step 3: Verify the application's output data.
     //
@@ -121,7 +112,9 @@ public class GenericAvroIntegrationTest {
     consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
     consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class);
     consumerConfig.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, CLUSTER.schemaRegistryUrl());
-    List<GenericRecord> actualValues = IntegrationTestUtils.readValues(outputTopic, consumerConfig, inputValues.size());
+    List<GenericRecord> actualValues = IntegrationTestUtils.waitUntilMinValuesRecordsReceived(consumerConfig,
+        outputTopic, inputValues.size());
+    streams.close();
     assertEquals(inputValues, actualValues);
   }
 
