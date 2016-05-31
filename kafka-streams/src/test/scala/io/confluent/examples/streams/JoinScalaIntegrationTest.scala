@@ -108,6 +108,8 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
       p.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zookeeperConnect())
       p.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       p.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
+      p.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+      // Explicitly place the state directory under /tmp so that we can remove it via
       // Explicitly place the state directory under /tmp so that we can remove it via
       // `purgeLocalStreamsState` below.  Once Streams is updated to expose the effective
       // StreamsConfig configuration (so we can retrieve whatever state directory Streams came up
@@ -168,11 +170,6 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     val streams: KafkaStreams = new KafkaStreams(builder, streamsConfiguration)
     streams.start()
 
-    // Wait briefly for the topology to be fully up and running (otherwise it might miss some or all
-    // of the input data we produce below).
-    // Note: The sleep times are relatively high to support running the build on Travis CI.
-    Thread.sleep(5000)
-
     //
     // Step 2: Publish user-region information.
     //
@@ -209,11 +206,6 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     }
     IntegrationTestUtils.produceKeyValuesSynchronously(userClicksTopic, userClicks, userClicksProducerConfig)
 
-    // Give the stream processing application some time to do its work.
-    // Note: The sleep times are relatively high to support running the build on Travis CI.
-    Thread.sleep(10000)
-    streams.close()
-
     //
     // Step 4: Verify the application's output data.
     //
@@ -226,7 +218,8 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
       p.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[LongDeserializer])
       p
     }
-    val actualClicksPerRegion: java.util.List[KeyValue[String, Long]] = IntegrationTestUtils.readKeyValues(outputTopic, consumerConfig)
+    val actualClicksPerRegion: java.util.List[KeyValue[String, Long]] = IntegrationTestUtils.waitUntilMinKeyValueRecordsReceived(consumerConfig,
+      outputTopic, expectedClicksPerRegion.size)
     assertThat(actualClicksPerRegion).containsExactlyElementsOf(expectedClicksPerRegion)
   }
 

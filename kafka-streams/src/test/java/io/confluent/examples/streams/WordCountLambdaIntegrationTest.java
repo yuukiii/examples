@@ -84,6 +84,7 @@ public class WordCountLambdaIntegrationTest {
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zookeeperConnect());
     streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+    streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     // Explicitly place the state directory under /tmp so that we can remove it via
     // `purgeLocalStreamsState` below.  Once Streams is updated to expose the effective
     // StreamsConfig configuration (so we can retrieve whatever state directory Streams came up
@@ -109,11 +110,6 @@ public class WordCountLambdaIntegrationTest {
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();
 
-    // Wait briefly for the topology to be fully up and running (otherwise it might miss some or all
-    // of the input data we produce below).
-    // Note: The sleep times are relatively high to support running the build on Travis CI.
-    Thread.sleep(5000);
-
     //
     // Step 2: Produce some input data to the input topic.
     //
@@ -125,11 +121,6 @@ public class WordCountLambdaIntegrationTest {
     producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     IntegrationTestUtils.produceValuesSynchronously(inputTopic, inputValues, producerConfig);
 
-    // Give the stream processing application some time to do its work.
-    // Note: The sleep times are relatively high to support running the build on Travis CI.
-    Thread.sleep(10000);
-    streams.close();
-
     //
     // Step 3: Verify the application's output data.
     //
@@ -139,7 +130,9 @@ public class WordCountLambdaIntegrationTest {
     consumerConfig.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
-    List<KeyValue<String, Long>> actualWordCounts = IntegrationTestUtils.readKeyValues(outputTopic, consumerConfig);
+    List<KeyValue<String, Long>> actualWordCounts = IntegrationTestUtils.waitUntilMinKeyValueRecordsReceived(consumerConfig,
+        outputTopic, expectedWordCounts.size());
+    streams.close();
     assertThat(actualWordCounts).containsExactlyElementsOf(expectedWordCounts);
   }
 
