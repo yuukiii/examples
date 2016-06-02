@@ -39,14 +39,16 @@ Table of Contents
 * [WordCountLambdaExample](src/main/java/io/confluent/examples/streams/WordCountLambdaExample.java)
   -- demonstrates, using the Kafka Streams DSL, how to implement the WordCount program that computes a simple word
   occurrence histogram from an input text.
+* [MapFunctionLambdaExample](src/main/java/io/confluent/examples/streams/MapFunctionLambdaExample.java)
+  -- demonstrates how to perform stateless transformations via map functions, using the Kafka Streams DSL
+  (see also the Scala variant
+  [MapFunctionScalaExample](src/main/scala/io/confluent/examples/streams/MapFunctionScalaExample.scala))
+* [SumLambdaExample](src/main/java/io/confluent/examples/streams/SumLambdaExample.java)
+  -- demonstrates how to perform stateful transformations via `reduceByKey`, using the Kafka Streams DSL
 * [PageViewRegionLambdaExample](src/main/java/io/confluent/examples/streams/PageViewRegionLambdaExample.java)
   -- demonstrates how to perform a join between a `KStream` and a `KTable`, i.e. an example of a stateful computation
     * Variant: [PageViewRegionExample](src/main/java/io/confluent/examples/streams/PageViewRegionExample.java),
       which implements the same example but without lambda expressions and thus works with Java 7+.
-* [MapFunctionLambdaExample](src/main/java/io/confluent/examples/streams/MapFunctionLambdaExample.java)
-  -- demonstrates how to perform simple, state-less transformations via map functions, using the Kafka Streams DSL
-  (see also the Scala variant
-  [MapFunctionScalaExample](src/main/scala/io/confluent/examples/streams/MapFunctionScalaExample.scala))
 * Working with data in Apache Avro format (see also the end-to-end demos under integration tests below):
     * Generic Avro:
       [PageViewRegionLambdaExample](src/main/java/io/confluent/examples/streams/PageViewRegionLambdaExample.java)
@@ -67,6 +69,7 @@ clusters and the [Confluent Schema Registry](https://github.com/confluentinc/sch
 * [JoinLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/JoinLambdaIntegrationTest.java)
 * [MapFunctionLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/MapFunctionLambdaIntegrationTest.java)
 * [PassThroughIntegrationTest](src/test/java/io/confluent/examples/streams/PassThroughIntegrationTest.java)
+* [SumLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/SumLambdaIntegrationTest.java)
 * [GenericAvroIntegrationTest.java](src/test/java/io/confluent/examples/streams/GenericAvroIntegrationTest.java)
 * [SpecificAvroIntegrationTest.java](src/test/java/io/confluent/examples/streams/SpecificAvroIntegrationTest.java)
 
