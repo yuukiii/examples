@@ -149,6 +149,12 @@ Kafka Streams examples via:
 
 ```shell
 # Create a standalone jar
+#
+# Tip: You can also disable the test suite (e.g. to speed up the packaging
+#      or to lower JVM memory usage) if needed:
+#
+#     $ mvn -DskipTests=true clean package
+#
 $ mvn clean package
 
 # >>> Creates target/streams-examples-3.0.0-standalone.jar
