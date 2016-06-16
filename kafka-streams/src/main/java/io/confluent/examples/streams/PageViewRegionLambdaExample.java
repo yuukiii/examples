@@ -78,12 +78,18 @@ public class PageViewRegionLambdaExample {
 
         KStreamBuilder builder = new KStreamBuilder();
 
-        // See `pageview.avsc` under `src/main/avro/`.
+        // Create a stream of page view events from the PageViews topic, where the key of
+        // a record is assumed to be the user id (String) and the value an Avro GenericRecord
+        // that represents the full details of the page view event.  See `pageview.avsc` under
+        // `src/main/avro/` for the corresponding Avro schema.
         KStream<String, GenericRecord> views = builder.stream("PageViews");
 
         KStream<String, GenericRecord> viewsByUser = views.map((dummy, record) -> new KeyValue<>((String) record.get("user"), record));
 
-        // See `userprofile.avsc` under `src/main/avro/`.
+        // Create a changelog stream for user profiles from the UserProfiles topic,
+        // where the key of a record is assumed to be the user id (String) and its value
+        // an Avro GenericRecord.  See `userprofile.avsc` under `src/main/avro/` for the
+        // corresponding Avro schema.
         KTable<String, GenericRecord> users = builder.table("UserProfile");
 
         KTable<String, String> userRegions = users.mapValues(record -> (String) record.get("region"));
