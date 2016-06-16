@@ -81,7 +81,10 @@ public class PageViewRegionExample {
 
         KStreamBuilder builder = new KStreamBuilder();
 
-        // See `pageview.avsc` under `src/main/avro/`.
+        // Create a stream of page view events from the PageViews topic, where the key of
+        // a record is assumed to be the user id (String) and the value an Avro GenericRecord
+        // that represents the full details of the page view event.  See `pageview.avsc` under
+        // `src/main/avro/` for the corresponding Avro schema.
         KStream<String, GenericRecord> views = builder.stream("PageViews");
 
         KStream<String, GenericRecord> viewsByUser = views.map(new KeyValueMapper<String, GenericRecord, KeyValue<String, GenericRecord>>() {
@@ -91,7 +94,10 @@ public class PageViewRegionExample {
             }
         });
 
-        // See `userprofile.avsc` under `src/main/avro/`.
+        // Create a changelog stream for user profiles from the UserProfiles topic,
+        // where the key of a record is assumed to be the user id (String) and its value
+        // an Avro GenericRecord.  See `userprofile.avsc` under `src/main/avro/` for the
+        // corresponding Avro schema.
         KTable<String, GenericRecord> users = builder.table("UserProfiles");
 
         KTable<String, String> userRegions = users.mapValues(new ValueMapper<GenericRecord, String>() {
