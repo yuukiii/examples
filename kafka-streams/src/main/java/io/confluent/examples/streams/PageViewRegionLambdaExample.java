@@ -49,6 +49,9 @@ import java.util.Properties;
  *
  * Note: Before running this example you must
  * 1) Start Zookeeper, Kafka and Schema Registry
+ *    please refer to <a href='http://docs.confluent.io/3.0.0/quickstart.html#quickstart'>CP3.0.0
+ *    QuickStart
+ *    </a>
  * 2) create the topics e.g.
  * bin/kafka-topics --create --topic PageViews --zookeeper localhost:2181 --partitions 1
  *  --replication-factor 1
@@ -59,10 +62,19 @@ import java.util.Properties;
  * bin/kafka-topics --create --topic PageViewsByRegion --zookeeper localhost:2181 --partitions 1
  * --replication-factor 1
  *
- * 3) start this example
+ *  (Note the above commands are for CP3.0.0 only. For Apache Kafka it should be `bin/kafka-topics
+ *  .sh ...`)
+ *
+ * 3) start this example either in your IDE or on the command line. If via the command line please
+ * refer to:
+ * <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>
+ * Once packaged you can then run:
+ * java -cp -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.PageViewRegionLambdaExample
+ *
  * 4) write some data to the source topics (e.g. via `kafka-avro-console-producer` or
  * {@link PageViewRegionExampleDriver}. Otherwise you won't see any data
  * arriving in the output topic.
+ *
  *
  * Note: The generic Avro binding is used for serialization/deserialization.  This means the
  * appropriate Avro schema files must be provided for each of the "intermediate" Avro classes, i.e.
