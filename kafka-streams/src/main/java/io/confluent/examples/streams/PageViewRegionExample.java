@@ -22,6 +22,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -37,6 +38,7 @@ import org.apache.kafka.streams.kstream.ValueMapper;
 import org.apache.kafka.streams.kstream.Windowed;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Properties;
 
 /**
@@ -48,9 +50,21 @@ import java.util.Properties;
  * "PageViews" with a user profile table that reads from a topic named "UserProfiles" to compute the
  * number of page views per user region.
  *
- * Note: Before running this example you must 1) create the source topic (e.g. via
- * `kafka-topics --create ...`), then 2) start this example and 3) write some data to
- * the source topic (e.g. via `kafka-avro-console-producer`). Otherwise you won't see any data
+ * Note: Before running this example you must
+ * 1) Start Zookeeper, Kafka and Schema Registry
+ * 2) create the topics e.g.
+ * bin/kafka-topics --create --topic PageViews --zookeeper localhost:2181 --partitions 1
+ *  --replication-factor 1
+ * bin/kafka-topics --create --topic PageViewsByUser --zookeeper localhost:2181 --partitions 1
+ * --replication-factor 1
+ * bin/kafka-topics --create --topic UserProfile --zookeeper localhost:2181 --partitions 1
+ * --replication-factor 1
+ * bin/kafka-topics --create --topic PageViewsByRegion --zookeeper localhost:2181 --partitions 1
+ * --replication-factor 1
+ *
+ * 3) start this example
+ * 4) write some data to the source topics (e.g. via `kafka-avro-console-producer` or
+ * {@link PageViewRegionExampleDriver}. Otherwise you won't see any data
  * arriving in the output topic.
  *
  * Note: The generic Avro binding is used for serialization/deserialization.  This means the
@@ -74,6 +88,7 @@ public class PageViewRegionExample {
         // Specify default (de)serializers for record keys and for record values.
         streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class);
+        streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         final Serde<String> stringSerde = Serdes.String();
         final Serde<Long> longSerde = Serdes.Long();
@@ -90,27 +105,31 @@ public class PageViewRegionExample {
         KStream<String, GenericRecord> viewsByUser = views.map(new KeyValueMapper<String, GenericRecord, KeyValue<String, GenericRecord>>() {
             @Override
             public KeyValue<String, GenericRecord> apply(String dummy, GenericRecord record) {
-                return new KeyValue<>((String) record.get("user"), record);
+                return new KeyValue<>(record.get("user").toString(), record);
             }
-        });
+        }).through("PageViewsByUser");
 
         // Create a changelog stream for user profiles from the UserProfiles topic,
         // where the key of a record is assumed to be the user id (String) and its value
         // an Avro GenericRecord.  See `userprofile.avsc` under `src/main/avro/` for the
         // corresponding Avro schema.
-        KTable<String, GenericRecord> users = builder.table("UserProfiles");
+        KTable<String, GenericRecord> users = builder.table("UserProfile");
 
         KTable<String, String> userRegions = users.mapValues(new ValueMapper<GenericRecord, String>() {
             @Override
             public String apply(GenericRecord record) {
-                return (String) record.get("region");
+                return record.get("region").toString();
             }
         });
 
         // We must specify the Avro schemas for all intermediate (Avro) classes, if any.
         // In this example, we want to create an intermediate GenericRecord to hold the view region
         // (see below).
-        Schema schema = new Schema.Parser().parse(new File("pageviewregion.avsc"));
+        final InputStream
+            pageViewRegionSchema =
+            PageViewRegionLambdaExample.class.getClassLoader()
+                .getResourceAsStream("avro/io/confluent/examples/streams/pageviewregion.avsc");
+        Schema schema = new Schema.Parser().parse(pageViewRegionSchema);
 
         KTable<Windowed<String>, Long> regionCount = viewsByUser
                 .leftJoin(userRegions, new ValueJoiner<GenericRecord, String, GenericRecord>() {
@@ -126,7 +145,7 @@ public class PageViewRegionExample {
                 .map(new KeyValueMapper<String, GenericRecord, KeyValue<String, GenericRecord>>() {
                     @Override
                     public KeyValue<String, GenericRecord> apply(String user, GenericRecord viewRegion) {
-                        return new KeyValue<>((String) viewRegion.get("region"), viewRegion);
+                        return new KeyValue<>(viewRegion.get("region").toString(), viewRegion);
                     }
                 })
             // count views by user, using hopping windows of size 5 minutes that advance every 1 minute
