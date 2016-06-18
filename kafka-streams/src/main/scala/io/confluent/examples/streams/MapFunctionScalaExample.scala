@@ -31,7 +31,7 @@ import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder}
   * Requires a version of Scala that supports Java 8 and SAM / Java lambda (e.g. Scala 2.11 with
   * `-Xexperimental` compiler flag, or 2.12).
   */
-class MapFunctionScalaExample {
+object MapFunctionScalaExample {
 
   def main(args: Array[String]) {
     val builder: KStreamBuilder = new KStreamBuilder
