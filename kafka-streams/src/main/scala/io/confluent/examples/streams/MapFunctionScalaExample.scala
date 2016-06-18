@@ -82,11 +82,11 @@ object MapFunctionScalaExample {
     //       do it.
     val originalAndUppercased: KStream[String, String] = textLines.map((key, value) => (value, value.toUpperCase()))
 
-    // Write the results to a new Kafka topic "OriginalAndUppercased".
+    // Write the results to a new Kafka topic "OriginalAndUppercasedTopic".
     //
     // In this case we must explicitly set the correct serializers because the default serializers
     // (cf. streaming configuration) do not match the type of this particular KStream instance.
-    originalAndUppercased.to(stringSerde, stringSerde, "OriginalAndUppercased")
+    originalAndUppercased.to(stringSerde, stringSerde, "OriginalAndUppercasedTopic")
 
     val stream: KafkaStreams = new KafkaStreams(builder, streamingConfig)
     stream.start()
