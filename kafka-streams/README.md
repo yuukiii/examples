@@ -109,6 +109,9 @@ The code in this repository requires Apache Kafka 0.10.0+ because from this poin
 
 The code in this repository requires Confluent Platform 3.0.x.
 
+* [Confluent Platform 3.0.0 Quickstart](http://docs.confluent.io/3.0.0/quickstart.html) (how to download and install)
+* [Confluent Platform 3.0.0 documentation](http://docs.confluent.io/3.0.0/)
+
 
 <a name="requirements-java"/>
 
