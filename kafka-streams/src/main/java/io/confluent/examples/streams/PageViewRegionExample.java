@@ -65,8 +65,8 @@ import java.util.Properties;
  * bin/kafka-topics --create --topic PageViewsByRegion --zookeeper localhost:2181 --partitions 1
  * --replication-factor 1
  *
- *  (Note the above commands are for CP3.0.0 only. For Apache Kafka it should be `bin/kafka-topics
- *  .sh ...`)
+ *  (Note the above commands are for CP 3.0.0 only. For Apache Kafka it should be
+ *  `bin/kafka-topics.sh ...`)
  *
  * 3) start this example either in your IDE or on the command line. If via the command line please
  * refer to:
