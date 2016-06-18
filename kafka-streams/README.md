@@ -140,6 +140,27 @@ and SAM / Java lambda (e.g. Scala 2.11 with * `-Xexperimental` compiler flag, or
 
 # Packaging and running the examples
 
+The first step is to install and run a Kafka cluster, which must consist of at least one Kafka broker as well as
+at least one ZooKeeper instance.  Some examples may also require a running instance of Confluent schema registry.
+The [Confluent Platform 3.0.0 Quickstart](http://docs.confluent.io/3.0.0/quickstart.html) guide provides the full
+details.
+
+In a nutshell:
+
+```shell
+# Start ZooKeeper
+$ ./bin/zookeeper-server-start ./etc/kafka/zookeeper.properties
+
+# In a separate terminal, start Kafka broker
+$ ./bin/kafka-server-start ./etc/kafka/server.properties
+
+# In a separate terminal, start Confluent schema registry
+$ ./bin/schema-registry-start ./etc/schema-registry/schema-registry.properties
+
+# Again, please refer to the Confluent Platform Quickstart for details such as
+# how to download Confluent Platform, how to stop the above three services, etc.
+```
+
 > Tip:  You can also run `mvn test`, which executes the included integration tests.  These tests spawn embedded Kafka
 > clusters to showcase the Kafka Streams functionality end-to-end.  The benefit of the integration tests is that you
 > don't need to install and run a Kafka cluster yourself.
