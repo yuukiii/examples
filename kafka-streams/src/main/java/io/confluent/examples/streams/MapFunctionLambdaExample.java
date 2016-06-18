@@ -79,11 +79,11 @@ public class MapFunctionLambdaExample {
     //       do it.
     KStream<String, String> originalAndUppercased = textLines.map((key, value) -> KeyValue.pair(value, value.toUpperCase()));
 
-    // Write the results to a new Kafka topic "OriginalAndUppercased".
+    // Write the results to a new Kafka topic "OriginalAndUppercasedTopic".
     //
     // In this case we must explicitly set the correct serializers because the default serializers
     // (cf. streaming configuration) do not match the type of this particular KStream instance.
-    originalAndUppercased.to(stringSerde, stringSerde, "OriginalAndUppercased");
+    originalAndUppercased.to(stringSerde, stringSerde, "OriginalAndUppercasedTopic");
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();
