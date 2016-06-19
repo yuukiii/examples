@@ -69,7 +69,8 @@ import java.util.Properties;
  * refer to:
  * <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>
  * Once packaged you can then run:
- * java -cp -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.PageViewRegionLambdaExample
+ * java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams
+ * .PageViewRegionLambdaExample
  *
  * 4) write some data to the source topics (e.g. via `kafka-avro-console-producer` or
  * {@link PageViewRegionExampleDriver}. Otherwise you won't see any data
