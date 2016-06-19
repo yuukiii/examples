@@ -43,7 +43,7 @@ import java.util.Properties;
  * Once packaged you can then run:
  * java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.SumLambdaExample
  *
- * 4) write some data to the source topics (e.g. via `kafka-console-producer` or
+ * 4) write some data to the source topics (e.g. via
  * {@link SumLambdaExampleDriver}. Otherwise you won't see any data
  * arriving in the output topic.
  *
