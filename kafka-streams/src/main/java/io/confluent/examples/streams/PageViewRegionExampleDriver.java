@@ -39,7 +39,8 @@ import java.util.stream.IntStream;
 import io.confluent.examples.streams.utils.WindowedStringDeserializer;
 
 /**
- * This is sample driver for the {@link PageViewRegionExample} and {@link PageViewRegionLambdaExample}
+ * This is a sample driver for the {@link PageViewRegionExample} and
+ * {@link PageViewRegionLambdaExample}
  * To run this driver please first refer to the instructions in {@link PageViewRegionExample} or
  * {@link PageViewRegionLambdaExample}.
  * You can then run this class directly in your IDE or via the command line.
@@ -48,7 +49,7 @@ import io.confluent.examples.streams.utils.WindowedStringDeserializer;
  * <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>
  *
  * Once packaged you can then run:
- * java -cp -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.PageViewRegionExampleDriver
+ * java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.PageViewRegionExampleDriver
  *
  * You should terminate with Ctrl-C
  */
