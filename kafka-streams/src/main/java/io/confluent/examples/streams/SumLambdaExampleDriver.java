@@ -22,17 +22,14 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.IntegerDeserializer;
 import org.apache.kafka.common.serialization.IntegerSerializer;
-import org.apache.kafka.common.serialization.LongDeserializer;
 
 import java.util.Collections;
 import java.util.Properties;
 import java.util.stream.IntStream;
 
-import io.confluent.examples.streams.utils.WindowedStringDeserializer;
-
 /**
- * This is a sample driver for the {@link SumLambdaExample} and
- * To run this driver please first refer to the instructions in {@link SumLambdaExample}
+ * This is a sample driver for the {@link SumLambdaExample}.
+ * To run this driver please first refer to the instructions in {@link SumLambdaExample}.
  * You can then run this class directly in your IDE or via the command line.
  *
  * To run via the command line you might want to package as a fatjar first. Please refer to:
@@ -49,7 +46,7 @@ import io.confluent.examples.streams.utils.WindowedStringDeserializer;
 public class SumLambdaExampleDriver {
 
   public static void main(String[] args) throws Exception {
-    produceInpu();
+    produceInput();
     consumeOutput();
   }
 
@@ -73,7 +70,7 @@ public class SumLambdaExampleDriver {
     }
   }
 
-  private static void produceInpu() {
+  private static void produceInput() {
     final Properties props = new Properties();
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
     props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class);
