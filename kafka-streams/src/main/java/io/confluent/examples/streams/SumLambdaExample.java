@@ -71,10 +71,7 @@ import java.util.Properties;
  * }
  * </pre>
  *
- * 5) Inspect the resulting data in the output topics, e.g. via `kafka-console-consumer`. Note that
- * it may take a while until you see some output in the console because, by default, the example
- * application will operate on 1-minute tumbling windows (so initially you must wait for one minute
- * to see the first output).
+ * 5) Inspect the resulting data in the output topics, e.g. via `kafka-console-consumer`.
  *
  * <pre>
  * {@code
