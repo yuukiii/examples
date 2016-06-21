@@ -41,6 +41,81 @@ import java.util.Properties;
  * the source topic (e.g. via `kafka-console-producer`). Otherwise you won't see any data
  * arriving in the output topic.
  *
+ *
+ * HOW TO RUN THIS EXAMPLE
+ *
+ * 1) Start Zookeeper and Kafka. Please refer to <a href='http://docs.confluent.io/3.0.0/quickstart.html#quickstart'>CP3.0.0
+ * QuickStart</a>.
+ *
+ * 2) Create the input and output topics used by this example.
+ *
+ * <pre>
+ * {@code
+ * $ bin/kafka-topics --create --topic TextLinesTopic \
+ *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
+ * $ bin/kafka-topics --create --topic WordsWithCountsTopic \
+ *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
+ * }
+ * </pre>
+ *
+ * Note: The above commands are for CP 3.0.0 only. For Apache Kafka it should be
+ * `bin/kafka-topics.sh ...`.
+ *
+ * 3) Start this example application either in your IDE or on the command line.
+ *
+ * If via the command line please refer to <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>.
+ * Once packaged you can then run:
+ *
+ * <pre>
+ * {@code
+ * $ java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.WordCountLambdaExample
+ * }
+ * </pre>
+ *
+ * 4) Write some input data to the source topics (e.g. via `kafka-console-producer`.  The already
+ * running example application (step 3) will automatically process this input data and write the
+ * results to the output topic.
+ *
+ * <pre>
+ * {@code
+ * # Start the console producer.  You can then enter input data by writing some line of text,
+ * # followed by ENTER:
+ * #
+ * #   hello kafka streams<ENTER>
+ * #   all streams lead to kafka<ENTER>
+ * #
+ * # Every line you enter will become the value of a single Kafka message.
+ * $ bin/kafka-console-producer --broker-list localhost:9092 --topic TextLinesTopic
+ * }
+ * </pre>
+ *
+ * 5) Inspect the resulting data in the output topics, e.g. via `kafka-console-consumer`.
+ *
+ * <pre>
+ * {@code
+ * $ bin/kafka-console-consumer --topic WordsWithCountsTopic --from-beginning \
+ *                              --zookeeper localhost:2181 \
+ *                              --property print.key=true
+ * }
+ * </pre>
+ *
+ * You should see output data similar to:
+ *
+ * <pre>
+ * {@code
+ * hello    1
+ * kafka    1
+ * streams  1
+ * all      1
+ * streams  2
+ * lead     1
+ * to       1
+ * kafka    2
+ * }
+ * </pre>
+ *
+ * 6) Once you're done with your experiments, you can stop this example via `Ctrl-C`.  If needed,
+ * also stop the Kafka broker (`Ctrl-C`), and only then stop the ZooKeeper instance (`Ctrl-C`). *
  */
 public class WordCountLambdaExample {
 
