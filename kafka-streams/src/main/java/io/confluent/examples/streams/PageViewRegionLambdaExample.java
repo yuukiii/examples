@@ -135,6 +135,8 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
  * }
  * </pre>
  *
+ * Here, the output format is "[REGION@WINDOW_START_TIME] COUNT".
+ *
  * 6) Once you're done with your experiments, you can stop this example via `Ctrl-C`.  If needed,
  * also stop the Confluent Schema Registry (`Ctrl-C`), then stop the Kafka broker (`Ctrl-C`), and
  * only then stop the ZooKeeper instance (`Ctrl-C`).
