@@ -25,7 +25,7 @@ import java.util.Properties;
 
 /**
  * Demonstrates how to perform simple, state-less transformations via map functions. See also the
- * Scala variant MapFunctionScalaExample.
+ * Scala variant {@link MapFunctionScalaExample}.
  *
  * Use cases include e.g. basic data sanitization, data anonymization by obfuscating sensitive data
  * fields (such as personally identifiable information aka PII).  This specific example reads

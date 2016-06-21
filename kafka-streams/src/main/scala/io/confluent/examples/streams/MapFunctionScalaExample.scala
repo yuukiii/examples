@@ -23,7 +23,7 @@ import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder}
 
 /**
   * Demonstrates how to perform simple, state-less transformations via map functions.
-  * Same as MapFunctionLambdaExample but in Scala.
+  * Same as [[MapFunctionLambdaExample]] but in Scala.
   *
   * Use cases include e.g. basic data sanitization, data anonymization by obfuscating sensitive data
   * fields (such as personally identifiable information aka PII).  This specific example reads
