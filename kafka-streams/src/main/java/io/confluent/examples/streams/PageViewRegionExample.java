@@ -67,7 +67,7 @@ import java.util.Properties;
  *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
  * $ bin/kafka-topics --create --topic PageViewsByUser \
  *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
- * $ bin/kafka-topics --create --topic UserProfile \
+ * $ bin/kafka-topics --create --topic UserProfiles \
  *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
  * $ bin/kafka-topics --create --topic PageViewsByRegion \
  *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
@@ -182,9 +182,9 @@ public class PageViewRegionExample {
         // where the key of a record is assumed to be the user id (String) and its value
         // an Avro GenericRecord.  See `userprofile.avsc` under `src/main/avro/` for the
         // corresponding Avro schema.
-        KTable<String, GenericRecord> users = builder.table("UserProfile");
+        KTable<String, GenericRecord> userProfiles = builder.table("UserProfiles");
 
-        KTable<String, String> userRegions = users.mapValues(new ValueMapper<GenericRecord, String>() {
+        KTable<String, String> userRegions = userProfiles.mapValues(new ValueMapper<GenericRecord, String>() {
             @Override
             public String apply(GenericRecord record) {
                 return record.get("region").toString();

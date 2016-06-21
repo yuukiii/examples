@@ -78,7 +78,7 @@ public class PageViewRegionExampleDriver {
             new GenericRecordBuilder(loadSchema("userprofile.avsc"));
 
         final String pageViewsTopic = "PageViews";
-        final String userProfilesTopic = "UserProfile";
+        final String userProfilesTopic = "UserProfiles";
 
         final Random random = new Random();
         for (String user : users) {

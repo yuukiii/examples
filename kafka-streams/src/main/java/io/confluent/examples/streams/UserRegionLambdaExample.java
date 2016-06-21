@@ -59,10 +59,10 @@ public class UserRegionLambdaExample {
         KStreamBuilder builder = new KStreamBuilder();
 
         // Read the source stream
-        KTable<String, GenericRecord> profile = builder.table("UserProfile");
+        KTable<String, GenericRecord> userProfiles = builder.table("UserProfiles");
 
         // Aggregate the user counts of by region
-        KTable<String, Long> regionCount = profile
+        KTable<String, Long> regionCount = userProfiles
             // Filter out incomplete profiles with less than 200 characters
             .filter((userId, record) -> ((String) record.get("experience")).getBytes().length > 200)
             // Count by region
