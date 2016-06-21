@@ -87,9 +87,9 @@ import java.util.Properties;
  * }
  * </pre>
  *
- * 4) Write some input data to the source topics (e.g. via `kafka-avro-console-producer` or
- * {@link PageViewRegionExampleDriver}).  The already running example application (step 3) will
- * automatically process this input data and write the results to the output topic.
+ * 4) Write some input data to the source topics (e.g. via {@link PageViewRegionExampleDriver}).
+ * The already running example application (step 3) will automatically process this input data and
+ * write the results to the output topic.
  *
  * <pre>
  * {@code
