@@ -15,10 +15,6 @@
  */
 package io.confluent.examples.streams;
 
-import io.confluent.examples.streams.utils.GenericAvroSerde;
-import io.confluent.examples.streams.utils.WindowedSerde;
-import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -32,11 +28,12 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.TimeWindows;
-import org.apache.kafka.streams.kstream.Windowed;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.Properties;
+
+import io.confluent.examples.streams.utils.GenericAvroSerde;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 
 /**
  * Demonstrates how to perform a join between a KStream and a KTable, i.e. an example of a stateful
@@ -103,7 +100,9 @@ import java.util.Properties;
  *
  * <pre>
  * {@code
- * $ bin/kafka-console-consumer --zookeeper localhost:2181 --topic PageViewsByRegion --from-beginning \
+ * $ bin/kafka-console-consumer --zookeeper localhost:2181 --topic PageViewsByRegion \
+ *          --from-beginning \
+ *          --property print.key=true \
  *          --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
  * }
  * </pre>
@@ -112,18 +111,27 @@ import java.util.Properties;
  *
  * <pre>
  * {@code
- * 1
- * 1
- * 1
- * 1
- * 2
- * 2
- * 2
- * 2
- * 2
- * 1
- * 1
- * 1
+ * [africa@1466515140000]	1
+ * [africa@1466515080000]	1
+ * [africa@1466514900000]	1
+ * [africa@1466515020000]	1
+ * [africa@1466514960000]	1
+ * [africa@1466514900000]	2
+ * [africa@1466514960000]	2
+ * [africa@1466515020000]	2
+ * [africa@1466515080000]	2
+ * [africa@1466515140000]	2
+ * [asia@1466515140000]	1
+ * [asia@1466515080000]	1
+ * [asia@1466514900000]	1
+ * [asia@1466515020000]	1
+ * [asia@1466514960000]	1
+ * [asia@1466514900000]	2
+ * [asia@1466514960000]	2
+ * [asia@1466515020000]	2
+ * [asia@1466515080000]	2
+ * [asia@1466515140000]	2
+ * [asia@1466514900000]	3
  * ...
  * }
  * </pre>
@@ -152,7 +160,6 @@ public class PageViewRegionLambdaExample {
 
         final Serde<String> stringSerde = Serdes.String();
         final Serde<Long> longSerde = Serdes.Long();
-        final Serde<Windowed<String>> windowedStringSerde = new WindowedSerde<>(stringSerde);
 
         KStreamBuilder builder = new KStreamBuilder();
 
@@ -185,7 +192,7 @@ public class PageViewRegionLambdaExample {
                 .getResourceAsStream("avro/io/confluent/examples/streams/pageviewregion.avsc");
         Schema schema = new Schema.Parser().parse(pageViewRegionSchema);
 
-        KTable<Windowed<String>, Long> regionCount = viewsByUser
+        KStream<String, Long> regionCount = viewsByUser
                 .leftJoin(userRegions, (view, region) -> {
                     GenericRecord viewRegion = new GenericData.Record(schema);
                     viewRegion.put("user", view.get("user"));
@@ -195,9 +202,19 @@ public class PageViewRegionLambdaExample {
                 })
                 .map((user, viewRegion) -> new KeyValue<>(viewRegion.get("region").toString(), viewRegion))
                 // count views by user, using hopping windows of size 5 minutes that advance every 1 minute
-                .countByKey(TimeWindows.of("GeoPageViewsWindow", 5 * 60 * 1000L).advanceBy(60 * 1000L));
+                .countByKey(TimeWindows.of("GeoPageViewsWindow", 5 * 60 * 1000L).advanceBy(60 * 1000L))
+                //
+                // Note: The following operations would NOT be needed for the actual
+                // pageview-by-region computation, which would normally stop at the countByKey()
+                // above.  We use the operations below only to "massage" the output data so it is
+                // easier to inspect on the console via kafka-console-consumer.
+                //
+                // get rid of windows (and the underlying KTable) by transforming the KTable to a
+                // KStream and by also converting the record key from type `Windowed<String>` (which
+                // kafka-console-consumer can't print to console out-of-the-box) to `String`
+                .toStream((windowedRegion, count) -> windowedRegion.toString());
 
-        regionCount.to(windowedStringSerde, longSerde, "PageViewsByRegion");
+        regionCount.to(stringSerde, longSerde, "PageViewsByRegion");
 
         KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
         streams.start();

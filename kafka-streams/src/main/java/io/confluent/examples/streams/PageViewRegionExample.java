@@ -16,7 +16,6 @@
 package io.confluent.examples.streams;
 
 import io.confluent.examples.streams.utils.GenericAvroSerde;
-import io.confluent.examples.streams.utils.WindowedSerde;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 
 import org.apache.avro.Schema;
@@ -37,7 +36,6 @@ import org.apache.kafka.streams.kstream.ValueJoiner;
 import org.apache.kafka.streams.kstream.ValueMapper;
 import org.apache.kafka.streams.kstream.Windowed;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -115,18 +113,27 @@ import java.util.Properties;
  *
  * <pre>
  * {@code
- * 1
- * 1
- * 1
- * 1
- * 2
- * 2
- * 2
- * 2
- * 2
- * 1
- * 1
- * 1
+ * [africa@1466515140000]	1
+ * [africa@1466515080000]	1
+ * [africa@1466514900000]	1
+ * [africa@1466515020000]	1
+ * [africa@1466514960000]	1
+ * [africa@1466514900000]	2
+ * [africa@1466514960000]	2
+ * [africa@1466515020000]	2
+ * [africa@1466515080000]	2
+ * [africa@1466515140000]	2
+ * [asia@1466515140000]	1
+ * [asia@1466515080000]	1
+ * [asia@1466514900000]	1
+ * [asia@1466515020000]	1
+ * [asia@1466514960000]	1
+ * [asia@1466514900000]	2
+ * [asia@1466514960000]	2
+ * [asia@1466515020000]	2
+ * [asia@1466515080000]	2
+ * [asia@1466515140000]	2
+ * [asia@1466514900000]	3
  * ...
  * }
  * </pre>
@@ -155,7 +162,6 @@ public class PageViewRegionExample {
 
         final Serde<String> stringSerde = Serdes.String();
         final Serde<Long> longSerde = Serdes.Long();
-        final Serde<Windowed<String>> windowedStringSerde = new WindowedSerde<>(stringSerde);
 
         KStreamBuilder builder = new KStreamBuilder();
 
@@ -194,7 +200,7 @@ public class PageViewRegionExample {
                 .getResourceAsStream("avro/io/confluent/examples/streams/pageviewregion.avsc");
         Schema schema = new Schema.Parser().parse(pageViewRegionSchema);
 
-        KTable<Windowed<String>, Long> regionCount = viewsByUser
+        KStream<String, Long> regionCount = viewsByUser
                 .leftJoin(userRegions, new ValueJoiner<GenericRecord, String, GenericRecord>() {
                     @Override
                     public GenericRecord apply(GenericRecord view, String region) {
@@ -212,10 +218,25 @@ public class PageViewRegionExample {
                     }
                 })
             // count views by user, using hopping windows of size 5 minutes that advance every 1 minute
-            .countByKey(TimeWindows.of("GeoPageViewsWindow", 5 * 60 * 1000L).advanceBy(60 * 1000L));
+            .countByKey(TimeWindows.of("GeoPageViewsWindow", 5 * 60 * 1000L).advanceBy(60 * 1000L))
+            //
+            // Note: The following operations would NOT be needed for the actual
+            // pageview-by-region computation, which would normally stop at the countByKey()
+            // above.  We use the operations below only to "massage" the output data so it is
+            // easier to inspect on the console via kafka-console-consumer.
+            //
+            // get rid of windows (and the underlying KTable) by transforming the KTable to a
+            // KStream and by also converting the record key from type `Windowed<String>` (which
+            // kafka-console-consumer can't print to console out-of-the-box) to `String`
+            .toStream(new KeyValueMapper<Windowed<String>, Long, String>() {
+                @Override
+                public String apply(Windowed<String> windowedRegion, Long count) {
+                    return windowedRegion.toString();
+                }
+            });
 
         // write to the result topic
-        regionCount.to(windowedStringSerde, longSerde, "PageViewsByRegion");
+        regionCount.to(stringSerde, longSerde, "PageViewsByRegion");
 
         KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
         streams.start();

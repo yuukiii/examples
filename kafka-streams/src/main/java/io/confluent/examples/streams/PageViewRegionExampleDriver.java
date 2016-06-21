@@ -26,8 +26,8 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.LongDeserializer;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.kafka.streams.kstream.Windowed;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,8 +35,6 @@ import java.util.Collections;
 import java.util.Properties;
 import java.util.Random;
 import java.util.stream.IntStream;
-
-import io.confluent.examples.streams.utils.WindowedStringDeserializer;
 
 /**
  * This is a sample driver for the {@link PageViewRegionExample} and
@@ -105,18 +103,17 @@ public class PageViewRegionExampleDriver {
         final String resultTopic = "PageViewsByRegion";
         final Properties consumerProperties = new Properties();
         consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, WindowedStringDeserializer.class);
+        consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,LongDeserializer.class);
         consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG,
                                "pageview-region-lambda-example-consumer");
         consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        final KafkaConsumer<Windowed<String>, Long>
-            consumer = new KafkaConsumer<>(consumerProperties);
+        final KafkaConsumer<String, Long> consumer = new KafkaConsumer<>(consumerProperties);
 
         consumer.subscribe(Collections.singleton(resultTopic));
         while (true) {
-            ConsumerRecords<Windowed<String>, Long> consumerRecords = consumer.poll(Long.MAX_VALUE);
-            for (ConsumerRecord<Windowed<String>, Long> consumerRecord : consumerRecords) {
+            ConsumerRecords<String, Long> consumerRecords = consumer.poll(Long.MAX_VALUE);
+            for (ConsumerRecord<String, Long> consumerRecord : consumerRecords) {
                 System.out.println(consumerRecord.key() + ":" + consumerRecord.value());
             }
         }
