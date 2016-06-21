@@ -96,7 +96,8 @@ import java.util.Properties;
  *
  * <pre>
  * {@code
- * # Here: Write input data using the example driver.
+ * # Here: Write input data using the example driver.  Once the driver has stopped generating data,
+ * # you can terminate it via `Ctrl-C`.
  * $ java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.PageViewRegionExampleDriver
  * }
  * </pre>
