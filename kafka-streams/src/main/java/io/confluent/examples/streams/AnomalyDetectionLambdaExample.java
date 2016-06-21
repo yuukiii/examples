@@ -102,10 +102,12 @@ import java.util.Properties;
  *
  * <pre>
  * {@code
- * alice   3
- * alice   4
+ * [alice@1466521140000]	3
+ * [alice@1466521140000]	4
  * }
  * </pre>
+ *
+ * Here, the output format is "[USER@WINDOW_START_TIME] COUNT".
  *
  * 6) Once you're done with your experiments, you can stop this example via `Ctrl-C`.  If needed,
  * also stop the Kafka broker (`Ctrl-C`), and only then stop the ZooKeeper instance (`Ctrl-C`).
@@ -155,7 +157,7 @@ public class AnomalyDetectionLambdaExample {
         // because LongDeserializer fails on null values, and even though we could configure
         // kafka-console-consumer to skip messages on error the output still wouldn't look pretty)
         .filter((windowedUserId, count) -> count != null)
-        .map((windowedUserId, count) -> new KeyValue<>(windowedUserId.key(), count));
+        .map((windowedUserId, count) -> new KeyValue<>(windowedUserId.toString(), count));
 
     // write to the result topic
     anomalousUsersForConsole.to(stringSerde, longSerde, "AnomalousUsers");
