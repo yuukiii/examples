@@ -24,31 +24,84 @@ import org.apache.kafka.streams.kstream.KTable;
 import java.util.Properties;
 
 /**
- * Demonstrates how to use `reduceByKey` to sum numbers.
- * See `SumLambdaIntegrationTest` for an end-to-end example.
- * Note: Before running this example you must
- * 1) Start Zookeeper and Kafka
- *    please refer to <a href='http://docs.confluent.io/3.0.0/quickstart.html#quickstart'>CP3.0.0
- *    QuickStart
- *    </a>
- * 2) create the topics e.g.
- * bin/kafka-topics --create --topic numbers-topic --zookeeper localhost:2181 --partitions 1 --replication-factor 1
- * bin/kafka-topics --create --topic sum-of-odd-numbers-topic --zookeeper localhost:2181 --partitions 1 --replication-factor 1
- * (Note the above commands are for CP3.0.0 only. For Apache Kafka it should be `bin/kafka-topics
- * .sh ...`)
- *
- * 3) start this example either in your IDE or on the command line. If via the command line please
- * refer to:
- * <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>
- * Once packaged you can then run:
- * java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.SumLambdaExample
- *
- * 4) write some data to the source topics (e.g. via
- * {@link SumLambdaExampleDriver}. Otherwise you won't see any data
- * arriving in the output topic.
- *
+ * Demonstrates how to use `reduceByKey` to sum numbers. See `SumLambdaIntegrationTest` for an
+ * end-to-end example.
  *
  * Note: This example uses lambda expressions and thus works with Java 8+ only.
+ *
+ * HOW TO RUN THIS EXAMPLE
+ *
+ * 1) Start Zookeeper and Kafka. Please refer to <a href='http://docs.confluent.io/3.0.0/quickstart.html#quickstart'>CP3.0.0
+ * QuickStart</a>.
+ *
+ * 2) Create the input and output topics used by this example.
+ *
+ * <pre>
+ * {@code
+ * $ bin/kafka-topics --create --topic numbers-topic \
+ *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
+ * $ bin/kafka-topics --create --topic sum-of-odd-numbers-topic \
+ *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
+ * }
+ * </pre>
+ *
+ * Note: The above commands are for CP 3.0.0 only. For Apache Kafka it should be
+ * `bin/kafka-topics.sh ...`.
+ *
+ * 3) Start this example application either in your IDE or on the command line.
+ *
+ * If via the command line please refer to <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>.
+ * Once packaged you can then run:
+ *
+ * <pre>
+ * {@code
+ * $ java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.SumLambdaExample
+ * }
+ * </pre>
+ *
+ * 4) Write some input data to the source topic (e.g. via {@link SumLambdaExampleDriver}). The
+ * already running example application (step 3) will automatically process this input data and write
+ * the results to the output topic.
+ *
+ * <pre>
+ * {@code
+ * # Here: Write input data using the example driver.  Once the driver has stopped generating data,
+ * # you can terminate it via `Ctrl-C`.
+ * $ java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.SumLambdaExampleDriver
+ * }
+ * </pre>
+ *
+ * 5) Inspect the resulting data in the output topics, e.g. via `kafka-console-consumer`.
+ *
+ * <pre>
+ * {@code
+ * $ bin/kafka-console-consumer --topic sum-of-odd-numbers-topic --from-beginning
+ *        --zookeeper localhost:2181 \
+ *        --property value.deserializer=org.apache.kafka.common.serialization.IntegerDeserializer
+ * }
+ * </pre>
+ *
+ * You should see output data similar to:
+ *
+ * <pre>
+ * {@code
+ *    1
+ *    4
+ *    9
+ *   16
+ *   25
+ *   36
+ *   49
+ *  ...
+ * 2209
+ * 2304
+ * 2401
+ * 2500
+ * }
+ * </pre>
+ *
+ * 6) Once you're done with your experiments, you can stop this example via `Ctrl-C`.  If needed,
+ * also stop the Kafka broker (`Ctrl-C`), and only then stop the ZooKeeper instance (`Ctrl-C`).
  */
 public class SumLambdaExample {
 
