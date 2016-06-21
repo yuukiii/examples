@@ -120,14 +120,9 @@ public class PageViewRegionExampleDriver {
     }
 
     private static Schema loadSchema(String name) throws IOException {
-        final InputStream
-            input =
-            PageViewRegionLambdaExample.class.getClassLoader()
-                .getResourceAsStream("avro/io/confluent/examples/streams/" + name);
-        try {
+        try (InputStream input = PageViewRegionLambdaExample.class.getClassLoader()
+            .getResourceAsStream("avro/io/confluent/examples/streams/" + name)) {
             return new Schema.Parser().parse(input);
-        } finally {
-            input.close();
         }
     }
 
