@@ -153,7 +153,12 @@ public class UserRegionLambdaExample {
     // kafka-console-consumer.
     //
     KStream<String, Long> regionCountsForConsole = regionCounts
+        // get rid of windows (and the underlying KTable) by transforming the KTable to a KStream
         .toStream()
+        // sanitize the output by removing null record values (again, we do this only so that the
+        // output is easier to read via kafka-console-consumer combined with LongDeserializer
+        // because LongDeserializer fails on null values, and even though we could configure
+        // kafka-console-consumer to skip messages on error the output still wouldn't look pretty)
         .filter((regionName, count) -> count != null);
 
     // write to the result topic, we need to override the value serializer to for type long

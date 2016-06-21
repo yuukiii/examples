@@ -20,7 +20,9 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
+import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.apache.kafka.streams.kstream.Windowed;
 
 import java.util.Properties;
 
@@ -133,19 +135,19 @@ public class AnomalyDetectionLambdaExample {
     // click by the corresponding user).
     KStream<String, String> views = builder.stream("UserClicks");
 
-    KStream<String, Long> anomalyUsers = views
+    KTable<Windowed<String>, Long> anomalousUsers = views
         // map the user name as key, because the subsequent counting is performed based on the key
         .map((ignoredKey, username) -> new KeyValue<>(username, username))
         // count users, using one-minute tumbling windows
         .countByKey(TimeWindows.of("UserCountWindow", 60 * 1000L))
         // get users whose one-minute count is >= 3
-        .filter((windowedUserId, count) -> count >= 3)
-        //
-        // Note: The following operations would NOT be needed for the actual anomaly detection,
-        // which would normally stop at the filter() above.  We use the operations below only to
-        // "massage" the output data so it is easier to inspect on the console via
-        // kafka-console-consumer.
-        //
+        .filter((windowedUserId, count) -> count >= 3);
+
+    // Note: The following operations would NOT be needed for the actual anomaly detection,
+    // which would normally stop at the filter() above.  We use the operations below only to
+    // "massage" the output data so it is easier to inspect on the console via
+    // kafka-console-consumer.
+    KStream<String, Long> anomalousUsersForConsole = anomalousUsers
         // get rid of windows (and the underlying KTable) by transforming the KTable to a KStream
         .toStream()
         // sanitize the output by removing null record values (again, we do this only so that the
@@ -156,7 +158,7 @@ public class AnomalyDetectionLambdaExample {
         .map((windowedUserId, count) -> new KeyValue<>(windowedUserId.key(), count));
 
     // write to the result topic
-    anomalyUsers.to(stringSerde, longSerde, "AnomalousUsers");
+    anomalousUsersForConsole.to(stringSerde, longSerde, "AnomalousUsers");
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();

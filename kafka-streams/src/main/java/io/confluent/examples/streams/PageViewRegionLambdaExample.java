@@ -26,6 +26,7 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.apache.kafka.streams.kstream.Windowed;
 
 import java.io.InputStream;
 import java.util.Properties;
@@ -190,7 +191,7 @@ public class PageViewRegionLambdaExample {
             .getResourceAsStream("avro/io/confluent/examples/streams/pageviewregion.avsc");
     Schema schema = new Schema.Parser().parse(pageViewRegionSchema);
 
-    KStream<String, Long> regionCount = viewsByUser
+    KTable<Windowed<String>, Long> viewsByRegion = viewsByUser
         .leftJoin(userRegions, (view, region) -> {
           GenericRecord viewRegion = new GenericData.Record(schema);
           viewRegion.put("user", view.get("user"));
@@ -200,19 +201,19 @@ public class PageViewRegionLambdaExample {
         })
         .map((user, viewRegion) -> new KeyValue<>(viewRegion.get("region").toString(), viewRegion))
         // count views by user, using hopping windows of size 5 minutes that advance every 1 minute
-        .countByKey(TimeWindows.of("GeoPageViewsWindow", 5 * 60 * 1000L).advanceBy(60 * 1000L))
-        //
-        // Note: The following operations would NOT be needed for the actual
-        // pageview-by-region computation, which would normally stop at the countByKey()
-        // above.  We use the operations below only to "massage" the output data so it is
-        // easier to inspect on the console via kafka-console-consumer.
-        //
-        // get rid of windows (and the underlying KTable) by transforming the KTable to a
-        // KStream and by also converting the record key from type `Windowed<String>` (which
+        .countByKey(TimeWindows.of("GeoPageViewsWindow", 5 * 60 * 1000L).advanceBy(60 * 1000L));
+
+    // Note: The following operations would NOT be needed for the actual pageview-by-region
+    // computation, which would normally stop at the countByKey() above.  We use the operations
+    // below only to "massage" the output data so it is easier to inspect on the console via
+    // kafka-console-consumer.
+    KStream<String, Long> viewsByRegionForConsole = viewsByRegion
+        // get rid of windows (and the underlying KTable) by transforming the KTable to a KStream
+        // and by also converting the record key from type `Windowed<String>` (which
         // kafka-console-consumer can't print to console out-of-the-box) to `String`
         .toStream((windowedRegion, count) -> windowedRegion.toString());
 
-    regionCount.to(stringSerde, longSerde, "PageViewsByRegion");
+    viewsByRegionForConsole.to(stringSerde, longSerde, "PageViewsByRegion");
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();
