@@ -91,7 +91,8 @@ public class TopArticlesLambdaExample {
 
         KTable<Windowed<GenericRecord>, Long> viewCounts = articleViews
                 // count the clicks per hour, using tumbling windows with a size of one hour
-                .countByKey(TimeWindows.of("PageViewCountWindows", 60 * 60 * 1000L), avroSerde);
+                .groupByKey(avroSerde, avroSerde)
+                .count(TimeWindows.of("PageViewCountWindows", 60 * 60 * 1000L));
 
         KTable<Windowed<String>, PriorityQueue<GenericRecord>> allViewCounts = viewCounts
             .groupBy(

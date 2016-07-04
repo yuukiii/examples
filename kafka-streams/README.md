@@ -1,4 +1,4 @@
-# Kafka Streams examples
+# Kafka Streams examples [![Build Status](https://travis-ci.org/confluentinc/examples.svg?branch=kafka-0.10.0.0-cp-3.0.0)](https://travis-ci.org/confluentinc/examples)
 
 This sub-folder contains code examples that demonstrate how to implement real-time processing applications using Kafka
 Streams, which is a new stream processing library included with the [Apache Kafka](http://kafka.apache.org/) open source
@@ -44,7 +44,7 @@ Table of Contents
   (see also the Scala variant
   [MapFunctionScalaExample](src/main/scala/io/confluent/examples/streams/MapFunctionScalaExample.scala))
 * [SumLambdaExample](src/main/java/io/confluent/examples/streams/SumLambdaExample.java)
-  -- demonstrates how to perform stateful transformations via `reduceByKey`, using the Kafka Streams DSL
+  -- demonstrates how to perform stateful transformations via `reduce`, using the Kafka Streams DSL
 * [PageViewRegionLambdaExample](src/main/java/io/confluent/examples/streams/PageViewRegionLambdaExample.java)
   -- demonstrates how to perform a join between a `KStream` and a `KTable`, i.e. an example of a stateful computation
     * Variant: [PageViewRegionExample](src/main/java/io/confluent/examples/streams/PageViewRegionExample.java),
@@ -181,7 +181,7 @@ Kafka Streams examples via:
 #
 $ mvn clean package
 
-# >>> Creates target/streams-examples-3.0.0-standalone.jar
+# >>> Creates target/streams-examples-3.1.0-SNAPSHOT-standalone.jar
 ```
 
 You can now run the example applications as follows:
@@ -189,7 +189,7 @@ You can now run the example applications as follows:
 ```shell
 # Run an example application from the standalone jar.
 # Here: `WordCountLambdaExample`
-$ java -cp target/streams-examples-3.0.0-standalone.jar \
+$ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar \
   io.confluent.examples.streams.WordCountLambdaExample
 ```
 
@@ -214,10 +214,10 @@ $ mvn test    # But no tests yet!
 
 # Version Compatibility Matrix
 
-| Branch (this repo)                                                             | Apache Kafka | Confluent Platform |
-| -------------------------------------------------------------------------------|--------------|--------------------|
-| [master](../../../tree/master/kafka-streams)                                   | 0.10.0.0     | 3.0.0              |
-| [kafka-0.10.0.0-cp-3.0.0](../../../tree/kafka-0.10.0.0-cp-3.0.0/kafka-streams) | 0.10.0.0     | 3.0.0              |
+| Branch (this repo)                                                             | Apache Kafka      | Confluent Platform |
+| -------------------------------------------------------------------------------|-------------------|--------------------|
+| [master](../../../tree/master/kafka-streams)                                   | 0.10.1.0-SNAPSHOT | 3.0.0              |
+| [kafka-0.10.0.0-cp-3.0.0](../../../tree/kafka-0.10.0.0-cp-3.0.0/kafka-streams) | 0.10.0.0(-cp1)    | 3.0.0              |
 
 The `master` branch of this repository represents active development, and may require additional steps on your side to
 make it compile.  Check this README as well as [pom.xml](pom.xml) for any such information.
