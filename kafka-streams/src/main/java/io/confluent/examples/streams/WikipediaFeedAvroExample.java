@@ -84,8 +84,8 @@ public class WikipediaFeedAvroExample {
                         return new KeyValue<>(value.getUser(), value);
                     }
                 })
-                // sum by key, need to override the serdes for String typed key
-                .countByKey(stringSerde, "Counts");
+                .groupByKey()
+                .count("Counts");
 
         // write to the result topic, need to override serdes
         aggregated.to(stringSerde, longSerde, "WikipediaStats");

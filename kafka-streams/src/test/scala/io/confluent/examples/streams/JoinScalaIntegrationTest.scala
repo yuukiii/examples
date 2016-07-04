@@ -43,6 +43,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
 
   // Note: `@Rule def CLUSTER` does not work (will result in a NullPointerException).
   private val privateCluster: EmbeddedSingleNodeKafkaCluster = new EmbeddedSingleNodeKafkaCluster
+
   @Rule def CLUSTER = privateCluster
 
   private val userClicksTopic = "user-clicks"
@@ -159,10 +160,8 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
         // Change the stream from <user> -> <region, clicks> to <region> -> <clicks>
         .map((user: String, regionWithClicks: (String, JLong)) => new KeyValue[String, JLong](regionWithClicks._1, regionWithClicks._2))
         // Compute the total per region by summing the individual click counts per region.
-        .reduceByKey(
-      (firstClicks: JLong, secondClicks: JLong) => firstClicks + secondClicks,
-      stringSerde, longSerde, "ClicksPerRegionUnwindowedScala"
-    )
+        .groupByKey(stringSerde, longSerde)
+        .reduce((firstClicks: JLong, secondClicks: JLong) => firstClicks + secondClicks, "ClicksPerRegionUnwindowedScala")
 
     // Write the (continuously updating) results to the output topic.
     clicksPerRegion.to(stringSerde, longSerde, outputTopic)

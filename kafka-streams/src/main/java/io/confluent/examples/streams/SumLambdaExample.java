@@ -134,12 +134,13 @@ public class SumLambdaExample {
         .filter((k, v) -> v % 2 != 0)
         // We want to compute the total sum across ALL numbers, so we must re-key all records to the
         // same key.  This re-keying is required because in Kafka Streams a data record is always a
-        // key-value pair, and KStream aggregations such as `reduceByKey` operate on a per-key basis.
+        // key-value pair, and KStream aggregations such as `reduce` operate on a per-key basis.
         // The actual new key (here: `1`) we pick here doesn't matter as long it is the same across
         // all records.
         .selectKey((k, v) -> 1)
         // Add the numbers to compute the sum.
-        .reduceByKey((v1, v2) -> v1 + v2, "sum");
+        .groupByKey()
+        .reduce((v1, v2) -> v1 + v2, "sum");
     sumOfOddNumbers.to(SUM_OF_ODD_NUMBERS_TOPIC);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);

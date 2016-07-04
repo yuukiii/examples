@@ -99,7 +99,8 @@ public class WordCountLambdaIntegrationTest {
     KStream<String, Long> wordCounts = textLines
         .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
         .map((key, word) -> new KeyValue<>(word, word))
-        .countByKey(stringSerde, "Counts")
+        .groupByKey()
+        .count("Counts")
         .toStream();
 
     wordCounts.to(stringSerde, longSerde, outputTopic);

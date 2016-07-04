@@ -195,9 +195,8 @@ public class JoinLambdaIntegrationTest {
         // Change the stream from <user> -> <region, clicks> to <region> -> <clicks>
         .map((user, regionWithClicks) -> new KeyValue<>(regionWithClicks.getRegion(), regionWithClicks.getClicks()))
         // Compute the total per region by summing the individual click counts per region.
-        .reduceByKey(
-            (firstClicks, secondClicks) -> firstClicks + secondClicks,
-            stringSerde, longSerde, "ClicksPerRegionUnwindowed");
+        .groupByKey(stringSerde, longSerde)
+        .reduce((firstClicks, secondClicks) -> firstClicks + secondClicks, "ClicksPerRegionUnwindowed");
 
     // Write the (continuously updating) results to the output topic.
     clicksPerRegion.to(stringSerde, longSerde, outputTopic);
