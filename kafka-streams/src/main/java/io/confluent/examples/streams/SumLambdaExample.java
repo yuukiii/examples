@@ -24,7 +24,7 @@ import org.apache.kafka.streams.kstream.KTable;
 import java.util.Properties;
 
 /**
- * Demonstrates how to use `reduceByKey` to sum numbers. See `SumLambdaIntegrationTest` for an
+ * Demonstrates how to use `reduce` to sum numbers. See `SumLambdaIntegrationTest` for an
  * end-to-end example.
  *
  * Note: This example uses lambda expressions and thus works with Java 8+ only.

@@ -155,7 +155,7 @@ public class WordCountLambdaExample {
             // values, i.e. we can ignore whatever data is in the record keys and thus invoke
             // `flatMapValues` instead of the more generic `flatMap`.
             .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
-            // We will subsequently invoke `countByKey` to count the occurrences of words, so we use
+            // We will subsequently invoke `count` to count the occurrences of words, so we use
             // `map` to ensure the key of each record contains the respective word.
             .map((key, word) -> new KeyValue<>(word, word))
             // Count the occurrences of each word (record key).
