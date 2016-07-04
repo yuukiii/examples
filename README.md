@@ -1,4 +1,4 @@
-# Confluent Examples [![Build Status](https://travis-ci.org/confluentinc/examples.svg?branch=master)](https://travis-ci.org/confluentinc/examples)
+# Confluent Examples
 
 This repository contains code examples for [Apache Kafka](http://kafka.apache.org/) and the
 [Confluent Platform](http://www.confluent.io/product).
