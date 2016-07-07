@@ -15,27 +15,18 @@ public class ZooKeeperEmbedded {
 
   private static final Logger log = LoggerFactory.getLogger(ZooKeeperEmbedded.class);
 
-  private static final int DEFAULT_PORT = 2181;
-
   private final TestingServer server;
 
   /**
-   * Starts a ZooKeeper instance that listens on port 2181.
+   * Creates and starts a ZooKeeper instance.
+   *
    * @throws Exception
    */
   public ZooKeeperEmbedded() throws Exception {
-    this(DEFAULT_PORT);
-  }
-
-  /**
-   * Starts a ZooKeeper instance that listens at the defined port.
-   *
-   * @param port The port (aka `clientPort`) to listen to.  Default: 2181.
-   * @throws Exception
-   */
-  public ZooKeeperEmbedded(int port) throws Exception {
-    log.debug("Starting embedded ZooKeeper server on port {} ...", port);
-    this.server = new TestingServer(port);
+    log.debug("Starting embedded ZooKeeper server...");
+    this.server = new TestingServer();
+    log.debug("Embedded ZooKeeper server at {} uses the temp directory at {}",
+        server.getConnectString(), server.getTempDirectory());
   }
 
   public void stop() throws IOException {
