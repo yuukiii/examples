@@ -100,17 +100,6 @@ public class KafkaEmbedded {
   }
 
   /**
-   * Start the broker.
-   */
-  public void start() {
-    log.debug("Starting embedded Kafka broker at {} (with log.dirs={} and ZK ensemble at {}) ...",
-        brokerList(), logDir, zookeeperConnect());
-    kafka.startup();
-    log.debug("Startup of embedded Kafka broker at {} completed (with ZK ensemble at {}) ...",
-        brokerList(), zookeeperConnect());
-  }
-
-  /**
    * Stop the broker.
    */
   public void stop() {
