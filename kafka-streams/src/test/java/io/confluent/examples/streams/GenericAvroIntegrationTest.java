@@ -21,9 +21,11 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
+import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -85,7 +87,26 @@ public class GenericAvroIntegrationTest {
     streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
     // Write the input data as-is to the output topic.
-    builder.stream(inputTopic).to(outputTopic);
+    //
+    // Normally, because a) we have already configured the correct default serdes for keys and
+    // values and b) the types for keys and values are the same for both the input topic and the
+    // output topic, we would only need to define:
+    //
+    //   builder.stream(inputTopic).to(outputTopic);
+    //
+    // However, in the code below we intentionally override the default serdes in `to()` to
+    // demonstrate how you can construct and configure a generic Avro serde manually.
+    final Serde<String> stringSerde = Serdes.String();
+    final Serde<GenericRecord> genericAvroSerde = new GenericAvroSerde();
+    // Note how we must manually call `configure()` on this serde to configure the schema registry
+    // url.  This is different from the case of setting default serdes (see `streamsConfiguration`
+    // above), which will be auto-configured based on the `StreamsConfiguration` instance.
+    boolean isKeySerde = false;
+    genericAvroSerde.configure(
+        Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, CLUSTER.schemaRegistryUrl()),
+        isKeySerde);
+    KStream<String, GenericRecord> stream = builder.stream(inputTopic);
+    stream.to(stringSerde, genericAvroSerde, outputTopic);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();
