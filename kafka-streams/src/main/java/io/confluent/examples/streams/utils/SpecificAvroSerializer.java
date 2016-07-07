@@ -17,6 +17,7 @@ package io.confluent.examples.streams.utils;
 
 import org.apache.kafka.common.serialization.Serializer;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
@@ -46,8 +47,9 @@ public class SpecificAvroSerializer<T extends  org.apache.avro.specific.Specific
     @Override
     @SuppressWarnings("unchecked")
     public void configure(Map<String, ?> configs, boolean isKey) {
-        ((Map<String, Object>) configs).put(SPECIFIC_AVRO_READER_CONFIG, true);
-        inner.configure(configs, isKey);
+        Map<String, Object> effectiveConfigs = new HashMap<>(configs);
+        effectiveConfigs.put(SPECIFIC_AVRO_READER_CONFIG, true);
+        inner.configure(effectiveConfigs, isKey);
     }
 
     @Override
