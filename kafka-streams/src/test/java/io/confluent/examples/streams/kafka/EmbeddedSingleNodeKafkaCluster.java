@@ -50,9 +50,8 @@ public class EmbeddedSingleNodeKafkaCluster extends ExternalResource {
    */
   public void start() throws Exception {
     log.debug("Initiating embedded Kafka cluster startup");
-    int zkPort = InstanceSpec.getRandomPort();
-    log.debug("Starting a ZooKeeper instance on port {} ...", zkPort);
-    zookeeper = new ZooKeeperEmbedded(zkPort);
+    log.debug("Starting a ZooKeeper instance ...");
+    zookeeper = new ZooKeeperEmbedded();
     log.debug("ZooKeeper instance is running at {}", zookeeper.connectString());
 
     Properties effectiveBrokerConfig = effectiveBrokerConfigFrom(brokerConfig, zookeeper);
