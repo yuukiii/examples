@@ -50,7 +50,7 @@ public class EmbeddedSingleNodeKafkaCluster extends ExternalResource {
    */
   public void start() throws Exception {
     log.debug("Initiating embedded Kafka cluster startup");
-    log.debug("Starting a ZooKeeper instance ...");
+    log.debug("Starting a ZooKeeper instance...");
     zookeeper = new ZooKeeperEmbedded();
     log.debug("ZooKeeper instance is running at {}", zookeeper.connectString());
 
@@ -76,10 +76,12 @@ public class EmbeddedSingleNodeKafkaCluster extends ExternalResource {
     return effectiveConfig;
   }
 
+  @Override
   protected void before() throws Exception {
     start();
   }
 
+  @Override
   protected void after() {
     stop();
   }
