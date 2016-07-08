@@ -38,7 +38,8 @@ There are two kinds of examples:
   instructions at the very top.
 * **Examples under [src/test/](src/test/)**: These examples are a bit longer because they implement integration tests
   that demonstrate end-to-end data pipelines.  Here, we use a testing framework to automatically spawn embedded Kafka
-  clusters, feed input data to them, process the data using Kafka Streams, and finally verify the output results.
+  clusters, feed input data to them (using the standard Kafka producer client), process the data using Kafka Streams,
+  and finally read and verify the output results (using the standard Kafka consumer client).
   These examples are also a good starting point to learn how to implement your own end-to-end integration tests.
 
 
@@ -72,8 +73,10 @@ There are two kinds of examples:
       [WikipediaFeedAvroExample](src/main/java/io/confluent/examples/streams/WikipediaFeedAvroExample.java) (Java 7+)
 * And [further examples](src/main/java/io/confluent/examples/streams/).
 
-There are also a few **integration tests**, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka
-clusters and the [Confluent Schema Registry](https://github.com/confluentinc/schema-registry), feed input data to them, process the data using Kafka Streams, and finally verify the output results.
+We also provide several **integration tests**, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka
+clusters and the [Confluent Schema Registry](https://github.com/confluentinc/schema-registry), feed input data to them
+(using the standard Kafka producer client), process the data using Kafka Streams, and finally read and verify the output
+results (using the standard Kafka consumer client).
 
 > Tip: Run `mvn test` to launch the integration tests.
 
@@ -95,8 +98,10 @@ clusters and the [Confluent Schema Registry](https://github.com/confluentinc/sch
   (see also the Java variant
   [MapFunctionLambdaExample](src/main/java/io/confluent/examples/streams/MapFunctionLambdaExample.java))
 
-There is also an integration test, which demonstrates end-to-end data pipelines.  Here, we spawn embedded Kafka
-clusters, feed input data to them, process the data using Kafka Streams, and finally verify the output results.
+We also provide several **integration tests**, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka
+clusters and the [Confluent Schema Registry](https://github.com/confluentinc/schema-registry), feed input data to them
+(using the standard Kafka producer client), process the data using Kafka Streams, and finally read and verify the output
+results (using the standard Kafka consumer client).
 
 > Tip: Run `mvn test` to launch the integration tests.
 
