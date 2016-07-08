@@ -29,6 +29,18 @@ Table of Contents
 This repository has several branches to help you find the correct code examples for the version of Apache Kafka and/or
 Confluent Platform that you are using.  See [Version Compatibility Matrix](#version-compatibility) below for details.
 
+There are two kinds of examples:
+
+* **Examples under [src/main/](src/main/)**: These examples are short and concise.  Also, you can interactively
+  test-drive these examples, e.g. against a local Kafka cluster.  If you want to actually run these examples, then you
+  must first install and run Apache Kafka and friends, which we describe in section
+  [Packaging and running the examples](#packaging-and-running).  Each example also states its exact requirements and
+  instructions at the very top.
+* **Examples under [src/test/](src/test/)**: These examples are a bit longer because they implement integration tests
+  that demonstrate end-to-end data pipelines.  Here, we use a testing framework to automatically spawn embedded Kafka
+  clusters, feed input data to them, process the data using Kafka Streams, and finally verify the output results.
+  These examples are also a good starting point to learn how to implement your own end-to-end integration tests.
+
 
 <a name="examples-java"/>
 
