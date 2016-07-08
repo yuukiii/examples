@@ -89,6 +89,7 @@ clusters, feed input data to them, process the data using Kafka Streams, and fin
 > Tip: Run `mvn test` to launch the integration tests.
 
 * [JoinScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/JoinScalaIntegrationTest.scala)
+* [WordCountScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/WordCountScalaIntegrationTest.scala)
 
 
 <a name="requirements"/>
