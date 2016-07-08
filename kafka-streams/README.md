@@ -105,16 +105,16 @@ The code in this repository requires Apache Kafka 0.10.0+ because from this poin
 See [Version Compatibility Matrix](#version-compatibility) for further details, as different branches of this
 repository may have different Kafka requirements.
 
-**When using the `master` branch:** The `master` branch typically requires the latest `trunk` version of Apache Kafka
-(cf. `kafka.version` in [pom.xml](pom.xml) for details).  The following instructions will build and locally install
-the latest `trunk` Kafka version:
-
-    $ git clone git@github.com:apache/kafka.git
-    $ cd kafka
-    $ git checkout trunk
-    # Bootstrap gradle wrapper
-    $ gradle
-    $ ./gradlew clean installAll
+> **When using the `master` branch:** The `master` branch typically requires the latest `trunk` version of Apache Kafka
+> (cf. `kafka.version` in [pom.xml](pom.xml) for details).  The following instructions will build and locally install
+> the latest `trunk` Kafka version:
+>
+>    $ git clone git@github.com:apache/kafka.git
+>    $ cd kafka
+>    $ git checkout trunk
+>    # Bootstrap gradle wrapper
+>    $ gradle
+>    $ ./gradlew clean installAll
 
 
 <a name="requirements-confluent-platform"/>
