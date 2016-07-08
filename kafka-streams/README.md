@@ -137,7 +137,8 @@ If you just run the integration tests (`mvn test`), then you do not need to inst
 will be downloaded automatically for the build.  However, if you want to interactively test-drive the examples under
 [src/main/](src/main/)
 (such as [WordCountLambdaExample](src/main/java/io/confluent/examples/streams/WordCountLambdaExample.java)), then you
-do need to install Confluent Platform.  Each example states its exact requirements at the very top.
+do need to install Confluent Platform.  See [Packaging and running the examples](#packaging-and-running) below.  Also,
+each example states its exact requirements at the very top.
 
 
 <a name="requirements-java"/>
@@ -169,6 +170,10 @@ and SAM / Java lambda (e.g. Scala 2.11 with * `-Xexperimental` compiler flag, or
 <a name="packaging-and-running"/>
 
 # Packaging and running the examples
+
+> **Tip:** If you only want to run the integration tests (`mvn test`), then you do not need to package or install
+> anything -- just run `mvn test`.  The instructions below are only needed if you want to interactively test-drive the
+> examples under [src/main/](src/main/).
 
 The first step is to install and run a Kafka cluster, which must consist of at least one Kafka broker as well as
 at least one ZooKeeper instance.  Some examples may also require a running instance of Confluent schema registry.
