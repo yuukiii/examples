@@ -109,7 +109,7 @@ repository may have different Kafka requirements.
 > (cf. `kafka.version` in [pom.xml](pom.xml) for details).  The following instructions will build and locally install
 > the latest `trunk` Kafka version:
 >
-> ```
+> ```shell
 > $ git clone git@github.com:apache/kafka.git
 > $ cd kafka
 > $ git checkout trunk
