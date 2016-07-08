@@ -173,7 +173,7 @@ public class JoinLambdaIntegrationTest {
     // subsequently processed in the `leftJoin`, the latest region update for "alice" is "europe"
     // (which overrides her previous region value of "asia").
     KTable<String, String> userRegionsTable =
-        builder.table(stringSerde, stringSerde, userRegionsTopic);
+        builder.table(stringSerde, stringSerde, userRegionsTopic, userRegionsTopic);
 
     // Compute the number of clicks per region, e.g. "europe" -> 13L.
     //
