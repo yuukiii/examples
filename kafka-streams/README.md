@@ -26,8 +26,8 @@ Table of Contents
 
 # Available examples
 
-> Note: See [Version Compatibility Matrix](#version-compatibility) below for an overview of
-> which examples are available for which versions of Apache Kafka and Confluent Platform.
+This repository has several branches to help you find the correct code examples for the version of Apache Kafka and/or
+Confluent Platform that you are using.  See [Version Compatibility Matrix](#version-compatibility) below for details.
 
 
 <a name="examples-java"/>
@@ -102,6 +102,8 @@ clusters, feed input data to them, process the data using Kafka Streams, and fin
 
 The code in this repository requires Apache Kafka 0.10.0+ because from this point onwards Kafka includes its
 [Kafka Streams](https://github.com/apache/kafka/tree/trunk/streams) library.
+See [Version Compatibility Matrix](#version-compatibility) for further details, as different branches of this
+repository may have different Kafka requirements.
 
 **When using the `master` branch:** The `master` branch typically requires the latest `trunk` version of Apache Kafka
 (cf. `kafka.version` in [pom.xml](pom.xml) for details).  The following instructions will build and locally install
@@ -120,6 +122,8 @@ the latest `trunk` Kafka version:
 ## Confluent Platform
 
 The code in this repository requires Confluent Platform 3.0.x.
+See [Version Compatibility Matrix](#version-compatibility) for further details, as different branches of this
+repository may have different Confluent Platform requirements.
 
 * [Confluent Platform 3.0.0 Quickstart](http://docs.confluent.io/3.0.0/quickstart.html) (how to download and install)
 * [Confluent Platform 3.0.0 documentation](http://docs.confluent.io/3.0.0/)
