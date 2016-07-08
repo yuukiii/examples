@@ -170,6 +170,10 @@ and SAM / Java lambda (e.g. Scala 2.11 with * `-Xexperimental` compiler flag, or
 
 # Packaging and running the examples
 
+> **Tip:** If you only want to run the integration tests (`mvn test`), then you do not need to package or install
+> anything -- just run `mvn test`.  The instructions below are only needed if you want to interactively test-drive the
+> examples under [src/main/](src/main/).
+
 The first step is to install and run a Kafka cluster, which must consist of at least one Kafka broker as well as
 at least one ZooKeeper instance.  Some examples may also require a running instance of Confluent schema registry.
 The [Confluent Platform 3.0.0 Quickstart](http://docs.confluent.io/3.0.0/quickstart.html) guide provides the full
