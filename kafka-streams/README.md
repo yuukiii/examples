@@ -103,6 +103,17 @@ clusters, feed input data to them, process the data using Kafka Streams, and fin
 The code in this repository requires Apache Kafka 0.10.0+ because from this point onwards Kafka includes its
 [Kafka Streams](https://github.com/apache/kafka/tree/trunk/streams) library.
 
+**When using the `master` branch:** The `master` branch typically requires the latest `trunk` version of Apache Kafka
+(cf. `kafka.version` in [pom.xml](pom.xml) for details).  The following instructions will build and locally install
+the latest `trunk` Kafka version:
+
+    $ git clone git@github.com:apache/kafka.git
+    $ cd kafka
+    $ git checkout trunk
+    # Bootstrap gradle wrapper
+    $ gradle
+    $ ./gradlew clean installAll
+
 
 <a name="requirements-confluent-platform"/>
 
@@ -112,6 +123,12 @@ The code in this repository requires Confluent Platform 3.0.x.
 
 * [Confluent Platform 3.0.0 Quickstart](http://docs.confluent.io/3.0.0/quickstart.html) (how to download and install)
 * [Confluent Platform 3.0.0 documentation](http://docs.confluent.io/3.0.0/)
+
+If you just run the integration tests (`mvn test`), then you do not need to install anything -- all maven artifacts
+will be downloaded automatically for the build.  However, if you want to interactively test-drive the examples under
+[src/main/](src/main/)
+(such as [WordCountLambdaExample](src/main/java/io/confluent/examples/streams/WordCountLambdaExample.java)), then you
+do need to install Confluent Platform.  Each example states its exact requirements at the very top.
 
 
 <a name="requirements-java"/>
