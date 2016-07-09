@@ -56,7 +56,7 @@ class WordCountScalaIntegrationTest extends AssertionsForJUnit {
   }
 
   @Test
-  def shouldCountClicksPerRegion() {
+  def shouldCountWords() {
     // To convert between Scala's `Tuple2` and Streams' `KeyValue`.
     import KeyValueImplicits._
 
