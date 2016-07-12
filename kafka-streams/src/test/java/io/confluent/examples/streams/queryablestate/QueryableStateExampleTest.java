@@ -110,7 +110,7 @@ public class QueryableStateExampleTest {
     // Fetch all instances. Done in a loop to wait for initialization
     // of the stores
     while (hostStoreInfo.isEmpty()
-           || hostStoreInfo.get(0).getStores().size() != 2
+           || hostStoreInfo.get(0).getStoreNames().size() != 2
               && System.currentTimeMillis() - start < 60000L) {
       Thread.sleep(10);
       hostStoreInfo = client.target(BASE_URL + "/instances")

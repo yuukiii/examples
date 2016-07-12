@@ -16,18 +16,22 @@ package io.confluent.examples.streams.queryablestate;
 
 import java.util.Set;
 
+/**
+ * A simple bean that can be JSON serialized via Jersey. Represents a KafkaStreams instance
+ * that has a set of state stores. See {@link QueryableStateProxy} for how it is used.
+ */
 public class HostStoreInfo {
 
   private String host;
   private int port;
-  private Set<String> stores;
+  private Set<String> storeNames;
 
   public HostStoreInfo(){}
 
-  public HostStoreInfo(final String host, final int port, final Set<String> stores) {
+  public HostStoreInfo(final String host, final int port, final Set<String> storeNames) {
     this.host = host;
     this.port = port;
-    this.stores = stores;
+    this.storeNames = storeNames;
   }
 
   public String getHost() {
@@ -46,12 +50,12 @@ public class HostStoreInfo {
     this.port = port;
   }
 
-  public Set<String> getStores() {
-    return stores;
+  public Set<String> getStoreNames() {
+    return storeNames;
   }
 
-  public void setStores(final Set<String> stores) {
-    this.stores = stores;
+  public void setStoreNames(final Set<String> storeNames) {
+    this.storeNames = storeNames;
   }
 
   @Override
@@ -59,7 +63,7 @@ public class HostStoreInfo {
     return "HostStoreInfo{" +
            "host='" + host + '\'' +
            ", port=" + port +
-           ", stores=" + stores +
+           ", storeNames=" + storeNames +
            '}';
   }
 
@@ -80,7 +84,7 @@ public class HostStoreInfo {
     if (host != null ? !host.equals(that.host) : that.host != null) {
       return false;
     }
-    return stores != null ? stores.equals(that.stores) : that.stores == null;
+    return storeNames != null ? storeNames.equals(that.storeNames) : that.storeNames == null;
 
   }
 
@@ -88,7 +92,7 @@ public class HostStoreInfo {
   public int hashCode() {
     int result = host != null ? host.hashCode() : 0;
     result = 31 * result + port;
-    result = 31 * result + (stores != null ? stores.hashCode() : 0);
+    result = 31 * result + (storeNames != null ? storeNames.hashCode() : 0);
     return result;
   }
 }

@@ -14,6 +14,10 @@
  */
 package io.confluent.examples.streams.queryablestate;
 
+/**
+ * A bean that represent the current queryable window range for a given
+ * windowed store.
+ */
 public class WindowRangeBean {
 
   private long earliest;

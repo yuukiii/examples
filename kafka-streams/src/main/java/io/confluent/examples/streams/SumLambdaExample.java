@@ -138,8 +138,8 @@ public class SumLambdaExample {
         // The actual new key (here: `1`) we pick here doesn't matter as long it is the same across
         // all records.
         .selectKey((k, v) -> 1)
-        // Add the numbers to compute the sum.
         .groupByKey()
+        // Add the numbers to compute the sum.
         .reduce((v1, v2) -> v1 + v2, "sum");
     sumOfOddNumbers.to(SUM_OF_ODD_NUMBERS_TOPIC);
 

@@ -22,6 +22,7 @@ import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.apache.kafka.streams.state.ReadOnlyWindowStore;
+import org.apache.kafka.streams.state.WindowRange;
 import org.apache.kafka.streams.state.WindowStoreIterator;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -110,6 +111,21 @@ public class QueryableStateProxy {
       windowResults.add(new KeyValueBean(key + "@" + next.key, next.value));
     }
     return windowResults;
+  }
+
+  @GET()
+  @Path("/windowed/{storeName}/windowrange")
+  public WindowRangeBean windowRange(@PathParam("storeName") String storeName) {
+    final ReadOnlyWindowStore<String, Long>
+        store =
+        streams.store(storeName, QueryableStoreTypes.<String, Long>windowStore());
+    if (store == null) {
+      throw new NotFoundException("store " + storeName + " not found");
+    }
+    final WindowRange windowRange =
+        store.openWindowRange();
+
+    return new WindowRangeBean(windowRange.earliest(), windowRange.latest());
   }
 
   @GET()

@@ -24,10 +24,85 @@ import org.apache.kafka.streams.kstream.TimeWindows;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Properties;
 
+/**
+ * Demonstrates using the KafkaStreams API to locate and query State Stores (Queryable State). This
+ * example uses the same Topology as {@link io.confluent.examples.streams.WordCountLambdaExample}
+ * so please see that for an explanation of the topology.
+ *
+ * We expose two State Stores: word-count (KeyValue) and windowed-word-count (Windowed Store).
+ * The word-count store contains the all time word-count. The windowed-word-count contains per
+ * minute word-counts.
+ *
+ * Note: Before running this example you must 1) create the source topic (e.g. via `kafka-topics
+ * --create ...`), then 2) start this example and 3) write some data to the source topic (e.g. via
+ * `kafka-console-producer`). Otherwise you won't see any data arriving in the output topic.
+ *
+ *
+ * HOW TO RUN THIS EXAMPLE
+ *
+ * 1) Start Zookeeper and Kafka. Please refer to <a href='http://docs.confluent.io/3.0.0/quickstart.html#quickstart'>CP3.0.0
+ * QuickStart</a>.
+ *
+ * 2) Create the input and output topics used by this example.
+ *
+ * <pre>
+ * {@code
+ * $ bin/kafka-topics --create --topic TextLinesTopic \
+ *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
+ * }
+ * </pre>
+ *
+ * Note: The above commands are for CP 3.0.0 only. For Apache Kafka it should be
+ * `bin/kafka-topics.sh ...`.
+ *
+ * 3) Start this example application either in your IDE or on the command line.
+ *
+ * If via the command line please refer to <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>.
+ * Once packaged you can then run:
+ *
+ * <pre>
+ * {@code
+ * $ java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams
+ * .QueryableStateExample <port>
+ * }
+ * </pre>
+ *
+ * 4) Write some input data to the source topics (e.g. via `kafka-console-producer`.  The already
+ * running example application (step 3) will automatically process this input data
+ *
+ *  {@code
+ * # Start the console producer.  You can then enter input data by writing some line of text,
+ * # followed by ENTER:
+ * #
+ * #   hello kafka streams<ENTER>
+ * #   all streams lead to kafka<ENTER>
+ * #
+ * # Every line you enter will become the value of a single Kafka message.
+ * $ bin/kafka-console-producer --broker-list localhost:9092 --topic TextLinesTopic
+ * }
+ * </pre>
+ *
+ * 5) Use your browser to hit the rest endpoint, i.e.:
+ * <pre>
+ * {@code
+ *   http://localhost:7070/state/instances
+ *   http://localhost:7070/state/instances/word-count
+ *   http://localhost:7070/state/instance/word-count/hello
+ *   http://localhost:7070/state/keyvalue/word-count/hello
+ *   http://localhost:7070/state/keyvalues/word-count/all
+ *   http://localhost:7070/state/windowed/windowed-word-count/all/streams
+ *  }
+ * </pre>
+ *
+ * 6) Once you're done with your experiments, you can stop this example via `Ctrl-C`.  If needed,
+ * also stop the Kafka broker (`Ctrl-C`), and only then stop the ZooKeeper instance (`Ctrl-C`).
+ *
+ * If you like you can run multiple instances of this example by passing in a different port. You
+ * can then experiment with seeing how keys map to different instances etc.
+ */
 public class QueryableStateExample {
 
   static final String TEXT_LINES_TOPIC = "TextLinesTopic";
@@ -41,16 +116,16 @@ public class QueryableStateExample {
     Properties streamsConfiguration = new Properties();
     // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
     // against which the application is run.
-    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "wordcount-lambda-example");
+    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "queryable-state-example");
     // Where to find Kafka broker(s).
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
     // Where to find the corresponding ZooKeeper ensemble.
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
+    // Provide the details of our embedded http service that we'll use to connect to this streams
+    // instance and discover locations of stores.
     streamsConfiguration.put(StreamsConfig.APPLICATION_SERVER_CONFIG, "localhost:" + port);
     final File example = Files.createTempDirectory(new File("/tmp").toPath(), "example").toFile();
-    System.out.println(example);
     streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, example.getPath());
-
 
     KafkaStreams streams = createStreams(streamsConfiguration);
     // Now that we have finished the definition of the processing topology we can actually run
@@ -86,7 +161,7 @@ public class QueryableStateExample {
 
     // Create a Windowed State Store that contains the word count for every
     // 1 minute
-    groupedByWord.count(TimeWindows.of(60000),"windowed-word-count");
+    groupedByWord.count(TimeWindows.of(60000), "windowed-word-count");
 
     return new KafkaStreams(builder, streamsConfiguration);
   }

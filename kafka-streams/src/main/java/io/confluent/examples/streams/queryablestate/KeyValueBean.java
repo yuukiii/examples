@@ -14,6 +14,10 @@
  */
 package io.confluent.examples.streams.queryablestate;
 
+/**
+ * A simple bean used by {@link QueryableStateProxy} when responding to
+ * {@link QueryableStateProxy#byKey(String, String)}.
+ */
 public class KeyValueBean {
 
   private String key;

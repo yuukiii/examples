@@ -28,13 +28,13 @@ import java.util.Properties;
 
 /**
  * Demonstrates, using the high-level KStream DSL, how to implement the WordCount program that
- * computes a simple byKey occurrence histogram from an input text.  This example uses lambda
+ * computes a simple word occurrence histogram from an input text.  This example uses lambda
  * expressions and thus works with Java 8+ only.
  *
  * In this example, the input stream reads from a topic named "TextLinesTopic", where the values of
  * messages represent lines of text; and the histogram output is written to topic
- * "WordsWithCountsTopic", where each record is an updated count of a single byKey, i.e.
- * `byKey (String) -> currentCount (Long)`.
+ * "WordsWithCountsTopic", where each record is an updated count of a single word, i.e.
+ * `word (String) -> currentCount (Long)`.
  *
  * Note: Before running this example you must 1) create the source topic (e.g. via
  * `kafka-topics --create ...`), then 2) start this example and 3) write some data to
@@ -156,12 +156,12 @@ public class WordCountLambdaExample {
             // `flatMapValues` instead of the more generic `flatMap`.
             .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
             // We will subsequently invoke `count` to count the occurrences of words, so we use
-            // `map` to ensure the key of each record contains the respective byKey.
+            // `map` to ensure the key of each record contains the respective word.
             .map((key, word) -> new KeyValue<>(word, word))
-            // Count the occurrences of each byKey (record key).
+            // Count the occurrences of each word (record key).
             //
             // This will change the stream type from `KStream<String, String>` to
-            // `KTable<String, Long>` (byKey -> count).  In the `count` operation we must provide a
+            // `KTable<String, Long>` (word -> count).  In the `count` operation we must provide a
             // name for the resulting KTable, which will be used to name e.g. its associated state
             // store and changelog topic.
             .groupByKey()

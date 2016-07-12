@@ -136,7 +136,7 @@ public class UserRegionLambdaExample {
 
     // Read the source stream
     // We assume record key = username and record value = geo-region
-    KTable<String, String> userRegions = builder.table("UserRegions","UserRegions");
+    KTable<String, String> userRegions = builder.table("UserRegions","UserRegionStore");
 
     // Aggregate the user counts of by region
     KTable<String, Long> regionCounts = userRegions
