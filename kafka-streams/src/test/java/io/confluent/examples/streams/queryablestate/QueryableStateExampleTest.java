@@ -225,7 +225,7 @@ public class QueryableStateExampleTest {
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootStrap);
     // Where to find the corresponding ZooKeeper ensemble.
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zookeeperConnect());
-    streamsConfiguration.put(StreamsConfig.USER_ENDPOINT_CONFIG, "localhost:" + port);
+    streamsConfiguration.put(StreamsConfig.APPLICATION_SERVER_CONFIG, "localhost:" + port);
     streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, temp.newFolder(stateDir).getPath());
     return streamsConfiguration;
   }

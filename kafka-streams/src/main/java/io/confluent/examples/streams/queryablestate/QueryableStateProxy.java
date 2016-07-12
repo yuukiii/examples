@@ -17,7 +17,7 @@ package io.confluent.examples.streams.queryablestate;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.state.KafkaStreamsInstance;
+import org.apache.kafka.streams.state.KafkaStreamsMetadata;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
@@ -116,7 +116,7 @@ public class QueryableStateProxy {
   @Path("/instances")
   @Produces(MediaType.APPLICATION_JSON)
   public List<HostStoreInfo> streamsInstances() {
-    final Collection<KafkaStreamsInstance> instances = streams.allInstances();
+    final Collection<KafkaStreamsMetadata> instances = streams.allMetadata();
     return mapInstancesToHostStoreInfo(instances);
   }
 
@@ -125,7 +125,7 @@ public class QueryableStateProxy {
   @Path("/instances/{storeName}")
   @Produces(MediaType.APPLICATION_JSON)
   public List<HostStoreInfo> streamsInstancesForStore(@PathParam("storeName") String store) {
-    final Collection<KafkaStreamsInstance> instances = streams.allInstancesWithStore(store);
+    final Collection<KafkaStreamsMetadata> instances = streams.allMetadataForStore(store);
     return mapInstancesToHostStoreInfo(instances);
   }
 
@@ -134,9 +134,9 @@ public class QueryableStateProxy {
   @Produces(MediaType.APPLICATION_JSON)
   public HostStoreInfo streamsInstanceForStoreAndKey(@PathParam("storeName") String store,
                                                      @PathParam("key") String key) {
-    final KafkaStreamsInstance
+    final KafkaStreamsMetadata
         instance =
-        streams.instanceWithKey(store, key, new StringSerializer());
+        streams.metadataWithKey(store, key, new StringSerializer());
     if (instance == null) {
       throw new NotFoundException();
     }
@@ -147,7 +147,7 @@ public class QueryableStateProxy {
   }
 
   private List<HostStoreInfo> mapInstancesToHostStoreInfo(
-      final Collection<KafkaStreamsInstance> instances) {
+      final Collection<KafkaStreamsMetadata> instances) {
     return instances.stream().map(instance -> new HostStoreInfo(instance.hostInfo().host(),
                                                                 instance.hostInfo().port(),
                                                                 instance.stateStoreNames()))

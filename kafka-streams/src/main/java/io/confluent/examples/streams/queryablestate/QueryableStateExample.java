@@ -22,6 +22,9 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.TimeWindows;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -43,7 +46,10 @@ public class QueryableStateExample {
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
     // Where to find the corresponding ZooKeeper ensemble.
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
-    streamsConfiguration.put(StreamsConfig.USER_ENDPOINT_CONFIG, "localhost:" + port);
+    streamsConfiguration.put(StreamsConfig.APPLICATION_SERVER_CONFIG, "localhost:" + port);
+    final File example = Files.createTempDirectory(new File("/tmp").toPath(), "example").toFile();
+    System.out.println(example);
+    streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, example.getPath());
 
 
     KafkaStreams streams = createStreams(streamsConfiguration);
