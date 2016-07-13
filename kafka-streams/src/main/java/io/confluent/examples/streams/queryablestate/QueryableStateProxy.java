@@ -17,11 +17,11 @@ package io.confluent.examples.streams.queryablestate;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.state.KafkaStreamsMetadata;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.apache.kafka.streams.state.ReadOnlyWindowStore;
+import org.apache.kafka.streams.state.StreamsMetadata;
 import org.apache.kafka.streams.state.WindowRange;
 import org.apache.kafka.streams.state.WindowStoreIterator;
 import org.eclipse.jetty.server.Server;
@@ -132,7 +132,7 @@ public class QueryableStateProxy {
   @Path("/instances")
   @Produces(MediaType.APPLICATION_JSON)
   public List<HostStoreInfo> streamsInstances() {
-    final Collection<KafkaStreamsMetadata> instances = streams.allMetadata();
+    final Collection<StreamsMetadata> instances = streams.allMetadata();
     return mapInstancesToHostStoreInfo(instances);
   }
 
@@ -141,7 +141,7 @@ public class QueryableStateProxy {
   @Path("/instances/{storeName}")
   @Produces(MediaType.APPLICATION_JSON)
   public List<HostStoreInfo> streamsInstancesForStore(@PathParam("storeName") String store) {
-    final Collection<KafkaStreamsMetadata> instances = streams.allMetadataForStore(store);
+    final Collection<StreamsMetadata> instances = streams.allMetadataForStore(store);
     return mapInstancesToHostStoreInfo(instances);
   }
 
@@ -150,7 +150,7 @@ public class QueryableStateProxy {
   @Produces(MediaType.APPLICATION_JSON)
   public HostStoreInfo streamsInstanceForStoreAndKey(@PathParam("storeName") String store,
                                                      @PathParam("key") String key) {
-    final KafkaStreamsMetadata
+    final StreamsMetadata
         instance =
         streams.metadataWithKey(store, key, new StringSerializer());
     if (instance == null) {
@@ -163,7 +163,7 @@ public class QueryableStateProxy {
   }
 
   private List<HostStoreInfo> mapInstancesToHostStoreInfo(
-      final Collection<KafkaStreamsMetadata> instances) {
+      final Collection<StreamsMetadata> instances) {
     return instances.stream().map(instance -> new HostStoreInfo(instance.hostInfo().host(),
                                                                 instance.hostInfo().port(),
                                                                 instance.stateStoreNames()))
