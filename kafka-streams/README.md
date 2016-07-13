@@ -71,6 +71,9 @@ There are two kinds of examples:
       [WikipediaFeedAvroLambdaExample](src/main/java/io/confluent/examples/streams/WikipediaFeedAvroLambdaExample.java)
       (Java 8+) and
       [WikipediaFeedAvroExample](src/main/java/io/confluent/examples/streams/WikipediaFeedAvroExample.java) (Java 7+)
+* [SecureKafkaStreamsExample](src/main/java/io/confluent/examples/streams/SecureKafkaStreamsExample.java)
+  -- demonstrates how to configure Kafka Streams for secure stream processing (here: encrypting data-in-transit
+  and enabling client authentication so that the Kafka Streams application authenticates itself to the Kafka brokers)
 * And [further examples](src/main/java/io/confluent/examples/streams/).
 
 We also provide several **integration tests**, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka
