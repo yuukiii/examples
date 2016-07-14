@@ -94,6 +94,7 @@ import java.util.Properties;
  * $ bin/kafka-console-consumer --topic WordsWithCountsTopic --from-beginning \
  *                              --zookeeper localhost:2181 \
  *                              --property print.key=true
+ *                              --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
  * }
  * </pre>
  *
