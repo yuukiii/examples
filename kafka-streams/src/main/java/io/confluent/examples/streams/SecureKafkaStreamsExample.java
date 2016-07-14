@@ -63,13 +63,32 @@ import java.util.Properties;
  * # Secure ZooKeeper as configured in the VM requires SASL authentication
  * [vagrant@kafka ~]$ export KAFKA_OPTS="-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
  *
- * # Create the topics `secure-input` and `secure-output`
+ * # Create the topics `secure-input` and `secure-output`.
+ * # See comment after the code box in case you run into an authentication failure.
  * [vagrant@kafka ~]$ kafka-topics --create --topic secure-input \
  *                                 --zookeeper localhost:2181 --partitions 1 --replication-factor 1
  * [vagrant@kafka ~]$ kafka-topics --create --topic secure-output \
  *                                 --zookeeper localhost:2181 --partitions 1 --replication-factor 1
  * }
  * </pre>
+ *
+ * Note on "authentication failure":  If you attempt to create a topic right after you started
+ * ZooKeeper and Kafka via `sudo /usr/sbin/start-zk-and-kafka`, you may temporarily run into the
+ * following error:
+ *
+ * <pre>
+ * {@code
+ * ERROR An error: (java.security.PrivilegedActionException: javax.security.sasl.SaslException:
+ *          GSS initiate failed [Caused by GSSException: No valid credentials provided
+ *          (Mechanism level: Server not found in Kerberos database (7) - LOOKING_UP_SERVER)])
+ *   occurred when evaluating Zookeeper Quorum Member's  received SASL token.
+ *   Zookeeper Client will go to AUTH_FAILED state.
+ * Exception in thread "main" org.I0Itec.zkclient.exception.ZkAuthFailedException: Authentication
+ * failure
+ * }
+ * </pre>
+ *
+ * If this happens, just wait a minute so that ZooKeeper can finish its startup, then try again.
  *
  * 3) Within the VM: build this example application.
  *
