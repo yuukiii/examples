@@ -93,13 +93,19 @@ public class EmbeddedSingleNodeKafkaCluster extends ExternalResource {
    */
   public void stop() {
     try {
-      schemaRegistry.stop();
+      if (schemaRegistry != null) {
+        schemaRegistry.stop();
+      }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    broker.stop();
+    if (broker != null) {
+      broker.stop();
+    }
     try {
-      zookeeper.stop();
+      if (zookeeper != null) {
+        zookeeper.stop();
+      }
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
