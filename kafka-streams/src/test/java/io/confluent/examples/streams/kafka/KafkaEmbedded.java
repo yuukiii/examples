@@ -46,8 +46,8 @@ public class KafkaEmbedded {
    * Creates and starts an embedded Kafka broker.
    *
    * @param config Broker configuration settings.  Used to modify, for example, on which port the
-   *               broker should listen to.  Note that you cannot change the `log.dirs` setting
-   *               currently.
+   *               broker should listen to.  Note that you cannot change some settings such as
+   *               `log.dirs`, `port`.
    */
   public KafkaEmbedded(Properties config) throws IOException {
     tmpFolder = new TemporaryFolder();
