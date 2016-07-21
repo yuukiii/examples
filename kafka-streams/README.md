@@ -96,9 +96,6 @@ results (using the standard Kafka consumer client).
 
 ## Scala
 
-> **Important note:** The Scala examples require a version of Scala that supports Java 8 and SAM / Java lambda
-> (e.g. Scala 2.11 with `-Xexperimental` compiler flag, or 2.12).  See [pom.xml](pom.xml) for further information.
-
 * [MapFunctionScalaExample](src/main/scala/io/confluent/examples/streams/MapFunctionScalaExample.scala)
   -- demonstrates how to perform simple, state-less transformations via map functions, using the Kafka Streams DSL
   (see also the Java variant
