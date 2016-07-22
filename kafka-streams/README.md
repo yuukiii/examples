@@ -18,6 +18,7 @@ Table of Contents
 * [Packaging and running the examples](#packaging-and-running)
 * [Development](#development)
 * [Version Compatibility Matrix](#version-compatibility)
+* [Where to find help](#help)
 
 ---
 
@@ -273,3 +274,21 @@ $ mvn test    # But no tests yet!
 
 The `master` branch of this repository represents active development, and may require additional steps on your side to
 make it compile.  Check this README as well as [pom.xml](pom.xml) for any such information.
+
+
+<a name="help"/>
+
+# Where to find help
+
+* Looking for documentation on Kafka Streams?
+    * We recommend to read the [Kafka Streams chapter](http://docs.confluent.io/3.0.0/streams/) in the
+      [Confluent Platform documentation](http://docs.confluent.io/3.0.0/).
+    * Watch our video talk
+      [Introducing Kafka Streams, the new stream processing library of Apache Kafka](https://www.youtube.com/watch?v=o7zSLNiTZbA)
+      ([slides](http://www.slideshare.net/MichaelNoll4/introducing-kafka-streams-the-new-stream-processing-library-of-apache-kafka-berlin-buzzwords-2016))
+* Want to ask a question?
+    * First, you should check our [FAQ wiki](https://github.com/confluentinc/examples/wiki/FAQ) for an answer.
+    * If the FAQ doesn't help you, [create a new GitHub issue](https://github.com/confluentinc/examples/issues).
+* Running into problems to use this project?
+    * First, you should check our [FAQ wiki](https://github.com/confluentinc/examples/wiki/FAQ).
+    * If the FAQ doesn't help you, [create a new GitHub issue](https://github.com/confluentinc/examples/issues).
