@@ -14,6 +14,8 @@
  */
 package io.confluent.examples.streams.queryablestate;
 
+import java.util.Objects;
+
 /**
  * A simple bean used by {@link QueryableStateProxy} when responding to
  * {@link QueryableStateProxy#byKey(String, String)}.
@@ -58,21 +60,14 @@ public class KeyValueBean {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-
     final KeyValueBean that = (KeyValueBean) o;
-
-    if (key != null ? !key.equals(that.key) : that.key != null) {
-      return false;
-    }
-    return value != null ? value.equals(that.value) : that.value == null;
-
+    return Objects.equals(key, that.key) &&
+           Objects.equals(value, that.value);
   }
 
   @Override
   public int hashCode() {
-    int result = key != null ? key.hashCode() : 0;
-    result = 31 * result + (value != null ? value.hashCode() : 0);
-    return result;
+    return Objects.hash(key, value);
   }
 
   @Override

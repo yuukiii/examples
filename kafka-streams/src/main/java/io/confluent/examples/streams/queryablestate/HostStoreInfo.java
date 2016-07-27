@@ -14,6 +14,7 @@
  */
 package io.confluent.examples.streams.queryablestate;
 
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -78,24 +79,14 @@ public class HostStoreInfo {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-
     final HostStoreInfo that = (HostStoreInfo) o;
-
-    if (port != that.port) {
-      return false;
-    }
-    if (host != null ? !host.equals(that.host) : that.host != null) {
-      return false;
-    }
-    return storeNames != null ? storeNames.equals(that.storeNames) : that.storeNames == null;
-
+    return port == that.port &&
+           Objects.equals(host, that.host) &&
+           Objects.equals(storeNames, that.storeNames);
   }
 
   @Override
   public int hashCode() {
-    int result = host != null ? host.hashCode() : 0;
-    result = 31 * result + port;
-    result = 31 * result + (storeNames != null ? storeNames.hashCode() : 0);
-    return result;
+    return Objects.hash(host, port, storeNames);
   }
 }
