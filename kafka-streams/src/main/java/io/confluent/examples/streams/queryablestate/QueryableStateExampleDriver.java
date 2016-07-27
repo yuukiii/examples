@@ -4,20 +4,32 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 
-import io.confluent.examples.streams.IntegrationTestUtils;
 
-public class QueryableStateProducer {
+/**
+ * This is a sample driver for the {@link QueryableStateExample}.
+ * To run this driver please first refer to the instructions in {@link QueryableStateExample}.
+ * You can then run this class directly in your IDE or via the command line.
+ *
+ * To run via the command line you might want to package as a fatjar first. Please refer to:
+ * <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>
+ *
+ * Once packaged you can then run:
+ * <pre>
+ * {@code
+ * $ java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.queryablestate.QueryableStateExampleDriver
+ * }
+ * </pre>
+ * You should terminate with Ctrl-C
+ */
+public class QueryableStateExampleDriver {
 
-
-  @Test
-  public void shouldDemonstrateQueryableState() throws Exception {
+  public static void main(String [] args) throws Exception {
     final List<String> inputValues = Arrays.asList("hello world",
                                                    "all streams lead to kafka",
                                                    "streams",
@@ -43,6 +55,8 @@ public class QueryableStateProducer {
         producer =
         new KafkaProducer<>(producerConfig, new StringSerializer(), new StringSerializer());
 
+    // every 500 milliseconds produce one of the lines of text from inputValues to the
+    // TextLinesTopic
     final Random random = new Random();
     while (true) {
       final int i = random.nextInt(inputValues.size());

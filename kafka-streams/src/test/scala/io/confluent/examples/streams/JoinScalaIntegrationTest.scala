@@ -143,7 +143,8 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     // subsequently processed in the `leftJoin`, the latest region update for "alice" is "europe"
     // (which overrides her previous region value of "asia").
     val userRegionsTable: KTable[String, String] = builder.table(stringSerde, stringSerde,
-                                                                 userRegionsTopic, userRegionsTopic)
+                                                                 userRegionsTopic,
+                                                                 "user-regions-store")
 
     // Compute the number of clicks per region, e.g. "europe" -> 13L.
     //

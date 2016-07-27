@@ -55,7 +55,7 @@ public class QueryableStateExampleTest {
   public static void createTopic() {
     CLUSTER.createTopic(QueryableStateExample.TEXT_LINES_TOPIC, 2, 1);
     // The next two topics don't need to be created as they would be auto-created
-    // by KafkaStreams, but it just makes the test more reliable if they already exist
+    // by Kafka Streams, but it just makes the test more reliable if they already exist
     // as creating the topics causes a rebalance which closes the stores etc. So it makes
     // the timing quite difficult...
     CLUSTER.createTopic(WORD_COUNT, 2, 1);
@@ -133,7 +133,7 @@ public class QueryableStateExampleTest {
         new HostStoreInfo("localhost", 7070, Sets.newHashSet("word-count", "windowed-word-count"))
     ));
 
-    // Fetch all from the word-count store
+    // Fetch all key-value pairs from the word-count store
     final Invocation.Builder
         allRequest =
         client.target(BASE_URL + "/keyvalues/word-count/all")
@@ -153,7 +153,7 @@ public class QueryableStateExampleTest {
                                  allValues);
     assertThat(all, equalTo(allValues));
 
-    // Fetch a range of values from the word-count store
+    // Fetch a range of key-value pairs from the word-count store
     final List<KeyValueBean> expectedRange = Arrays.asList(
         new KeyValueBean("all", 1L),
         new KeyValueBean("hello", 2L),
@@ -168,13 +168,13 @@ public class QueryableStateExampleTest {
 
     assertThat(range, equalTo(expectedRange));
 
-    // Find the streams instance that would have the key hello
+    // Find the instance of the Kafka Streams application that would have the key hello
     final HostStoreInfo
         hostWithHelloKey =
         client.target(BASE_URL + "/instance/word-count/hello")
             .request(MediaType.APPLICATION_JSON_TYPE).get(HostStoreInfo.class);
 
-    // Fetch the value for hello from the instance.
+    // Fetch the value for the key hello from the instance.
     final KeyValueBean result = client.target("http://" + hostWithHelloKey.getHost() +
                                               ":" + hostWithHelloKey.getPort() +
                                               "/state/keyvalue/word-count/hello")
@@ -225,7 +225,9 @@ public class QueryableStateExampleTest {
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootStrap);
     // Where to find the corresponding ZooKeeper ensemble.
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zookeeperConnect());
+    // The host:port the embedded REST proxy will run on
     streamsConfiguration.put(StreamsConfig.APPLICATION_SERVER_CONFIG, "localhost:" + port);
+    // The directory where the RocksDB State Stores will reside
     streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, temp.newFolder(stateDir).getPath());
     return streamsConfiguration;
   }

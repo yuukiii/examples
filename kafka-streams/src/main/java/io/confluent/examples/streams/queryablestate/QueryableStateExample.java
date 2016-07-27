@@ -30,9 +30,12 @@ import java.util.Properties;
 /**
  * Demonstrates using the KafkaStreams API to locate and query State Stores (Queryable State). This
  * example uses the same Topology as {@link io.confluent.examples.streams.WordCountLambdaExample}
- * so please see that for an explanation of the topology.
+ * so please see that for the full explanation of the topology.
  *
- * We expose two State Stores: word-count (KeyValue) and windowed-word-count (Windowed Store).
+ * In this example, the input stream reads from a topic named "TextLinesTopic", where the values of
+ * messages represent lines of text; and the histogram output is exposed via to State Stores:
+ * word-count (KeyValue) and windowed-word-count (Windowed Store).
+ *
  * The word-count store contains the all time word-count. The windowed-word-count contains per
  * minute word-counts.
  *
@@ -66,7 +69,7 @@ import java.util.Properties;
  * <pre>
  * {@code
  * $ java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams
- * .QueryableStateExample <port>
+ * .QueryableStateExample <portForRestEndPoint>
  * }
  * </pre>
  *
@@ -85,7 +88,8 @@ import java.util.Properties;
  * }
  * </pre>
  *
- * 5) Use your browser to hit the rest endpoint, i.e.:
+ * 5) Use your browser to hit the REST endpoint to query the state managed by this application.
+ * For example:
  * <pre>
  * {@code
  *   http://localhost:7070/state/instances
@@ -96,6 +100,11 @@ import java.util.Properties;
  *   http://localhost:7070/state/windowed/windowed-word-count/all/streams
  *  }
  * </pre>
+ *
+ * Note: that the REST functionality is NOT part of Kafka Streams or its API. For demonstration
+ * purposes of this example application, we decided to go with a simple, custom-built
+ * REST API that uses the Queryable State API of Kafka Streams behind the scenes to expose the
+ * state stores of this application via REST.
  *
  * 6) Once you're done with your experiments, you can stop this example via `Ctrl-C`.  If needed,
  * also stop the Kafka broker (`Ctrl-C`), and only then stop the ZooKeeper instance (`Ctrl-C`).
@@ -109,7 +118,7 @@ public class QueryableStateExample {
 
   public static void main(String[] args) throws Exception {
     if (args.length != 1) {
-      throw new IllegalArgumentException("usage ... port");
+      throw new IllegalArgumentException("usage ... portForRestEndPoint");
     }
     final int port = Integer.valueOf(args[0]);
 

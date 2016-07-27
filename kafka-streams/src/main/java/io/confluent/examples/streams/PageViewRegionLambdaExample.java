@@ -179,7 +179,7 @@ public class PageViewRegionLambdaExample {
     // where the key of a record is assumed to be the user id (String) and its value
     // an Avro GenericRecord.  See `userprofile.avsc` under `src/main/avro/` for the
     // corresponding Avro schema.
-    KTable<String, GenericRecord> userProfiles = builder.table("UserProfiles","UserProfilesStore");
+    KTable<String, GenericRecord> userProfiles = builder.table("UserProfiles", "UserProfilesStore");
 
     KTable<String, String> userRegions = userProfiles.mapValues(record ->
         record.get("region").toString());
