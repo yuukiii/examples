@@ -2,6 +2,8 @@ package io.confluent.examples.streams.queryablestate;
 
 import com.google.common.collect.Sets;
 
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
@@ -178,8 +180,7 @@ public class QueryableStateExampleTest {
     final KeyValueBean result = client.target("http://" + hostWithHelloKey.getHost() +
                                               ":" + hostWithHelloKey.getPort() +
                                               "/state/keyvalue/word-count/hello")
-        .request(MediaType.APPLICATION_JSON_TYPE).get(new GenericType<KeyValueBean>() {
-        });
+        .request(MediaType.APPLICATION_JSON_TYPE).get(KeyValueBean.class);
 
     assertThat(result, equalTo(new KeyValueBean("hello", 2L)));
 
@@ -189,6 +190,7 @@ public class QueryableStateExampleTest {
         client.target(BASE_URL + "/windowed/windowed-word-count/streams/0/" + System
             .currentTimeMillis())
             .request(MediaType.APPLICATION_JSON_TYPE)
+
             .get(new GenericType<List<KeyValueBean>>() {
             });
     assertThat(windowedResult.size(), equalTo(1));
