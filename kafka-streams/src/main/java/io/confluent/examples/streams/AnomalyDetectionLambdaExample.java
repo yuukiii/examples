@@ -142,7 +142,7 @@ public class AnomalyDetectionLambdaExample {
         .map((ignoredKey, username) -> new KeyValue<>(username, username))
         // count users, using one-minute tumbling windows
         .groupByKey()
-        .count(TimeWindows.of("UserCountWindow", 60 * 1000L))
+        .count(TimeWindows.of(60 * 1000L), "UserCountStore")
         // get users whose one-minute count is >= 3
         .filter((windowedUserId, count) -> count >= 3);
 
