@@ -26,8 +26,21 @@ Table of Contents
 
 # Available examples
 
-> Note: See [Version Compatibility Matrix](#version-compatibility) below for an overview of
-> which examples are available for which versions of Apache Kafka and Confluent Platform.
+This repository has several branches to help you find the correct code examples for the version of Apache Kafka and/or
+Confluent Platform that you are using.  See [Version Compatibility Matrix](#version-compatibility) below for details.
+
+There are two kinds of examples:
+
+* **Examples under [src/main/](src/main/)**: These examples are short and concise.  Also, you can interactively
+  test-drive these examples, e.g. against a local Kafka cluster.  If you want to actually run these examples, then you
+  must first install and run Apache Kafka and friends, which we describe in section
+  [Packaging and running the examples](#packaging-and-running).  Each example also states its exact requirements and
+  instructions at the very top.
+* **Examples under [src/test/](src/test/)**: These examples are a bit longer because they implement integration tests
+  that demonstrate end-to-end data pipelines.  Here, we use a testing framework to automatically spawn embedded Kafka
+  clusters, feed input data to them (using the standard Kafka producer client), process the data using Kafka Streams,
+  and finally read and verify the output results (using the standard Kafka consumer client).
+  These examples are also a good starting point to learn how to implement your own end-to-end integration tests.
 
 
 <a name="examples-java"/>
@@ -58,10 +71,15 @@ Table of Contents
       [WikipediaFeedAvroLambdaExample](src/main/java/io/confluent/examples/streams/WikipediaFeedAvroLambdaExample.java)
       (Java 8+) and
       [WikipediaFeedAvroExample](src/main/java/io/confluent/examples/streams/WikipediaFeedAvroExample.java) (Java 7+)
+* [SecureKafkaStreamsExample](src/main/java/io/confluent/examples/streams/SecureKafkaStreamsExample.java)
+  -- demonstrates how to configure Kafka Streams for secure stream processing (here: encrypting data-in-transit
+  and enabling client authentication so that the Kafka Streams application authenticates itself to the Kafka brokers)
 * And [further examples](src/main/java/io/confluent/examples/streams/).
 
-There are also a few **integration tests**, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka
-clusters and the [Confluent Schema Registry](https://github.com/confluentinc/schema-registry), feed input data to them, process the data using Kafka Streams, and finally verify the output results.
+We also provide several **integration tests**, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka
+clusters and the [Confluent Schema Registry](https://github.com/confluentinc/schema-registry), feed input data to them
+(using the standard Kafka producer client), process the data using Kafka Streams, and finally read and verify the output
+results (using the standard Kafka consumer client).
 
 > Tip: Run `mvn test` to launch the integration tests.
 
@@ -83,12 +101,15 @@ clusters and the [Confluent Schema Registry](https://github.com/confluentinc/sch
   (see also the Java variant
   [MapFunctionLambdaExample](src/main/java/io/confluent/examples/streams/MapFunctionLambdaExample.java))
 
-There is also an integration test, which demonstrates end-to-end data pipelines.  Here, we spawn embedded Kafka
-clusters, feed input data to them, process the data using Kafka Streams, and finally verify the output results.
+We also provide several **integration tests**, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka
+clusters and the [Confluent Schema Registry](https://github.com/confluentinc/schema-registry), feed input data to them
+(using the standard Kafka producer client), process the data using Kafka Streams, and finally read and verify the output
+results (using the standard Kafka consumer client).
 
 > Tip: Run `mvn test` to launch the integration tests.
 
 * [JoinScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/JoinScalaIntegrationTest.scala)
+* [WordCountScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/WordCountScalaIntegrationTest.scala)
 
 
 <a name="requirements"/>
@@ -101,6 +122,24 @@ clusters, feed input data to them, process the data using Kafka Streams, and fin
 
 The code in this repository requires Apache Kafka 0.10.0+ because from this point onwards Kafka includes its
 [Kafka Streams](https://github.com/apache/kafka/tree/trunk/streams) library.
+See [Version Compatibility Matrix](#version-compatibility) for further details, as different branches of this
+repository may have different Kafka requirements.
+
+> **When using the `master` branch:** The `master` branch typically requires the latest `trunk` version of Apache Kafka
+> (cf. `kafka.version` in [pom.xml](pom.xml) for details).  The following instructions will build and locally install
+> the latest `trunk` Kafka version:
+>
+> ```shell
+> $ git clone git@github.com:apache/kafka.git
+> $ cd kafka
+> $ git checkout trunk
+>
+> # Bootstrap gradle wrapper
+> $ gradle
+>
+> # Now build and install Kafka locally
+> $ ./gradlew clean installAll
+> ```
 
 
 <a name="requirements-confluent-platform"/>
@@ -108,9 +147,18 @@ The code in this repository requires Apache Kafka 0.10.0+ because from this poin
 ## Confluent Platform
 
 The code in this repository requires Confluent Platform 3.0.x.
+See [Version Compatibility Matrix](#version-compatibility) for further details, as different branches of this
+repository may have different Confluent Platform requirements.
 
 * [Confluent Platform 3.0.0 Quickstart](http://docs.confluent.io/3.0.0/quickstart.html) (how to download and install)
 * [Confluent Platform 3.0.0 documentation](http://docs.confluent.io/3.0.0/)
+
+If you just run the integration tests (`mvn test`), then you do not need to install anything -- all maven artifacts
+will be downloaded automatically for the build.  However, if you want to interactively test-drive the examples under
+[src/main/](src/main/)
+(such as [WordCountLambdaExample](src/main/java/io/confluent/examples/streams/WordCountLambdaExample.java)), then you
+do need to install Confluent Platform.  See [Packaging and running the examples](#packaging-and-running) below.  Also,
+each example states its exact requirements at the very top.
 
 
 <a name="requirements-java"/>
@@ -142,6 +190,10 @@ and SAM / Java lambda (e.g. Scala 2.11 with * `-Xexperimental` compiler flag, or
 <a name="packaging-and-running"/>
 
 # Packaging and running the examples
+
+> **Tip:** If you only want to run the integration tests (`mvn test`), then you do not need to package or install
+> anything -- just run `mvn test`.  The instructions below are only needed if you want to interactively test-drive the
+> examples under [src/main/](src/main/).
 
 The first step is to install and run a Kafka cluster, which must consist of at least one Kafka broker as well as
 at least one ZooKeeper instance.  Some examples may also require a running instance of Confluent schema registry.
@@ -214,10 +266,10 @@ $ mvn test    # But no tests yet!
 
 # Version Compatibility Matrix
 
-| Branch (this repo)                                                             | Apache Kafka      | Confluent Platform |
-| -------------------------------------------------------------------------------|-------------------|--------------------|
-| [master](../../../tree/master/kafka-streams)                                   | 0.10.1.0-SNAPSHOT | 3.0.0              |
-| [kafka-0.10.0.0-cp-3.0.0](../../../tree/kafka-0.10.0.0-cp-3.0.0/kafka-streams) | 0.10.0.0(-cp1)    | 3.0.0              |
+| Branch (this repo)                                                             | Apache Kafka      | Confluent Platform | Notes                                                                                 |
+| -------------------------------------------------------------------------------|-------------------|--------------------|---------------------------------------------------------------------------------------|
+| [master](../../../tree/master/kafka-streams)                                   | 0.10.1.0-SNAPSHOT | 3.0.0              | You must manually build the `trunk` version of Apache Kafka.  See instructions above. |
+| [kafka-0.10.0.0-cp-3.0.0](../../../tree/kafka-0.10.0.0-cp-3.0.0/kafka-streams) | 0.10.0.0(-cp1)    | 3.0.0              | Works out of the box                                                                  |
 
 The `master` branch of this repository represents active development, and may require additional steps on your side to
 make it compile.  Check this README as well as [pom.xml](pom.xml) for any such information.

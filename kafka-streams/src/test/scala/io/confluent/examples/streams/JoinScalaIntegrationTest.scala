@@ -41,7 +41,6 @@ import org.scalatest.junit.AssertionsForJUnit
   */
 class JoinScalaIntegrationTest extends AssertionsForJUnit {
 
-  // Note: `@Rule def CLUSTER` does not work (will result in a NullPointerException).
   private val privateCluster: EmbeddedSingleNodeKafkaCluster = new EmbeddedSingleNodeKafkaCluster
 
   @Rule def CLUSTER = privateCluster
@@ -59,7 +58,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
 
   @Test
   def shouldCountClicksPerRegion() {
-    // To convert between Scala's `Tuple2` and Streams' `KeyValue`.
+    // Scala-Java interoperability: to convert between Scala's `Tuple2` and Streams' `KeyValue`.
     import KeyValueImplicits._
 
     // Input 1: Clicks per user (multiple records allowed per user).
@@ -109,8 +108,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
       p.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zookeeperConnect())
       p.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       p.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
-      p.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-      // Explicitly place the state directory under /tmp so that we can remove it via
+      p.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
       // Explicitly place the state directory under /tmp so that we can remove it via
       // `purgeLocalStreamsState` below.  Once Streams is updated to expose the effective
       // StreamsConfig configuration (so we can retrieve whatever state directory Streams came up
@@ -186,8 +184,8 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
       p.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
       p
     }
-    // We need to convert `userRegions, `userClicks`, `expectedClicksPerRegion` (which have type
-    // `Seq`) to the appropriate Java collections, which we achieve via this import.
+    // Scala-Java interoperability: to convert `userRegions, `userClicks`, `expectedClicksPerRegion`
+    // (which have type `Seq`) to the appropriate Java collections, which we achieve via this import.
     // (We wouldn't need to convert if we modified the Java-focused `IntegrationTestUtils` to be
     // more Scala friendly or if we provided Scala-focused test utilities.)
     import scala.collection.convert.wrapAsJava._

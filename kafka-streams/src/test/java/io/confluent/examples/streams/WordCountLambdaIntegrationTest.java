@@ -39,7 +39,12 @@ import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * End-to-end integration test based on WordCountLambdaExample, using an embedded Kafka cluster.
+ * End-to-end integration test based on {@link WordCountLambdaExample}, using an embedded Kafka
+ * cluster.
+ *
+ * See {@link WordCountLambdaExample} for further documentation.
+ *
+ * See {@link WordCountScalaIntegrationTest} for the equivalent Scala example.
  *
  * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */
@@ -59,13 +64,23 @@ public class WordCountLambdaIntegrationTest {
 
   @Test
   public void shouldCountWords() throws Exception {
-    List<String> inputValues = Arrays.asList("hello", "world", "world", "hello world");
+    List<String> inputValues = Arrays.asList(
+        "Hello Kafka Streams",
+        "All streams lead to Kafka",
+        "Join Kafka Summit"
+    );
     List<KeyValue<String, Long>> expectedWordCounts = Arrays.asList(
         new KeyValue<>("hello", 1L),
-        new KeyValue<>("world", 1L),
-        new KeyValue<>("world", 2L),
-        new KeyValue<>("hello", 2L),
-        new KeyValue<>("world", 3L)
+        new KeyValue<>("kafka", 1L),
+        new KeyValue<>("streams", 1L),
+        new KeyValue<>("all", 1L),
+        new KeyValue<>("streams", 2L),
+        new KeyValue<>("lead", 1L),
+        new KeyValue<>("to", 1L),
+        new KeyValue<>("kafka", 2L),
+        new KeyValue<>("join", 1L),
+        new KeyValue<>("kafka", 3L),
+        new KeyValue<>("summit", 1L)
     );
 
     //
@@ -92,6 +107,9 @@ public class WordCountLambdaIntegrationTest {
     // accordingly.
     streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, "/tmp/kafka-streams");
 
+    // Remove any state from previous test runs
+    IntegrationTestUtils.purgeLocalStreamsState(streamsConfiguration);
+
     KStreamBuilder builder = new KStreamBuilder();
 
     KStream<String, String> textLines = builder.stream(inputTopic);
@@ -104,9 +122,6 @@ public class WordCountLambdaIntegrationTest {
         .toStream();
 
     wordCounts.to(stringSerde, longSerde, outputTopic);
-
-    // Remove any state from previous test runs
-    IntegrationTestUtils.purgeLocalStreamsState(streamsConfiguration);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();

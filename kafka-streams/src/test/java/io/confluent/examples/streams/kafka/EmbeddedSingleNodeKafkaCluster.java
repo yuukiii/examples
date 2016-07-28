@@ -50,16 +50,14 @@ public class EmbeddedSingleNodeKafkaCluster extends ExternalResource {
    */
   public void start() throws Exception {
     log.debug("Initiating embedded Kafka cluster startup");
-    int zkPort = InstanceSpec.getRandomPort();
-    log.debug("Starting a ZooKeeper instance on port {} ...", zkPort);
-    zookeeper = new ZooKeeperEmbedded(zkPort);
+    log.debug("Starting a ZooKeeper instance...");
+    zookeeper = new ZooKeeperEmbedded();
     log.debug("ZooKeeper instance is running at {}", zookeeper.connectString());
 
     Properties effectiveBrokerConfig = effectiveBrokerConfigFrom(brokerConfig, zookeeper);
     log.debug("Starting a Kafka instance on port {} ...",
         effectiveBrokerConfig.getProperty(KafkaConfig$.MODULE$.PortProp()));
     broker = new KafkaEmbedded(effectiveBrokerConfig);
-    broker.start();
     log.debug("Kafka instance is running at {}, connected to ZooKeeper at {}",
         broker.brokerList(), broker.zookeeperConnect());
 
@@ -72,16 +70,20 @@ public class EmbeddedSingleNodeKafkaCluster extends ExternalResource {
 
   private Properties effectiveBrokerConfigFrom(Properties brokerConfig, ZooKeeperEmbedded zookeeper) {
     Properties effectiveConfig = new Properties();
+    effectiveConfig.putAll(brokerConfig);
     effectiveConfig.put(KafkaConfig$.MODULE$.ZkConnectProp(), zookeeper.connectString());
     effectiveConfig.put(KafkaConfig$.MODULE$.PortProp(), DEFAULT_BROKER_PORT);
-    effectiveConfig.putAll(brokerConfig);
+    effectiveConfig.put(KafkaConfig$.MODULE$.DeleteTopicEnableProp(), true);
+    effectiveConfig.put(KafkaConfig$.MODULE$.LogCleanerDedupeBufferSizeProp(), 2 * 1024 * 1024L);
     return effectiveConfig;
   }
 
+  @Override
   protected void before() throws Exception {
     start();
   }
 
+  @Override
   protected void after() {
     stop();
   }
@@ -91,13 +93,19 @@ public class EmbeddedSingleNodeKafkaCluster extends ExternalResource {
    */
   public void stop() {
     try {
-      schemaRegistry.stop();
+      if (schemaRegistry != null) {
+        schemaRegistry.stop();
+      }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    broker.stop();
+    if (broker != null) {
+      broker.stop();
+    }
     try {
-      zookeeper.stop();
+      if (zookeeper != null) {
+        zookeeper.stop();
+      }
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

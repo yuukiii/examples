@@ -65,7 +65,7 @@ import java.util.Properties;
  * }
  * </pre>
  *
- * 4) Write some input data to the source topics (e.g. via `kafka-console-producer`.  The already
+ * 4) Write some input data to the source topic (e.g. via `kafka-console-producer`.  The already
  * running example application (step 3) will automatically process this input data and write the
  * results to the output topics.
  *

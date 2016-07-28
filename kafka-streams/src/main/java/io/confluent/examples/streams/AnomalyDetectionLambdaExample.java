@@ -63,7 +63,7 @@ import java.util.Properties;
  * }
  * </pre>
  *
- * 4) Write some input data to the source topics (e.g. via `kafka-console-producer`.  The already
+ * 4) Write some input data to the source topic (e.g. via `kafka-console-producer`.  The already
  * running example application (step 3) will automatically process this input data and write the
  * results to the output topic.
  *
@@ -87,7 +87,7 @@ import java.util.Properties;
  * }
  * </pre>
  *
- * 5) Inspect the resulting data in the output topics, e.g. via `kafka-console-consumer`.
+ * 5) Inspect the resulting data in the output topic, e.g. via `kafka-console-consumer`.
  *
  * <pre>
  * {@code
