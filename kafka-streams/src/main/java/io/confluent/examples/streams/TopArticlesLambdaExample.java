@@ -52,7 +52,7 @@ import java.util.Properties;
  */
 public class TopArticlesLambdaExample {
 
-    public static boolean isArticle(GenericRecord record) {
+    private static boolean isArticle(GenericRecord record) {
         String flags = (String) record.get("flags");
 
         return flags.contains("ART");
@@ -92,7 +92,7 @@ public class TopArticlesLambdaExample {
         KTable<Windowed<GenericRecord>, Long> viewCounts = articleViews
                 // count the clicks per hour, using tumbling windows with a size of one hour
                 .groupByKey(avroSerde, avroSerde)
-                .count(TimeWindows.of(60 * 60 * 1000L),"PageViewCountWindows");
+                .count(TimeWindows.of(60 * 60 * 1000L), "PageViewCountStore");
 
         KTable<Windowed<String>, PriorityQueue<GenericRecord>> allViewCounts = viewCounts
             .groupBy(
