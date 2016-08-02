@@ -23,6 +23,7 @@ import org.apache.kafka.streams.kstream.KStreamBuilder;
 
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 /**
  * Demonstrates, using the high-level KStream DSL, how to implement the WordCount program that
@@ -152,11 +153,13 @@ public class WordCountLambdaExample {
     // call to `stream()` below in order to show how that's done, too.
     KStream<String, String> textLines = builder.stream(stringSerde, stringSerde, "TextLinesTopic");
 
+    Pattern pattern = Pattern.compile("\\W+", Pattern.UNICODE_CHARACTER_CLASS);
+
     KStream<String, Long> wordCounts = textLines
         // Split each text line, by whitespace, into words.  The text lines are the record
         // values, i.e. we can ignore whatever data is in the record keys and thus invoke
         // `flatMapValues` instead of the more generic `flatMap`.
-        .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
+        .flatMapValues(value -> Arrays.asList(pattern.split(value.toLowerCase())))
         // We will subsequently invoke `countByKey` to count the occurrences of words, so we use
         // `map` to ensure the key of each record contains the respective word.
         .map((key, word) -> new KeyValue<>(word, word))

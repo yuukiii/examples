@@ -33,6 +33,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
 
@@ -67,7 +68,8 @@ public class WordCountLambdaIntegrationTest {
     List<String> inputValues = Arrays.asList(
         "Hello Kafka Streams",
         "All streams lead to Kafka",
-        "Join Kafka Summit"
+        "Join Kafka Summit",
+        "И теперь пошли русские слова"
     );
     List<KeyValue<String, Long>> expectedWordCounts = Arrays.asList(
         new KeyValue<>("hello", 1L),
@@ -80,7 +82,12 @@ public class WordCountLambdaIntegrationTest {
         new KeyValue<>("kafka", 2L),
         new KeyValue<>("join", 1L),
         new KeyValue<>("kafka", 3L),
-        new KeyValue<>("summit", 1L)
+        new KeyValue<>("summit", 1L),
+        new KeyValue<>("и", 1L),
+        new KeyValue<>("теперь", 1L),
+        new KeyValue<>("пошли", 1L),
+        new KeyValue<>("русские", 1L),
+        new KeyValue<>("слова", 1L)
     );
 
     //
@@ -113,9 +120,9 @@ public class WordCountLambdaIntegrationTest {
     KStreamBuilder builder = new KStreamBuilder();
 
     KStream<String, String> textLines = builder.stream(inputTopic);
-
+    Pattern pattern = Pattern.compile("\\W+", Pattern.UNICODE_CHARACTER_CLASS);
     KStream<String, Long> wordCounts = textLines
-        .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
+        .flatMapValues(value -> Arrays.asList(pattern.split(value.toLowerCase())))
         .map((key, word) -> new KeyValue<>(word, word))
         .countByKey(stringSerde, "Counts")
         .toStream();
