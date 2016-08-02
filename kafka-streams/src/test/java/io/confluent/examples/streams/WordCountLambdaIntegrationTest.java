@@ -121,12 +121,10 @@ public class WordCountLambdaIntegrationTest {
 
     KStream<String, String> textLines = builder.stream(inputTopic);
 
-    final Pattern pattern = Pattern.compile("\\W+", Pattern.UNICODE_CHARACTER_CLASS);
+    Pattern pattern = Pattern.compile("\\W+", Pattern.UNICODE_CHARACTER_CLASS);
 
     KStream<String, Long> wordCounts = textLines
-        .flatMapValues(value ->
-          Arrays.asList(pattern.split(value.toLowerCase()))
-        )
+        .flatMapValues(value -> Arrays.asList(pattern.split(value.toLowerCase())))
         .map((key, word) -> new KeyValue<>(word, word))
         .groupByKey()
         .count("Counts")

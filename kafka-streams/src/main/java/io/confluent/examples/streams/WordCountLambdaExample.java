@@ -153,7 +153,7 @@ public class WordCountLambdaExample {
     // call to `stream()` below in order to show how that's done, too.
     KStream<String, String> textLines = builder.stream(stringSerde, stringSerde, "TextLinesTopic");
 
-    final Pattern pattern = Pattern.compile("\\W+", Pattern.UNICODE_CHARACTER_CLASS);
+    Pattern pattern = Pattern.compile("\\W+", Pattern.UNICODE_CHARACTER_CLASS);
 
     KStream<String, Long> wordCounts = textLines
         // Split each text line, by whitespace, into words.  The text lines are the record
