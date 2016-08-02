@@ -118,7 +118,6 @@
             <artifactId>jersey-media-json-jackson</artifactId>
             <version>${jersey.version}</version>
         </dependency>
-      
         <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>

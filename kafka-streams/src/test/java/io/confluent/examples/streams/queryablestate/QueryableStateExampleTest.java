@@ -35,9 +35,12 @@ import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
 import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
-import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsEqual.equalTo;
 
+/**
+ * End-to-end integration test for {@link QueryableStateExample}. Demonstrates
+ * how you can programmatically query the REST API exposed by {@link QueryableStateProxy}
+ */
 public class QueryableStateExampleTest {
 
   @ClassRule
