@@ -2,8 +2,6 @@ package io.confluent.examples.streams.queryablestate;
 
 import com.google.common.collect.Sets;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
@@ -39,7 +37,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 
 /**
  * End-to-end integration test for {@link QueryableStateExample}. Demonstrates
- * how you can programmatically query the REST API exposed by {@link QueryableStateProxy}
+ * how you can programmatically query the REST API exposed by {@link QueryableStateRestService}
  */
 public class QueryableStateExampleTest {
 
@@ -54,7 +52,7 @@ public class QueryableStateExampleTest {
   @Rule
   public final TemporaryFolder temp = new TemporaryFolder();
   private KafkaStreams kafkaStreams;
-  private QueryableStateProxy proxy;
+  private QueryableStateRestService proxy;
 
   @BeforeClass
   public static void createTopic() {

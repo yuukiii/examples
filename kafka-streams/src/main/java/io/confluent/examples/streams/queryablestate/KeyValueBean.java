@@ -17,8 +17,8 @@ package io.confluent.examples.streams.queryablestate;
 import java.util.Objects;
 
 /**
- * A simple bean used by {@link QueryableStateProxy} when responding to
- * {@link QueryableStateProxy#byKey(String, String)}.
+ * A simple bean used by {@link QueryableStateRestService} when responding to
+ * {@link QueryableStateRestService#byKey(String, String)}.
  *
  * We use this JavaBean based approach as it fits nicely with JSON serialization provided by
  * jax-rs/jersey

@@ -21,10 +21,12 @@ import org.apache.kafka.streams.kstream.KGroupedStream;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.apache.kafka.streams.state.StreamsMetadata;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -144,15 +146,15 @@ public class QueryableStateExample {
 
     // Start the Restful proxy for servicing remote access to state stores
     startRestProxy(streams, port);
-
   }
 
 
-  static QueryableStateProxy startRestProxy(final KafkaStreams streams, final int port)
+  static QueryableStateRestService startRestProxy(final KafkaStreams streams, final int port)
       throws Exception {
-    final QueryableStateProxy queryableStateProxy = new QueryableStateProxy(streams);
-    queryableStateProxy.start(port);
-    return queryableStateProxy;
+    final QueryableStateRestService
+        queryableStateRestService = new QueryableStateRestService(streams);
+    queryableStateRestService.start(port);
+    return queryableStateRestService;
   }
 
   static KafkaStreams createStreams(final Properties streamsConfiguration) {

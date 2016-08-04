@@ -14,8 +14,6 @@
  */
 package io.confluent.examples.streams.queryablestate;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
@@ -50,12 +48,12 @@ import javax.ws.rs.core.MediaType;
  *  locate and query the State Stores within a Kafka Streams Application.
  */
 @Path("state")
-public class QueryableStateProxy {
+public class QueryableStateRestService {
 
   private final KafkaStreams streams;
   private Server jettyServer;
 
-  QueryableStateProxy(final KafkaStreams streams) {
+  QueryableStateRestService(final KafkaStreams streams) {
     this.streams = streams;
   }
 
