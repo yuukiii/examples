@@ -21,15 +21,12 @@ import org.apache.kafka.streams.kstream.KGroupedStream;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.TimeWindows;
-import org.apache.kafka.streams.state.StreamsMetadata;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.Properties;
 
-import io.confluent.examples.streams.PageViewRegionExampleDriver;
 
 /**
  * Demonstrates using the KafkaStreams API to locate and query State Stores (Queryable State). This

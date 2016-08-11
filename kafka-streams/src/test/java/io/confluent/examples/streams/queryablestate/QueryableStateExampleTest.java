@@ -1,3 +1,16 @@
+/**
+ * Copyright 2016 Confluent Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package io.confluent.examples.streams.queryablestate;
 
 import com.google.common.collect.Sets;
@@ -104,33 +117,22 @@ public class QueryableStateExampleTest {
     proxy = QueryableStateExample.startRestProxy(kafkaStreams, port);
 
     final Client client = ClientBuilder.newClient();
-    List<HostStoreInfo> hostStoreInfo = client.target(BASE_URL + "/instances")
-        .request(MediaType.APPLICATION_JSON_TYPE).get(new GenericType<List<HostStoreInfo>>() {
-        });
 
-    final long start = System.currentTimeMillis();
-
-    // Fetch all instances. Done in a loop to wait for initialization
-    // of the stores
-    while (hostStoreInfo.isEmpty()
-           || hostStoreInfo.get(0).getStoreNames().size() != 2
-              && System.currentTimeMillis() - start < 60000L) {
-      Thread.sleep(10);
-      hostStoreInfo = client.target(BASE_URL + "/instances")
-          .request(MediaType.APPLICATION_JSON_TYPE).get(new GenericType<List<HostStoreInfo>>() {
-          });
-    }
+    // Create a request to fetch all instances of HostStoreInfo
+    final Invocation.Builder allInstancesRequest = client.target(BASE_URL + "/instances")
+        .request(MediaType.APPLICATION_JSON_TYPE);
+    final List<HostStoreInfo> hostStoreInfo = fetchHostInfo(allInstancesRequest);
 
     assertThat(hostStoreInfo, hasItem(
         new HostStoreInfo("localhost", 7070, Sets.newHashSet("word-count", "windowed-word-count"))
     ));
 
-    // Fetch instances with word-count
+
+    // Create a request to fetch all instances with word-count
+    final Invocation.Builder wordCountInstancesRequest = client.target(BASE_URL + "/instances/word-count")
+        .request(MediaType.APPLICATION_JSON_TYPE);
     final List<HostStoreInfo>
-        wordCountInstances =
-        client.target(BASE_URL + "/instances/word-count")
-            .request(MediaType.APPLICATION_JSON_TYPE).get(new GenericType<List<HostStoreInfo>>() {
-        });
+        wordCountInstances = fetchHostInfo(wordCountInstancesRequest);
 
     assertThat(wordCountInstances, hasItem(
         new HostStoreInfo("localhost", 7070, Sets.newHashSet("word-count", "windowed-word-count"))
@@ -200,6 +202,26 @@ public class QueryableStateExampleTest {
     assertThat(keyValueBean.getValue(), equalTo(3L));
   }
 
+  /**
+   * We fetch these in a loop as they are the first couple of requests
+   * directly after KafkaStreams.start(), so it can take some time
+   * for the group to stabilize and all stores/instances to be available
+   */
+  private List<HostStoreInfo> fetchHostInfo(Invocation.Builder request)
+      throws InterruptedException {
+    List<HostStoreInfo> hostStoreInfo = request.get(new GenericType<List<HostStoreInfo>>() {
+    });
+    final long until = System.currentTimeMillis() + 60000L;
+    while (hostStoreInfo.isEmpty()
+           || hostStoreInfo.get(0).getStoreNames().size() != 2
+              && System.currentTimeMillis() < until) {
+      Thread.sleep(10);
+      hostStoreInfo = request.get(new GenericType<List<HostStoreInfo>>() {
+          });
+    }
+    return hostStoreInfo;
+  }
+
   private List<KeyValueBean> fetchRangeOfValues(final Invocation.Builder request,
                                                 final List<KeyValueBean>
                                                     expectedResults) {
@@ -223,7 +245,8 @@ public class QueryableStateExampleTest {
     Properties streamsConfiguration = new Properties();
     // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
     // against which the application is run.
-    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "wordcount-lambda-example");
+    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG,
+                             "queryable-state-wordcount-example");
     // Where to find Kafka broker(s).
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootStrap);
     // Where to find the corresponding ZooKeeper ensemble.
