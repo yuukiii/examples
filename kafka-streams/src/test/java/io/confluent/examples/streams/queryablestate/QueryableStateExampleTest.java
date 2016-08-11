@@ -56,10 +56,11 @@ public class QueryableStateExampleTest {
 
   @ClassRule
   public static final EmbeddedSingleNodeKafkaCluster CLUSTER = new EmbeddedSingleNodeKafkaCluster();
-  public static final String WORD_COUNT = "wordcount-lambda-example-word-count-repartition";
+  public static final String WORD_COUNT =
+      "queryable-state-wordcount-example-word-count-repartition";
   public static final String
       WINDOWED_WORD_COUNT =
-      "wordcount-lambda-example-windowed-word-count-repartition";
+      "queryable-state-wordcount-example-windowed-word-count-repartition";
   public static final String BASE_URL = "http://localhost:7070/state";
 
   @Rule
