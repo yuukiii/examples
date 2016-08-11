@@ -29,13 +29,15 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.Properties;
 
+import io.confluent.examples.streams.PageViewRegionExampleDriver;
+
 /**
  * Demonstrates using the KafkaStreams API to locate and query State Stores (Queryable State). This
  * example uses the same Topology as {@link io.confluent.examples.streams.WordCountLambdaExample}
  * so please see that for the full explanation of the topology.
  *
  * In this example, the input stream reads from a topic named "TextLinesTopic", where the values of
- * messages represent lines of text; and the histogram output is exposed via to State Stores:
+ * messages represent lines of text; and the histogram output is exposed via two State Stores:
  * word-count (KeyValue) and windowed-word-count (Windowed Store).
  *
  * The word-count store contains the all time word-count. The windowed-word-count contains per
@@ -75,20 +77,9 @@ import java.util.Properties;
  * }
  * </pre>
  *
- * 4) Write some input data to the source topics (e.g. via `kafka-console-producer`.  The already
- * running example application (step 3) will automatically process this input data
+ * 4) Write some input data to the source topics (e.g. via {@link QueryableStateExampleDriver}).
+ * The already running example application (step 3) will automatically process this input data
  *
- *  {@code
- * # Start the console producer.  You can then enter input data by writing some line of text,
- * # followed by ENTER:
- * #
- * #   hello kafka streams<ENTER>
- * #   all streams lead to kafka<ENTER>
- * #
- * # Every line you enter will become the value of a single Kafka message.
- * $ bin/kafka-console-producer --broker-list localhost:9092 --topic TextLinesTopic
- * }
- * </pre>
  *
  * 5) Use your browser to hit the REST endpoint to query the state managed by this application.
  * For example:

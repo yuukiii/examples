@@ -193,7 +193,7 @@ public class QueryableStateRestService {
                                                      @PathParam("key") String key) {
     // Get metadata for the instances of this Kafka Streams application hosting the store and
     // potentially the value for key
-    final StreamsMetadata metadata = streams.metadataWithKey(store, key, new StringSerializer());
+    final StreamsMetadata metadata = streams.metadataForKey(store, key, new StringSerializer());
     if (metadata == null) {
       throw new NotFoundException();
     }
