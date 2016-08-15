@@ -33,6 +33,9 @@ import java.util.Properties;
  * example uses the same Topology as {@link io.confluent.examples.streams.WordCountLambdaExample}
  * so please see that for the full explanation of the topology.
  *
+ * Note: This example uses Java 8 functionality and thus works with Java 8+ only.  But of course you
+ * can use the Queryable State feature of Kafka Streams also with Java 7.
+ *
  * In this example, the input stream reads from a topic named "TextLinesTopic", where the values of
  * messages represent lines of text; and the histogram output is exposed via two State Stores:
  * word-count (KeyValue) and windowed-word-count (Windowed Store).
