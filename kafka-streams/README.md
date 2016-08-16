@@ -1,4 +1,4 @@
-# Kafka Streams examples [![Build Status](https://travis-ci.org/confluentinc/examples.svg?branch=kafka-0.10.0.0-cp-3.0.0)](https://travis-ci.org/confluentinc/examples)
+# Kafka Streams examples [![Build Status](https://travis-ci.org/confluentinc/examples.svg?branch=kafka-0.10.0.1-cp-3.0.1)](https://travis-ci.org/confluentinc/examples)
 
 This folder contains code examples that demonstrate how to implement real-time processing applications using Kafka
 Streams, which is a new stream processing library included with the [Apache Kafka](http://kafka.apache.org/) open source
@@ -151,8 +151,8 @@ The code in this repository requires Confluent Platform 3.0.x.
 See [Version Compatibility Matrix](#version-compatibility) for further details, as different branches of this
 repository may have different Confluent Platform requirements.
 
-* [Confluent Platform 3.0.0 Quickstart](http://docs.confluent.io/3.0.0/quickstart.html) (how to download and install)
-* [Confluent Platform 3.0.0 documentation](http://docs.confluent.io/3.0.0/)
+* [Confluent Platform 3.0.1 Quickstart](http://docs.confluent.io/3.0.1/quickstart.html) (how to download and install)
+* [Confluent Platform 3.0.1 documentation](http://docs.confluent.io/3.0.1/)
 
 If you just run the integration tests (`mvn test`), then you do not need to install anything -- all maven artifacts
 will be downloaded automatically for the build.  However, if you want to interactively test-drive the examples under
@@ -198,7 +198,7 @@ and SAM / Java lambda (e.g. Scala 2.11 with * `-Xexperimental` compiler flag, or
 
 The first step is to install and run a Kafka cluster, which must consist of at least one Kafka broker as well as
 at least one ZooKeeper instance.  Some examples may also require a running instance of Confluent schema registry.
-The [Confluent Platform 3.0.0 Quickstart](http://docs.confluent.io/3.0.0/quickstart.html) guide provides the full
+The [Confluent Platform 3.0.1 Quickstart](http://docs.confluent.io/3.0.1/quickstart.html) guide provides the full
 details.
 
 In a nutshell:
@@ -234,7 +234,7 @@ Kafka Streams examples via:
 #
 $ mvn clean package
 
-# >>> Creates target/streams-examples-3.0.0-standalone.jar
+# >>> Creates target/streams-examples-3.0.1-standalone.jar
 ```
 
 You can now run the example applications as follows:
@@ -242,7 +242,7 @@ You can now run the example applications as follows:
 ```shell
 # Run an example application from the standalone jar.
 # Here: `WordCountLambdaExample`
-$ java -cp target/streams-examples-3.0.0-standalone.jar \
+$ java -cp target/streams-examples-3.0.1-standalone.jar \
   io.confluent.examples.streams.WordCountLambdaExample
 ```
 
@@ -269,7 +269,8 @@ $ mvn test    # But no tests yet!
 
 | Branch (this repo)                                                             | Apache Kafka      | Confluent Platform | Notes                                                                                 |
 | -------------------------------------------------------------------------------|-------------------|--------------------|---------------------------------------------------------------------------------------|
-| [master](../../../tree/master/kafka-streams)                                   | 0.10.1.0-SNAPSHOT | 3.0.0              | You must manually build the `trunk` version of Apache Kafka.  See instructions above. |
+| [master](../../../tree/master/kafka-streams)                                   | 0.10.1.0-SNAPSHOT | 3.0.1              | You must manually build the `trunk` version of Apache Kafka.  See instructions above. |
+| [kafka-0.10.0.1-cp-3.0.1](../../../tree/kafka-0.10.0.1-cp-3.0.1/kafka-streams) | 0.10.0.1(-cp1)    | 3.0.1              | Works out of the box                                                                  |
 | [kafka-0.10.0.0-cp-3.0.0](../../../tree/kafka-0.10.0.0-cp-3.0.0/kafka-streams) | 0.10.0.0(-cp1)    | 3.0.0              | Works out of the box                                                                  |
 
 The `master` branch of this repository represents active development, and may require additional steps on your side to
@@ -281,8 +282,8 @@ make it compile.  Check this README as well as [pom.xml](pom.xml) for any such i
 # Where to find help
 
 * Looking for documentation on Kafka Streams?
-    * We recommend to read the [Kafka Streams chapter](http://docs.confluent.io/3.0.0/streams/) in the
-      [Confluent Platform documentation](http://docs.confluent.io/3.0.0/).
+    * We recommend to read the [Kafka Streams chapter](http://docs.confluent.io/3.0.1/streams/) in the
+      [Confluent Platform documentation](http://docs.confluent.io/3.0.1/).
     * Watch our video talk
       [Introducing Kafka Streams, the new stream processing library of Apache Kafka](https://www.youtube.com/watch?v=o7zSLNiTZbA)
       ([slides](http://www.slideshare.net/MichaelNoll4/introducing-kafka-streams-the-new-stream-processing-library-of-apache-kafka-berlin-buzzwords-2016))
