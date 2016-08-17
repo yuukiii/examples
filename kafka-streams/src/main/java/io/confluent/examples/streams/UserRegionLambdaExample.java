@@ -25,9 +25,8 @@ import org.apache.kafka.streams.kstream.KTable;
 import java.util.Properties;
 
 /**
- * Computes, per region, the number of users with "complete" user profiles for such regions that
- * have at least 10 million users with complete profiles.  A user profile is naively considered
- * "complete" whenever it has a total of at least 200 characters.
+ * Demonstrates group-by operations and aggregations on KTable.  In this specific example we
+ * compute the user count per geo-region from a KTable that contains <user, region> information.
  *
  * Note: This example uses lambda expressions and thus works with Java 8+ only.
  *
