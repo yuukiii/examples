@@ -85,14 +85,12 @@ public class StateStoresInTheDSLIntegrationTest {
     public Transformer<byte[], String, KeyValue<String, Long>> get() {
       return new Transformer<byte[], String, KeyValue<String, Long>>() {
 
-        private ProcessorContext context;
         private KeyValueStore<String, Long> stateStore;
 
         @SuppressWarnings("unchecked")
         @Override
         public void init(ProcessorContext context) {
-          this.context = context;
-          stateStore = (KeyValueStore<String, Long>) this.context.getStateStore(stateStoreName);
+          stateStore = (KeyValueStore<String, Long>) context.getStateStore(stateStoreName);
         }
 
         @Override
