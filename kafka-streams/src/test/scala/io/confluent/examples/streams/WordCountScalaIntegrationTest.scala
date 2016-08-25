@@ -160,6 +160,7 @@ class WordCountScalaIntegrationTest extends AssertionsForJUnit {
     }
     val actualWordCounts: java.util.List[KeyValue[String, Long]] =
       IntegrationTestUtils.waitUntilMinKeyValueRecordsReceived(consumerConfig, outputTopic, expectedWordCounts.size)
+    streams.close()
     assertThat(actualWordCounts).containsExactlyElementsOf(expectedWordCounts)
   }
 

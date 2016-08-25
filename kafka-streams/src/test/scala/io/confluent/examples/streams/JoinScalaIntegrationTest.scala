@@ -218,6 +218,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     }
     val actualClicksPerRegion: java.util.List[KeyValue[String, Long]] = IntegrationTestUtils.waitUntilMinKeyValueRecordsReceived(consumerConfig,
       outputTopic, expectedClicksPerRegion.size)
+    streams.close()
     assertThat(actualClicksPerRegion).containsExactlyElementsOf(expectedClicksPerRegion)
   }
 
