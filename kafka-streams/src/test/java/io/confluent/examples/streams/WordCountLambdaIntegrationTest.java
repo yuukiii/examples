@@ -55,11 +55,13 @@ public class WordCountLambdaIntegrationTest {
   public static final EmbeddedSingleNodeKafkaCluster CLUSTER = new EmbeddedSingleNodeKafkaCluster();
 
   private static final String inputTopic = "inputTopic";
+  private static final String rekeyedIntermediateTopic = "rekeyedIntermediateTopic";
   private static final String outputTopic = "outputTopic";
 
   @BeforeClass
   public static void startKafkaCluster() throws Exception {
-    CLUSTER.createTopic(inputTopic);
+    CLUSTER.createTopic(inputTopic, 2, 1);
+    CLUSTER.createTopic(rekeyedIntermediateTopic);
     CLUSTER.createTopic(outputTopic);
   }
 
@@ -124,6 +126,9 @@ public class WordCountLambdaIntegrationTest {
     KStream<String, Long> wordCounts = textLines
         .flatMapValues(value -> Arrays.asList(pattern.split(value.toLowerCase())))
         .map((key, word) -> new KeyValue<>(word, word))
+        // Required only in 0.10.0 to re-partition the data because we re-keyed the stream in the
+        // `map` step.  Upcoming Kafka 0.10.1 does this automatically (no need for `through`).
+        .through(rekeyedIntermediateTopic)
         .countByKey(stringSerde, "Counts")
         .toStream();
 
@@ -155,7 +160,7 @@ public class WordCountLambdaIntegrationTest {
     List<KeyValue<String, Long>> actualWordCounts = IntegrationTestUtils.waitUntilMinKeyValueRecordsReceived(consumerConfig,
         outputTopic, expectedWordCounts.size());
     streams.close();
-    assertThat(actualWordCounts).containsExactlyElementsOf(expectedWordCounts);
+    assertThat(actualWordCounts).containsOnlyElementsOf(expectedWordCounts);
   }
 
 }

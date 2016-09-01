@@ -44,6 +44,8 @@ import java.util.Properties;
  * {@code
  * $ bin/kafka-topics --create --topic UserClicks \
  *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
+ * $ bin/kafka-topics --create --topic RekeyedIntermediateTopic \
+ *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
  * $ bin/kafka-topics --create --topic AnomalousUsers \
  *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
  * }
@@ -138,11 +140,14 @@ public class AnomalyDetectionLambdaExample {
     KStream<String, String> views = builder.stream("UserClicks");
 
     KTable<Windowed<String>, Long> anomalousUsers = views
-        // map the user name as key, because the subsequent counting is performed based on the key
+        // Map the user name as key, because the subsequent counting is performed based on the key
         .map((ignoredKey, username) -> new KeyValue<>(username, username))
-        // count users, using one-minute tumbling windows
+        // Required in 0.10.0 to re-partition the data because we re-keyed the stream in the `map`
+        // step.  Upcoming Kafka 0.10.1 does this automatically for you (no need for `through`).
+        .through("RekeyedIntermediateTopic")
+        // Count users, using one-minute tumbling windows
         .countByKey(TimeWindows.of("UserCountWindow", 60 * 1000L))
-        // get users whose one-minute count is >= 3
+        // Get users whose one-minute count is >= 3
         .filter((windowedUserId, count) -> count >= 3);
 
     // Note: The following operations would NOT be needed for the actual anomaly detection,
