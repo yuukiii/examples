@@ -51,6 +51,8 @@ import java.util.regex.Pattern;
  * {@code
  * $ bin/kafka-topics --create --topic TextLinesTopic \
  *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
+ * $ bin/kafka-topics --create --topic RekeyedIntermediateTopic \
+ *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
  * $ bin/kafka-topics --create --topic WordsWithCountsTopic \
  *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
  * }
@@ -163,6 +165,9 @@ public class WordCountLambdaExample {
         // We will subsequently invoke `countByKey` to count the occurrences of words, so we use
         // `map` to ensure the key of each record contains the respective word.
         .map((key, word) -> new KeyValue<>(word, word))
+        // Required in 0.10.0 to re-partition the data because we re-keyed the stream in the `map`
+        // step.  Upcoming Kafka 0.10.1 does this automatically for you (no need for `through`).
+        .through("RekeyedIntermediateTopic")
         // Count the occurrences of each word (record key).
         //
         // This will change the stream type from `KStream<String, String>` to

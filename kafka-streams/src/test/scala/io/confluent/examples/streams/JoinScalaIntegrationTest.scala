@@ -46,12 +46,14 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
 
   private val userClicksTopic = "user-clicks"
   private val userRegionsTopic = "user-regions"
+  private val rekeyedIntermediateTopic = "rekeyedIntermediateTopic"
   private val outputTopic = "output-topic"
 
   @Before
   def startKafkaCluster() = {
-    CLUSTER.createTopic(userClicksTopic)
-    CLUSTER.createTopic(userRegionsTopic)
+    CLUSTER.createTopic(userClicksTopic, 2, 1)
+    CLUSTER.createTopic(userRegionsTopic, 2, 1)
+    CLUSTER.createTopic(rekeyedIntermediateTopic)
     CLUSTER.createTopic(outputTopic)
   }
 
@@ -88,7 +90,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
       ("americas", 4L),
       ("asia", 25L),
       ("americas", 23L),
-      ("europe", 69L),
+      ("europe", 53L),
       ("americas", 101L),
       ("europe", 109L),
       ("asia", 124L)
@@ -156,6 +158,9 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
         .leftJoin(userRegionsTable, (clicks: JLong, region: String) => (if (region == null) "UNKNOWN" else region, clicks))
         // Change the stream from <user> -> <region, clicks> to <region> -> <clicks>
         .map((user: String, regionWithClicks: (String, JLong)) => new KeyValue[String, JLong](regionWithClicks._1, regionWithClicks._2))
+        // Required only in 0.10.0 to re-partition the data because we re-keyed the stream in the
+        // `map` step.  Upcoming Kafka 0.10.1 does this automatically (no need for `through`).
+        .through(stringSerde, longSerde, rekeyedIntermediateTopic)
         // Compute the total per region by summing the individual click counts per region.
         .reduceByKey(
       (firstClicks: JLong, secondClicks: JLong) => firstClicks + secondClicks,
@@ -219,7 +224,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     val actualClicksPerRegion: java.util.List[KeyValue[String, Long]] = IntegrationTestUtils.waitUntilMinKeyValueRecordsReceived(consumerConfig,
       outputTopic, expectedClicksPerRegion.size)
     streams.close()
-    assertThat(actualClicksPerRegion).containsExactlyElementsOf(expectedClicksPerRegion)
+    assertThat(actualClicksPerRegion).containsOnlyElementsOf(expectedClicksPerRegion)
   }
 
 }

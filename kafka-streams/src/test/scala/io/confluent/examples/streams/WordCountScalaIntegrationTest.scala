@@ -48,10 +48,12 @@ class WordCountScalaIntegrationTest extends AssertionsForJUnit {
 
   private val inputTopic = "inputTopic"
   private val outputTopic = "output-topic"
+  private val rekeyedIntermediateTopic = "rekeyedIntermediateTopic"
 
   @Before
   def startKafkaCluster() = {
-    CLUSTER.createTopic(inputTopic)
+    CLUSTER.createTopic(inputTopic, 2, 1)
+    CLUSTER.createTopic(rekeyedIntermediateTopic)
     CLUSTER.createTopic(outputTopic)
   }
 
@@ -119,6 +121,9 @@ class WordCountScalaIntegrationTest extends AssertionsForJUnit {
     val wordCounts: KStream[String, JLong] = textLines
         .flatMapValues(value => value.toLowerCase.split("\\W+").toIterable.asJava)
         .map((key, word) => new KeyValue(word, word))
+        // Required only in 0.10.0 to re-partition the data because we re-keyed the stream in the
+        // `map` step.  Upcoming Kafka 0.10.1 does this automatically (no need for `through`).
+        .through(rekeyedIntermediateTopic)
         .countByKey("Counts")
         .toStream()
 
@@ -161,7 +166,7 @@ class WordCountScalaIntegrationTest extends AssertionsForJUnit {
     val actualWordCounts: java.util.List[KeyValue[String, Long]] =
       IntegrationTestUtils.waitUntilMinKeyValueRecordsReceived(consumerConfig, outputTopic, expectedWordCounts.size)
     streams.close()
-    assertThat(actualWordCounts).containsExactlyElementsOf(expectedWordCounts)
+    assertThat(actualWordCounts).containsOnlyElementsOf(expectedWordCounts)
   }
 
 }

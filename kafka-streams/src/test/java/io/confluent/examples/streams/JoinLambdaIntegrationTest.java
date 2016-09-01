@@ -55,12 +55,14 @@ public class JoinLambdaIntegrationTest {
 
   private static final String userClicksTopic = "user-clicks";
   private static final String userRegionsTopic = "user-regions";
+  private static final String rekeyedIntermediateTopic = "rekeyedIntermediateTopic";
   private static final String outputTopic = "output-topic";
 
   @BeforeClass
   public static void startKafkaCluster() throws Exception {
-    CLUSTER.createTopic(userClicksTopic);
-    CLUSTER.createTopic(userRegionsTopic);
+    CLUSTER.createTopic(userClicksTopic, 2, 1);
+    CLUSTER.createTopic(userRegionsTopic, 2, 1);
+    CLUSTER.createTopic(rekeyedIntermediateTopic);
     CLUSTER.createTopic(outputTopic);
   }
 
@@ -123,7 +125,7 @@ public class JoinLambdaIntegrationTest {
         new KeyValue<>("americas", 4L),
         new KeyValue<>("asia", 25L),
         new KeyValue<>("americas", 23L),
-        new KeyValue<>("europe", 69L),
+        new KeyValue<>("europe", 53L),
         new KeyValue<>("americas", 101L),
         new KeyValue<>("europe", 109L),
         new KeyValue<>("asia", 124L)
@@ -194,6 +196,9 @@ public class JoinLambdaIntegrationTest {
         .leftJoin(userRegionsTable, (clicks, region) -> new RegionWithClicks(region == null ? "UNKNOWN" : region, clicks))
         // Change the stream from <user> -> <region, clicks> to <region> -> <clicks>
         .map((user, regionWithClicks) -> new KeyValue<>(regionWithClicks.getRegion(), regionWithClicks.getClicks()))
+        // Required only in 0.10.0 to re-partition the data because we re-keyed the stream in the
+        // `map` step.  Upcoming Kafka 0.10.1 does this automatically (no need for `through`).
+        .through(stringSerde, longSerde, rekeyedIntermediateTopic)
         // Compute the total per region by summing the individual click counts per region.
         .reduceByKey(
             (firstClicks, secondClicks) -> firstClicks + secondClicks,
@@ -243,7 +248,7 @@ public class JoinLambdaIntegrationTest {
     List<KeyValue<String, Long>> actualClicksPerRegion = IntegrationTestUtils.waitUntilMinKeyValueRecordsReceived(consumerConfig,
         outputTopic, expectedClicksPerRegion.size());
     streams.close();
-    assertThat(actualClicksPerRegion).containsExactlyElementsOf(expectedClicksPerRegion);
+    assertThat(actualClicksPerRegion).containsOnlyElementsOf(expectedClicksPerRegion);
   }
 
 }
