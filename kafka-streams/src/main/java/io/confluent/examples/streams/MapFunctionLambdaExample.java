@@ -158,6 +158,9 @@ public class MapFunctionLambdaExample {
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();
+
+    // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
+    Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
   }
 
 }
