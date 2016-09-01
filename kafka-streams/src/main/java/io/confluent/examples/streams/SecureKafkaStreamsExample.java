@@ -189,6 +189,14 @@ public class SecureKafkaStreamsExample {
     builder.stream("secure-input").to("secure-output");
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();
+
+    // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
+    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+      @Override
+      public void run() {
+        streams.close();
+      }
+    }));
   }
 
 }

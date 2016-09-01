@@ -129,14 +129,24 @@ public class QueryableStateExample {
     final File example = Files.createTempDirectory(new File("/tmp").toPath(), "example").toFile();
     streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, example.getPath());
 
-    KafkaStreams streams = createStreams(streamsConfiguration);
+    final KafkaStreams streams = createStreams(streamsConfiguration);
     // Now that we have finished the definition of the processing topology we can actually run
     // it via `start()`.  The Streams application as a whole can be launched just like any
     // normal Java application that has a `main()` method.
     streams.start();
 
     // Start the Restful proxy for servicing remote access to state stores
-    startRestProxy(streams, port);
+    final QueryableStateRestService restService = startRestProxy(streams, port);
+
+    // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      try {
+        streams.close();
+        restService.stop();
+      } catch (Exception e) {
+        // ignored
+      }
+    }));
   }
 
 
