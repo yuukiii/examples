@@ -25,9 +25,11 @@ import org.apache.kafka.streams.state.WindowStoreIterator;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -254,6 +256,7 @@ public class QueryableStateRestService {
 
     ResourceConfig rc = new ResourceConfig();
     rc.register(this);
+    rc.register(JacksonFeature.class);
 
     ServletContainer sc = new ServletContainer(rc);
     ServletHolder holder = new ServletHolder(sc);
