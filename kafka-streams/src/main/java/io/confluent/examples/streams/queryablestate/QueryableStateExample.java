@@ -113,11 +113,11 @@ import java.util.Properties;
  * # Get all key-value records of state store "word-count" across all instances
  * http://localhost:7070/state/keyvalues/word-count/all
  *
- * # Find the app instance that contains key "creek" (if it exists) for the state store "word-count"
- * http://localhost:7070/state/instance/word-count/creek
+ * # Find the app instance that contains key "hello" (if it exists) for the state store "word-count"
+ * http://localhost:7070/state/instance/word-count/hello
  *
- * # Get the latest value for key "creek" in state store "word-count"
- * http://localhost:7070/state/keyvalue/word-count/creek
+ * # Get the latest value for key "hello" in state store "word-count"
+ * http://localhost:7070/state/keyvalue/word-count/hello
  * }
  * </pre>
  *

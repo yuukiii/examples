@@ -68,6 +68,13 @@ public class QueryableStateExampleDriver {
         producer =
         new KafkaProducer<>(producerConfig, new StringSerializer(), new StringSerializer());
 
+    // Always begin with writing the first line to the topic so that the REST API example calls in
+    // our step-by-step instructions always work right from the start (otherwise users may run into
+    // HTTP 404 errors when querying the latest value for a key, for example, until the right input
+    // data was sent to the topic).
+    producer.send(new ProducerRecord<>(QueryableStateExample.TEXT_LINES_TOPIC,
+        inputValues.get(0), inputValues.get(0)));
+
     // every 500 milliseconds produce one of the lines of text from inputValues to the
     // TextLinesTopic
     final Random random = new Random();
