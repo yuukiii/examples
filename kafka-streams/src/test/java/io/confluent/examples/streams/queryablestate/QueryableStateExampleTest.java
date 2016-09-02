@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,10 +59,8 @@ public class QueryableStateExampleTest {
   public static final EmbeddedSingleNodeKafkaCluster CLUSTER = new EmbeddedSingleNodeKafkaCluster();
   public static final String WORD_COUNT =
       "queryable-state-wordcount-example-word-count-repartition";
-  public static final String
-      WINDOWED_WORD_COUNT =
+  public static final String WINDOWED_WORD_COUNT =
       "queryable-state-wordcount-example-windowed-word-count-repartition";
-  public static final String BASE_URL = "http://localhost:7070/state";
 
   @Rule
   public final TemporaryFolder temp = new TemporaryFolder();
@@ -91,15 +90,22 @@ public class QueryableStateExampleTest {
 
   }
 
+  private static int randomFreeLocalPort() throws IOException {
+    ServerSocket s = new ServerSocket(0);
+    int port = s.getLocalPort();
+    s.close();
+    return port;
+  }
+
   @Test
   public void shouldDemonstrateQueryableState() throws Exception {
     final List<String> inputValues = Arrays.asList("hello",
-                                                   "world",
-                                                   "world",
-                                                   "hello world",
-                                                   "all streams lead to kafka",
-                                                   "streams",
-                                                   "kafka streams");
+        "world",
+        "world",
+        "hello world",
+        "all streams lead to kafka",
+        "streams",
+        "kafka streams");
 
     Properties producerConfig = new Properties();
     producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
@@ -109,9 +115,13 @@ public class QueryableStateExampleTest {
     producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     IntegrationTestUtils
         .produceValuesSynchronously(QueryableStateExample.TEXT_LINES_TOPIC, inputValues,
-                                    producerConfig);
+            producerConfig);
 
-    final int port = 7070;
+    // Race condition caveat:  This two-step approach of finding a free port but not immediately
+    // binding to it may cause occasional errors.
+    final int port = randomFreeLocalPort();
+    final String baseUrl = "http://localhost:" + port + "/state";
+
     kafkaStreams = QueryableStateExample.createStreams(
         createStreamConfig(CLUSTER.bootstrapServers(), port, "one"));
     kafkaStreams.start();
@@ -120,43 +130,42 @@ public class QueryableStateExampleTest {
     final Client client = ClientBuilder.newClient();
 
     // Create a request to fetch all instances of HostStoreInfo
-    final Invocation.Builder allInstancesRequest = client.target(BASE_URL + "/instances")
+    final Invocation.Builder allInstancesRequest = client.target(baseUrl + "/instances")
         .request(MediaType.APPLICATION_JSON_TYPE);
     final List<HostStoreInfo> hostStoreInfo = fetchHostInfo(allInstancesRequest);
 
     assertThat(hostStoreInfo, hasItem(
-        new HostStoreInfo("localhost", 7070, Sets.newHashSet("word-count", "windowed-word-count"))
+        new HostStoreInfo("localhost", port, Sets.newHashSet("word-count", "windowed-word-count"))
     ));
 
-
     // Create a request to fetch all instances with word-count
-    final Invocation.Builder wordCountInstancesRequest = client.target(BASE_URL + "/instances/word-count")
+    final Invocation.Builder wordCountInstancesRequest = client.target(baseUrl + "/instances/word-count")
         .request(MediaType.APPLICATION_JSON_TYPE);
     final List<HostStoreInfo>
         wordCountInstances = fetchHostInfo(wordCountInstancesRequest);
 
     assertThat(wordCountInstances, hasItem(
-        new HostStoreInfo("localhost", 7070, Sets.newHashSet("word-count", "windowed-word-count"))
+        new HostStoreInfo("localhost", port, Sets.newHashSet("word-count", "windowed-word-count"))
     ));
 
     // Fetch all key-value pairs from the word-count store
     final Invocation.Builder
         allRequest =
-        client.target(BASE_URL + "/keyvalues/word-count/all")
+        client.target(baseUrl + "/keyvalues/word-count/all")
             .request(MediaType.APPLICATION_JSON_TYPE);
 
     final List<KeyValueBean>
         allValues =
         Arrays.asList(new KeyValueBean("all", 1L),
-                      new KeyValueBean("hello", 2L),
-                      new KeyValueBean("kafka", 2L),
-                      new KeyValueBean("lead", 1L),
-                      new KeyValueBean("streams", 3L),
-                      new KeyValueBean("to", 1L),
-                      new KeyValueBean("world", 3L));
+            new KeyValueBean("hello", 2L),
+            new KeyValueBean("kafka", 2L),
+            new KeyValueBean("lead", 1L),
+            new KeyValueBean("streams", 3L),
+            new KeyValueBean("to", 1L),
+            new KeyValueBean("world", 3L));
     final List<KeyValueBean>
         all = fetchRangeOfValues(allRequest,
-                                 allValues);
+        allValues);
     assertThat(all, equalTo(allValues));
 
     // Fetch a range of key-value pairs from the word-count store
@@ -167,7 +176,7 @@ public class QueryableStateExampleTest {
 
     final Invocation.Builder
         request =
-        client.target(BASE_URL + "/keyvalues/word-count/range/all/kafka")
+        client.target(baseUrl + "/keyvalues/word-count/range/all/kafka")
             .request(MediaType.APPLICATION_JSON_TYPE);
     final List<KeyValueBean>
         range = fetchRangeOfValues(request, expectedRange);
@@ -177,13 +186,13 @@ public class QueryableStateExampleTest {
     // Find the instance of the Kafka Streams application that would have the key hello
     final HostStoreInfo
         hostWithHelloKey =
-        client.target(BASE_URL + "/instance/word-count/hello")
+        client.target(baseUrl + "/instance/word-count/hello")
             .request(MediaType.APPLICATION_JSON_TYPE).get(HostStoreInfo.class);
 
     // Fetch the value for the key hello from the instance.
     final KeyValueBean result = client.target("http://" + hostWithHelloKey.getHost() +
-                                              ":" + hostWithHelloKey.getPort() +
-                                              "/state/keyvalue/word-count/hello")
+        ":" + hostWithHelloKey.getPort() +
+        "/state/keyvalue/word-count/hello")
         .request(MediaType.APPLICATION_JSON_TYPE).get(KeyValueBean.class);
 
     assertThat(result, equalTo(new KeyValueBean("hello", 2L)));
@@ -191,7 +200,7 @@ public class QueryableStateExampleTest {
     // fetch windowed values for a key
     final List<KeyValueBean>
         windowedResult =
-        client.target(BASE_URL + "/windowed/windowed-word-count/streams/0/" + System
+        client.target(baseUrl + "/windowed/windowed-word-count/streams/0/" + System
             .currentTimeMillis())
             .request(MediaType.APPLICATION_JSON_TYPE)
 
@@ -214,11 +223,11 @@ public class QueryableStateExampleTest {
     });
     final long until = System.currentTimeMillis() + 60000L;
     while (hostStoreInfo.isEmpty()
-           || hostStoreInfo.get(0).getStoreNames().size() != 2
-              && System.currentTimeMillis() < until) {
+        || hostStoreInfo.get(0).getStoreNames().size() != 2
+        && System.currentTimeMillis() < until) {
       Thread.sleep(10);
       hostStoreInfo = request.get(new GenericType<List<HostStoreInfo>>() {
-          });
+      });
     }
     return hostStoreInfo;
   }
@@ -247,7 +256,7 @@ public class QueryableStateExampleTest {
     // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
     // against which the application is run.
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG,
-                             "queryable-state-wordcount-example");
+        "queryable-state-wordcount-example");
     // Where to find Kafka broker(s).
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootStrap);
     // Where to find the corresponding ZooKeeper ensemble.
