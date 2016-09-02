@@ -30,8 +30,8 @@ import java.util.Properties;
 
 /**
  * Demonstrates using the KafkaStreams API to locate and query State Stores (Queryable State). This
- * example uses the same Topology as {@link io.confluent.examples.streams.WordCountLambdaExample}
- * so please see that for the full explanation of the topology.
+ * example uses the same Topology as {@link io.confluent.examples.streams.WordCountLambdaExample} so
+ * please see that for the full explanation of the topology.
  *
  * Note: This example uses Java 8 functionality and thus works with Java 8+ only.  But of course you
  * can use the Queryable State feature of Kafka Streams also with Java 7.
@@ -58,46 +58,73 @@ import java.util.Properties;
  * <pre>
  * {@code
  * $ bin/kafka-topics --create --topic TextLinesTopic \
- *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
+ *                    --zookeeper localhost:2181 --partitions 3 --replication-factor 1
  * }
  * </pre>
  *
  * Note: The above commands are for CP 3.0.0 only. For Apache Kafka it should be
  * `bin/kafka-topics.sh ...`.
  *
- * 3) Start this example application either in your IDE or on the command line.
+ *
+ * 3) Start two instances of this example application either in your IDE or on the command line.
  *
  * If via the command line please refer to <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>.
- * Once packaged you can then run:
+ *
+ * Once packaged you can then start the first instance of the application (on port 7070):
  *
  * <pre>
  * {@code
- * $ java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams
- * .QueryableStateExample <portForRestEndPoint>
+ * $ java -cp target/streams-examples-3.0.0-standalone.jar \
+ *      io.confluent.examples.streams.queryablestate.QueryableStateExample 7070
  * }
  * </pre>
  *
- * 4) Write some input data to the source topics (e.g. via {@link QueryableStateExampleDriver}).
- * The already running example application (step 3) will automatically process this input data
+ * Here, `7070` sets the port for the REST endpoint that will be used by this application instance.
  *
+ * Then, in a separate terminal, run the second instance of this application (on port 7071):
  *
- * 5) Use your browser to hit the REST endpoint to query the state managed by this application.
- * For example:
  * <pre>
  * {@code
- *   http://localhost:7070/state/instances
- *   http://localhost:7070/state/instances/word-count
- *   http://localhost:7070/state/instance/word-count/hello
- *   http://localhost:7070/state/keyvalue/word-count/hello
- *   http://localhost:7070/state/keyvalues/word-count/all
- *   http://localhost:7070/state/windowed/windowed-word-count/all/streams
- *  }
+ * $ java -cp target/streams-examples-3.0.0-standalone.jar \
+ *      io.confluent.examples.streams.queryablestate.QueryableStateExample 7071
+ * }
+ * </pre>
+ *
+ *
+ * 4) Write some input data to the source topics (e.g. via {@link QueryableStateExampleDriver}). The
+ * already running example application (step 3) will automatically process this input data
+ *
+ *
+ * 5) Use your browser to hit the REST endpoint of the app instance you started in step 3 to query
+ * the state managed by this application.  Note: If you are running multiple app instances, you can
+ * query them arbitrarily -- if an app instance cannot satisfy a query itself, it will fetch the
+ * results from the other instances.
+ *
+ * For example:
+ *
+ * <pre>
+ * {@code
+ * # List all running instances of this application
+ * http://localhost:7070/state/instances
+ *
+ * # List app instances that currently manage (parts of) state store "word-count"
+ * http://localhost:7070/state/instances/word-count
+ *
+ * # Get all key-value records of state store "word-count" across all instances
+ * http://localhost:7070/state/keyvalues/word-count/all
+ *
+ * # Find the app instance that contains key "creek" (if it exists) for the state store "word-count"
+ * http://localhost:7070/state/instance/word-count/creek
+ *
+ * # Get the latest value for key "creek" in state store "word-count"
+ * http://localhost:7070/state/keyvalue/word-count/creek
+ * }
  * </pre>
  *
  * Note: that the REST functionality is NOT part of Kafka Streams or its API. For demonstration
- * purposes of this example application, we decided to go with a simple, custom-built
- * REST API that uses the Queryable State API of Kafka Streams behind the scenes to expose the
- * state stores of this application via REST.
+ * purposes of this example application, we decided to go with a simple, custom-built REST API that
+ * uses the Queryable State API of Kafka Streams behind the scenes to expose the state stores of
+ * this application via REST.
  *
  * 6) Once you're done with your experiments, you can stop this example via `Ctrl-C`.  If needed,
  * also stop the Kafka broker (`Ctrl-C`), and only then stop the ZooKeeper instance (`Ctrl-C`).
