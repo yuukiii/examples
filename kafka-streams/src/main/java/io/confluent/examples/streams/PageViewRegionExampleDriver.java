@@ -1,11 +1,11 @@
 /**
  * Copyright 2016 Confluent Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -35,62 +35,59 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 /**
- * This is a sample driver for the {@link PageViewRegionExample} and
- * {@link PageViewRegionLambdaExample}
- * To run this driver please first refer to the instructions in {@link PageViewRegionExample} or
- * {@link PageViewRegionLambdaExample}.
+ * This is a sample driver for the {@link PageViewRegionExample} and {@link PageViewRegionLambdaExample}.
+ * To run this driver please first refer to the instructions in {@link PageViewRegionExample} or {@link PageViewRegionLambdaExample}.
  * You can then run this class directly in your IDE or via the command line.
- *
+ * <p>
  * To run via the command line you might want to package as a fatjar first. Please refer to:
  * <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>
- *
+ * <p>
  * Once packaged you can then run:
- * java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.PageViewRegionExampleDriver
- *
- * You should terminate with Ctrl-C
+ * <pre>
+ * {@code
+ * $ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.PageViewRegionExampleDriver
+ * }</pre>
+ * You should terminate with {@code Ctrl-C}.
  */
 public class PageViewRegionExampleDriver {
 
-  public static void main(String[] args) throws IOException {
+  public static void main(final String[] args) throws IOException {
     produceInputs();
     consumeOutput();
   }
 
   private static void produceInputs() throws IOException {
-    final String[] users = {"erica", "bob", "joe", "damian", "tania", "phil", "sam",
-        "lauren", "joseph"};
+    final String[] users = {"erica", "bob", "joe", "damian", "tania", "phil", "sam", "lauren", "joseph"};
     final String[] regions = {"europe", "usa", "asia", "africa"};
 
     final Properties props = new Properties();
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-        StringSerializer.class);
-    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-        io.confluent.kafka.serializers.KafkaAvroSerializer.class);
+    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
     props.put("schema.registry.url", "http://localhost:8081");
     final KafkaProducer<String, GenericRecord> producer = new KafkaProducer<>(props);
 
     final GenericRecordBuilder pageViewBuilder =
-        new GenericRecordBuilder(loadSchema("pageview.avsc"));
+      new GenericRecordBuilder(loadSchema("pageview.avsc"));
     final GenericRecordBuilder userProfileBuilder =
-        new GenericRecordBuilder(loadSchema("userprofile.avsc"));
+      new GenericRecordBuilder(loadSchema("userprofile.avsc"));
 
     final String pageViewsTopic = "PageViews";
     final String userProfilesTopic = "UserProfiles";
 
     final Random random = new Random();
-    for (String user : users) {
+    for (final String user : users) {
       userProfileBuilder.set("experience", "some");
       userProfileBuilder.set("region", regions[random.nextInt(regions.length)]);
       producer.send(new ProducerRecord<>(userProfilesTopic, user, userProfileBuilder.build()));
       // For each user generate some page views
       IntStream.range(0, random.nextInt(10))
-          .mapToObj(value -> {
-            pageViewBuilder.set("user", user);
-            pageViewBuilder.set("page", "index.html");
-            return pageViewBuilder.build();
-          }).forEach(
-          record -> producer.send(new ProducerRecord<>(pageViewsTopic, null, record))
+        .mapToObj(value -> {
+          pageViewBuilder.set("user", user);
+          pageViewBuilder.set("page", "index.html");
+          return pageViewBuilder.build();
+        }).forEach(
+        record -> producer.send(new ProducerRecord<>(pageViewsTopic, null, record))
       );
     }
     producer.flush();
@@ -103,22 +100,22 @@ public class PageViewRegionExampleDriver {
     consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
     consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG,
-        "pageview-region-lambda-example-consumer");
+      "pageview-region-lambda-example-consumer");
     consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     final KafkaConsumer<String, Long> consumer = new KafkaConsumer<>(consumerProperties);
 
     consumer.subscribe(Collections.singleton(resultTopic));
     while (true) {
-      ConsumerRecords<String, Long> consumerRecords = consumer.poll(Long.MAX_VALUE);
-      for (ConsumerRecord<String, Long> consumerRecord : consumerRecords) {
+      final ConsumerRecords<String, Long> consumerRecords = consumer.poll(Long.MAX_VALUE);
+      for (final ConsumerRecord<String, Long> consumerRecord : consumerRecords) {
         System.out.println(consumerRecord.key() + ":" + consumerRecord.value());
       }
     }
   }
 
-  private static Schema loadSchema(String name) throws IOException {
+  private static Schema loadSchema(final String name) throws IOException {
     try (InputStream input = PageViewRegionLambdaExample.class.getClassLoader()
-        .getResourceAsStream("avro/io/confluent/examples/streams/" + name)) {
+      .getResourceAsStream("avro/io/confluent/examples/streams/" + name)) {
       return new Schema.Parser().parse(input);
     }
   }

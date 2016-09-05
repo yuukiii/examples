@@ -1,11 +1,11 @@
 /**
  * Copyright 2016 Confluent Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -31,21 +31,23 @@ import java.util.stream.IntStream;
  * This is a sample driver for the {@link SumLambdaExample}.
  * To run this driver please first refer to the instructions in {@link SumLambdaExample}.
  * You can then run this class directly in your IDE or via the command line.
- *
+ * <p>
  * To run via the command line you might want to package as a fatjar first. Please refer to:
  * <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>
- *
+ * <p>
  * Once packaged you can then run:
- * java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.SumLambdaExampleDriver
- *
- * You should terminate with Ctrl-C
+ * <pre>
+ * {@code
+ * $ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.SumLambdaExampleDriver
+ * }</pre>
+ * You should terminate with {@code Ctrl-C}.
  * Please refer to {@link SumLambdaExample} for instructions on running the example.
- *
+ * <p>
  * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */
 public class SumLambdaExampleDriver {
 
-  public static void main(String[] args) throws Exception {
+  public static void main(final String[] args) throws Exception {
     produceInput();
     consumeOutput();
   }
@@ -55,16 +57,15 @@ public class SumLambdaExampleDriver {
     properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
     properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, IntegerDeserializer.class);
     properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, IntegerDeserializer.class);
-    properties.put(ConsumerConfig.GROUP_ID_CONFIG,
-                           "sum-lambda-example-consumer");
+    properties.put(ConsumerConfig.GROUP_ID_CONFIG, "sum-lambda-example-consumer");
     properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-    KafkaConsumer<Integer, Integer> consumer = new KafkaConsumer<>(properties);
+    final KafkaConsumer<Integer, Integer> consumer = new KafkaConsumer<>(properties);
     consumer.subscribe(Collections.singleton(SumLambdaExample.SUM_OF_ODD_NUMBERS_TOPIC));
     while (true) {
-      ConsumerRecords<Integer, Integer> records =
-          consumer.poll(Long.MAX_VALUE);
+      final ConsumerRecords<Integer, Integer> records =
+              consumer.poll(Long.MAX_VALUE);
 
-      for (ConsumerRecord<Integer, Integer> record : records) {
+      for (final ConsumerRecord<Integer, Integer> record : records) {
         System.out.println("Current sum of odd numbers is:" + record.value());
       }
     }
@@ -79,8 +80,8 @@ public class SumLambdaExampleDriver {
     final KafkaProducer<Integer, Integer> producer = new KafkaProducer<>(props);
 
     IntStream.range(0, 100)
-        .mapToObj(val -> new ProducerRecord<>(SumLambdaExample.NUMBERS_TOPIC, val, val))
-        .forEach(producer::send);
+            .mapToObj(val -> new ProducerRecord<>(SumLambdaExample.NUMBERS_TOPIC, val, val))
+            .forEach(producer::send);
 
     producer.flush();
   }
