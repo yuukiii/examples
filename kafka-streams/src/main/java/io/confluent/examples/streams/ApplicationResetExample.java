@@ -26,13 +26,14 @@ import java.util.Properties;
  * <p>
  * 2) Create the input, intermediate, and output topics used by this example.
  * <pre>
+ * {@code
  * $ bin/kafka-topics --create --topic my-input-topic \
  *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
  * $ bin/kafka-topics --create --topic rekeyed-topic \
  *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
  * $ bin/kafka-topics --create --topic my-output-topic \
  *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
- * </pre>
+ * }</pre>
  * Note: The above commands are for CP 3.0.1 only. For Apache Kafka it should be {@code bin/kafka-topics.sh ...}.
  * <p>
  * 3) Start this example application either in your IDE or on the command line.
@@ -40,33 +41,37 @@ import java.util.Properties;
  * If via the command line please refer to <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>.
  * Once packaged you can then run:
  * <pre>
+ * {@code
  * $ java -cp target/streams-examples-3.0.1-standalone.jar io.confluent.examples.streams.ApplicationResetExample
- * </pre>
+ * }</pre>
  * 4) Write some input data to the source topic (e.g. via {@code kafka-console-producer}).
  * The already running example application (step 3) will automatically process this input data and write the results to the output topics.
  * <pre>
+ * {@code
  * # Start the console producer. You can then enter input data by writing some line of text, followed by ENTER:
  * #
- * #    hello world&lt;ENTER&gt;
- * #    hello kafka streams&lt;ENTER&gt;
- * #    all streams lead to kafka&lt;ENTER&gt;
+ * #    hello world<ENTER>
+ * #    hello kafka streams<ENTER>
+ * #    all streams lead to kafka<ENTER>
  * #
  * # Every line you enter will become the value of a single Kafka message.
  * $ bin/kafka-console-producer --broker-list localhost:9092 --topic my-input-topic
- * </pre>
+ * }</pre>
  * 5) Inspect the resulting data in the output topic, e.g. via {@code kafka-console-consumer}.
  * <pre>
+ * {@code
  * $ bin/kafka-console-consumer --topic my-output-topic --from-beginning \
  *                              --zookeeper localhost:2181 \
  *                              --property print.key=true \
  *                              --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
- * </pre>
+ * }</pre>
  * You should see output data similar to:
  * <pre>
+ * {@code
  *     hello 1
  *     hello 2
  *     all 1
- * </pre>
+ * }</pre>
  * 6) Now you can stop the Streams application via {@code Ctrl-C}.
  * <p>
  * 7) If you would restart this application again (and not add any new data the the input topic),
@@ -74,18 +79,20 @@ import java.util.Properties;
  * If you want to reprocess the input data that is already contained in the input topic,
  * you first need to <strong>reset</strong> your application as follows:
  * <pre>
+ * {@code
  * $ bin/kafka-streams-application-reset --application-id my-streams-app \
  *                                       --input-topics my-input-topic \
  *                                       --intermediate-topics rekeyed-topic
- * </pre>
+ * }</pre>
  * 8) You can now restart the application to reprocess the input topic from scratch.
  * For this, there is also a "local cleanup" required.
  * In this example application, you need to specify command line argument {@code --reset} to tell the application to
  * call {@link KafkaStreams#cleanUp()} before the application gets started.
  * Thus, restart the application via:
  * <pre>
+ * {@code
  * $ java -cp target/streams-examples-3.0.1-standalone.jar io.confluent.examples.streams.ApplicationResetExample --reset
- * </pre>
+ * }</pre>
  * 9) If your console consumer (from step 5) is still running, you should see the same output data again.
  * If it was stopped and you restart it, if will print the result "twice".
  * Resetting an application does not modify output topics, thus, for this example, the output topic will contain the result twice.
