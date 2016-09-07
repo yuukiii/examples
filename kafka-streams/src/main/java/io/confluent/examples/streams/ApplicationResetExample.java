@@ -20,6 +20,7 @@ import java.util.Properties;
  * One important part in the code is the call to {@link KafkaStreams#cleanUp()}.
  * This call performs a local application (instance) reset and must be part in the code to make the application "reset ready".
  * <p>
+ * <p>
  * HOW TO RUN THIS EXAMPLE
  * <p>
  * 1) Start Zookeeper and Kafka. Please refer to <a href='http://docs.confluent.io/3.0.1/quickstart.html#quickstart'>CP3.0.1 QuickStart</a>.

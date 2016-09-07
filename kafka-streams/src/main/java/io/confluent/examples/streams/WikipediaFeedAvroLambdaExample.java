@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Confluent Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,8 +18,6 @@ package io.confluent.examples.streams;
 import io.confluent.examples.streams.avro.WikiFeed;
 import io.confluent.examples.streams.utils.SpecificAvroSerde;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
-
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -33,16 +31,16 @@ import java.util.Properties;
 
 /**
  * Computes, for every minute the number of new user feeds from the Wikipedia feed irc stream.
- * Same as WikipediaFeedAvroExample but uses lambda expressions and thus only works on Java 8+.
- *
- * Note: The specific Avro binding is used for serialization/deserialization, where the `WikiFeed`
- * class is auto-generated from its Avro schema by the maven avro plugin.  See `wikifeed.avsc`
- * under `src/main/avro/`.
+ * Same as {@link WikipediaFeedAvroExample} but uses lambda expressions and thus only works on Java 8+.
+ * <p>
+ * Note: The specific Avro binding is used for serialization/deserialization, where the {@code WikiFeed}
+ * class is auto-generated from its Avro schema by the maven avro plugin. See {@code wikifeed.avsc}
+ * under {@code src/main/avro/}.
  */
 public class WikipediaFeedAvroLambdaExample {
 
-    public static void main(String[] args) throws Exception {
-        Properties streamsConfiguration = new Properties();
+    public static void main(final String[] args) throws Exception {
+        final Properties streamsConfiguration = new Properties();
 
         // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
         // against which the application is run.
@@ -60,24 +58,24 @@ public class WikipediaFeedAvroLambdaExample {
         final Serde<String> stringSerde = Serdes.String();
         final Serde<Long> longSerde = Serdes.Long();
 
-        KStreamBuilder builder = new KStreamBuilder();
+        final KStreamBuilder builder = new KStreamBuilder();
 
         // read the source stream
-        KStream<String, WikiFeed> feeds = builder.stream("WikipediaFeed");
+        final KStream<String, WikiFeed> feeds = builder.stream("WikipediaFeed");
 
         // aggregate the new feed counts of by user
-        KTable<String, Long> aggregated = feeds
-                // filter out old feeds
-                .filter((dummy, value) -> value.getIsNew())
-                // map the user id as key
-                .map((key, value) -> new KeyValue<>(value.getUser(), value))
-                // sum by key, need to override the serdes for String typed key
-                .countByKey(stringSerde, "Counts");
+        final KTable<String, Long> aggregated = feeds
+            // filter out old feeds
+            .filter((dummy, value) -> value.getIsNew())
+            // map the user id as key
+            .map((key, value) -> new KeyValue<>(value.getUser(), value))
+            // sum by key, need to override the serdes for String typed key
+            .countByKey(stringSerde, "Counts");
 
         // write to the result topic, need to override serdes
         aggregated.to(stringSerde, longSerde, "WikipediaStats");
 
-        KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
+        final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
         streams.start();
 
         // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
