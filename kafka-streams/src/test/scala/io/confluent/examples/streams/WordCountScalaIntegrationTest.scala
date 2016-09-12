@@ -90,6 +90,7 @@ class WordCountScalaIntegrationTest extends AssertionsForJUnit {
       p.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zookeeperConnect())
       p.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       p.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
+      p.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "1")
       p.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
       // Explicitly place the state directory under /tmp so that we can remove it via
       // `purgeLocalStreamsState` below.  Once Streams is updated to expose the effective
