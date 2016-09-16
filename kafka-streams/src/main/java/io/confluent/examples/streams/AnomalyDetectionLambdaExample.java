@@ -33,7 +33,7 @@ import java.util.Properties;
  * <p>
  * Note: This example uses lambda expressions and thus works with Java 8+ only.
  * <p>
- * <p>
+ * <br>
  * HOW TO RUN THIS EXAMPLE
  * <p>
  * 1) Start Zookeeper and Kafka. Please refer to <a href='http://docs.confluent.io/3.0.1/quickstart.html#quickstart'>CP3.0.1 QuickStart</a>.
@@ -101,62 +101,62 @@ import java.util.Properties;
  */
 public class AnomalyDetectionLambdaExample {
 
-    public static void main(final String[] args) throws Exception {
-        final Properties streamsConfiguration = new Properties();
-        // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
-        // against which the application is run.
-        streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "anomaly-detection-lambda-example");
-        // Where to find Kafka broker(s).
-        streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        // Where to find the corresponding ZooKeeper ensemble.
-        streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
-        // Specify default (de)serializers for record keys and for record values.
-        streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+  public static void main(final String[] args) throws Exception {
+    final Properties streamsConfiguration = new Properties();
+    // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
+    // against which the application is run.
+    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "anomaly-detection-lambda-example");
+    // Where to find Kafka broker(s).
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    // Where to find the corresponding ZooKeeper ensemble.
+    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
+    // Specify default (de)serializers for record keys and for record values.
+    streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+    streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
 
-        final Serde<String> stringSerde = Serdes.String();
-        final Serde<Long> longSerde = Serdes.Long();
+    final Serde<String> stringSerde = Serdes.String();
+    final Serde<Long> longSerde = Serdes.Long();
 
-        final KStreamBuilder builder = new KStreamBuilder();
+    final KStreamBuilder builder = new KStreamBuilder();
 
-        // Read the source stream.  In this example, we ignore whatever is stored in the record key and
-        // assume the record value contains the username (and each record would represent a single
-        // click by the corresponding user).
-        final KStream<String, String> views = builder.stream("UserClicks");
+    // Read the source stream.  In this example, we ignore whatever is stored in the record key and
+    // assume the record value contains the username (and each record would represent a single
+    // click by the corresponding user).
+    final KStream<String, String> views = builder.stream("UserClicks");
 
-        final KTable<Windowed<String>, Long> anomalousUsers = views
-            // Map the user name as key, because the subsequent counting is performed based on the key
-            .map((ignoredKey, username) -> new KeyValue<>(username, username))
-            // Required in 0.10.0 to re-partition the data because we re-keyed the stream in the `map`
-            // step.  Upcoming Kafka 0.10.1 does this automatically for you (no need for `through`).
-            .through("RekeyedIntermediateTopic")
-            // Count users, using one-minute tumbling windows
-            .countByKey(TimeWindows.of("UserCountWindow", 60 * 1000L))
-            // Get users whose one-minute count is >= 3
-            .filter((windowedUserId, count) -> count >= 3);
+    final KTable<Windowed<String>, Long> anomalousUsers = views
+      // Map the user name as key, because the subsequent counting is performed based on the key
+      .map((ignoredKey, username) -> new KeyValue<>(username, username))
+      // Required in 0.10.0 to re-partition the data because we re-keyed the stream in the `map`
+      // step.  Upcoming Kafka 0.10.1 does this automatically for you (no need for `through`).
+      .through("RekeyedIntermediateTopic")
+      // Count users, using one-minute tumbling windows
+      .countByKey(TimeWindows.of("UserCountWindow", 60 * 1000L))
+      // Get users whose one-minute count is >= 3
+      .filter((windowedUserId, count) -> count >= 3);
 
-        // Note: The following operations would NOT be needed for the actual anomaly detection,
-        // which would normally stop at the filter() above.  We use the operations below only to
-        // "massage" the output data so it is easier to inspect on the console via
-        // kafka-console-consumer.
-        final KStream<String, Long> anomalousUsersForConsole = anomalousUsers
-            // get rid of windows (and the underlying KTable) by transforming the KTable to a KStream
-            .toStream()
-            // sanitize the output by removing null record values (again, we do this only so that the
-            // output is easier to read via kafka-console-consumer combined with LongDeserializer
-            // because LongDeserializer fails on null values, and even though we could configure
-            // kafka-console-consumer to skip messages on error the output still wouldn't look pretty)
-            .filter((windowedUserId, count) -> count != null)
-            .map((windowedUserId, count) -> new KeyValue<>(windowedUserId.toString(), count));
+    // Note: The following operations would NOT be needed for the actual anomaly detection,
+    // which would normally stop at the filter() above.  We use the operations below only to
+    // "massage" the output data so it is easier to inspect on the console via
+    // kafka-console-consumer.
+    final KStream<String, Long> anomalousUsersForConsole = anomalousUsers
+      // get rid of windows (and the underlying KTable) by transforming the KTable to a KStream
+      .toStream()
+      // sanitize the output by removing null record values (again, we do this only so that the
+      // output is easier to read via kafka-console-consumer combined with LongDeserializer
+      // because LongDeserializer fails on null values, and even though we could configure
+      // kafka-console-consumer to skip messages on error the output still wouldn't look pretty)
+      .filter((windowedUserId, count) -> count != null)
+      .map((windowedUserId, count) -> new KeyValue<>(windowedUserId.toString(), count));
 
-        // write to the result topic
-        anomalousUsersForConsole.to(stringSerde, longSerde, "AnomalousUsers");
+    // write to the result topic
+    anomalousUsersForConsole.to(stringSerde, longSerde, "AnomalousUsers");
 
-        final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
-        streams.start();
+    final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
+    streams.start();
 
-        // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
-        Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
-    }
+    // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
+    Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+  }
 
 }

@@ -30,7 +30,7 @@ import java.util.Properties;
  * <p>
  * Note: This example uses lambda expressions and thus works with Java 8+ only.
  * <p>
- * <p>
+ * <br>
  * HOW TO RUN THIS EXAMPLE
  * <p>
  * 1) Start Zookeeper and Kafka. Please refer to <a href='http://docs.confluent.io/3.0.1/quickstart.html#quickstart'>CP3.0.1 QuickStart</a>.
@@ -99,59 +99,59 @@ import java.util.Properties;
  */
 public class UserRegionLambdaExample {
 
-    public static void main(final String[] args) throws Exception {
-        final Properties streamsConfiguration = new Properties();
-        // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
-        // against which the application is run.
-        streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "user-region-lambda-example");
-        // Where to find Kafka broker(s).
-        streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        // Where to find the corresponding ZooKeeper ensemble.
-        streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
-        // Specify default (de)serializers for record keys and for record values.
-        streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+  public static void main(final String[] args) throws Exception {
+    final Properties streamsConfiguration = new Properties();
+    // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
+    // against which the application is run.
+    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "user-region-lambda-example");
+    // Where to find Kafka broker(s).
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    // Where to find the corresponding ZooKeeper ensemble.
+    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
+    // Specify default (de)serializers for record keys and for record values.
+    streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+    streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
 
-        final Serde<String> stringSerde = Serdes.String();
-        final Serde<Long> longSerde = Serdes.Long();
+    final Serde<String> stringSerde = Serdes.String();
+    final Serde<Long> longSerde = Serdes.Long();
 
-        final KStreamBuilder builder = new KStreamBuilder();
+    final KStreamBuilder builder = new KStreamBuilder();
 
-        // Read the source stream
-        // We assume record key = username and record value = geo-region
-        final KTable<String, String> userRegions = builder.table("UserRegions");
+    // Read the source stream
+    // We assume record key = username and record value = geo-region
+    final KTable<String, String> userRegions = builder.table("UserRegions");
 
-        // Aggregate the user counts of by region
-        final KTable<String, Long> regionCounts = userRegions
-            // Count by region
-            // We do not need to specify any explict serdes because the key and value types do not change
-            .groupBy((userId, region) -> KeyValue.pair(region, region))
-            .count("CountsByRegion")
-            // discard any regions with only 1 user
-            .filter((regionName, count) -> count >= 2);
+    // Aggregate the user counts of by region
+    final KTable<String, Long> regionCounts = userRegions
+      // Count by region
+      // We do not need to specify any explict serdes because the key and value types do not change
+      .groupBy((userId, region) -> KeyValue.pair(region, region))
+      .count("CountsByRegion")
+      // discard any regions with only 1 user
+      .filter((regionName, count) -> count >= 2);
 
-        // Note: The following operations would NOT be needed for the actual users-per-region
-        // computation, which would normally stop at the filter() above.  We use the operations
-        // below only to "massage" the output data so it is easier to inspect on the console via
-        // kafka-console-consumer.
-        //
-        final KStream<String, Long> regionCountsForConsole = regionCounts
-            // get rid of windows (and the underlying KTable) by transforming the KTable to a KStream
-            .toStream()
-            // sanitize the output by removing null record values (again, we do this only so that the
-            // output is easier to read via kafka-console-consumer combined with LongDeserializer
-            // because LongDeserializer fails on null values, and even though we could configure
-            // kafka-console-consumer to skip messages on error the output still wouldn't look pretty)
-            .filter((regionName, count) -> count != null);
+    // Note: The following operations would NOT be needed for the actual users-per-region
+    // computation, which would normally stop at the filter() above.  We use the operations
+    // below only to "massage" the output data so it is easier to inspect on the console via
+    // kafka-console-consumer.
+    //
+    final KStream<String, Long> regionCountsForConsole = regionCounts
+      // get rid of windows (and the underlying KTable) by transforming the KTable to a KStream
+      .toStream()
+      // sanitize the output by removing null record values (again, we do this only so that the
+      // output is easier to read via kafka-console-consumer combined with LongDeserializer
+      // because LongDeserializer fails on null values, and even though we could configure
+      // kafka-console-consumer to skip messages on error the output still wouldn't look pretty)
+      .filter((regionName, count) -> count != null);
 
-        // write to the result topic, we need to override the value serializer to for type long
-        regionCountsForConsole.to(stringSerde, longSerde, "LargeRegions");
+    // write to the result topic, we need to override the value serializer to for type long
+    regionCountsForConsole.to(stringSerde, longSerde, "LargeRegions");
 
-        final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
-        streams.start();
+    final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
+    streams.start();
 
-        // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
-        Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
-    }
+    // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
+    Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+  }
 
 }

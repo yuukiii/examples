@@ -32,7 +32,7 @@ import java.util.Properties;
  * this specific example: the application will simply write its input data as-is to an output
  * topic.
  * <p>
- * <p>
+ * <br>
  * HOW TO RUN THIS EXAMPLE
  * <p>
  * This example requires running a secure Kafka cluster. Because setting up such a secure cluster
@@ -137,46 +137,46 @@ import java.util.Properties;
  */
 public class SecureKafkaStreamsExample {
 
-    public static void main(final String[] args) throws Exception {
-        final Properties streamsConfiguration = new Properties();
-        // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
-        // against which the application is run.
-        streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "secure-kafka-streams-app");
-        // Where to find secure (!) Kafka broker(s).  In the VM, the broker listens on port 9093 for
-        // SSL connections.
-        streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9093");
-        // Where to find the corresponding ZooKeeper ensemble.
-        streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
-        // Specify default (de)serializers for record keys and for record values.
-        streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass().getName());
-        streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass().getName());
-        // Security settings.
-        // 1. These settings must match the security settings of the secure Kafka cluster.
-        // 2. The SSL trust store and key store files must be locally accessible to the application.
-        //    Typically, this means they would be installed locally in the client machine (or container)
-        //    on which the application runs.  To simplify running this example, however, these files
-        //    were generated and stored in the VM in which the secure Kafka broker is running.  This
-        //    also explains why you must run this example application from within the VM.
-        streamsConfiguration.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
-        streamsConfiguration.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, "/etc/security/tls/kafka.client.truststore.jks");
-        streamsConfiguration.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, "test1234");
-        streamsConfiguration.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, "/etc/security/tls/kafka.client.keystore.jks");
-        streamsConfiguration.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, "test1234");
-        streamsConfiguration.put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, "test1234");
+  public static void main(final String[] args) throws Exception {
+    final Properties streamsConfiguration = new Properties();
+    // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
+    // against which the application is run.
+    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "secure-kafka-streams-app");
+    // Where to find secure (!) Kafka broker(s).  In the VM, the broker listens on port 9093 for
+    // SSL connections.
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9093");
+    // Where to find the corresponding ZooKeeper ensemble.
+    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
+    // Specify default (de)serializers for record keys and for record values.
+    streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass().getName());
+    streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass().getName());
+    // Security settings.
+    // 1. These settings must match the security settings of the secure Kafka cluster.
+    // 2. The SSL trust store and key store files must be locally accessible to the application.
+    //    Typically, this means they would be installed locally in the client machine (or container)
+    //    on which the application runs.  To simplify running this example, however, these files
+    //    were generated and stored in the VM in which the secure Kafka broker is running.  This
+    //    also explains why you must run this example application from within the VM.
+    streamsConfiguration.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
+    streamsConfiguration.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, "/etc/security/tls/kafka.client.truststore.jks");
+    streamsConfiguration.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, "test1234");
+    streamsConfiguration.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, "/etc/security/tls/kafka.client.keystore.jks");
+    streamsConfiguration.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, "test1234");
+    streamsConfiguration.put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, "test1234");
 
-        final KStreamBuilder builder = new KStreamBuilder();
-        // Write the input data as-is to the output topic.
-        builder.stream("secure-input").to("secure-output");
-        final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
-        streams.start();
+    final KStreamBuilder builder = new KStreamBuilder();
+    // Write the input data as-is to the output topic.
+    builder.stream("secure-input").to("secure-output");
+    final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
+    streams.start();
 
-        // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            @Override
-            public void run() {
-                streams.close();
-            }
-        }));
-    }
+    // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
+    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+      @Override
+      public void run() {
+        streams.close();
+      }
+    }));
+  }
 
 }

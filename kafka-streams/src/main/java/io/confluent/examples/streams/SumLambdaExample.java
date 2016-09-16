@@ -29,7 +29,7 @@ import java.util.Properties;
  * <p>
  * Note: This example uses lambda expressions and thus works with Java 8+ only.
  * <p>
- * <p>
+ * <br>
  * HOW TO RUN THIS EXAMPLE
  * <p>
  * 1) Start Zookeeper and Kafka. Please refer to <a href='http://docs.confluent.io/3.0.1/quickstart.html#quickstart'>CP3.0.1 QuickStart</a>.
@@ -57,7 +57,7 @@ import java.util.Properties;
  * the results to the output topic.
  * <pre>
  * {@code
- * # Here: Write input data using the example driver. Once the driver has stopped generating data,
+ * # Here: Write input data using the example driver. mjsax Pending Once the driver has stopped generating data,
  * # you can terminate it via `Ctrl-C`.
  * $ java -cp target/streams-examples-3.0.1-standalone.jar io.confluent.examples.streams.SumLambdaExampleDriver
  * }</pre>
@@ -89,48 +89,48 @@ import java.util.Properties;
  */
 public class SumLambdaExample {
 
-    static final String SUM_OF_ODD_NUMBERS_TOPIC = "sum-of-odd-numbers-topic";
-    static final String NUMBERS_TOPIC = "numbers-topic";
+  static final String SUM_OF_ODD_NUMBERS_TOPIC = "sum-of-odd-numbers-topic";
+  static final String NUMBERS_TOPIC = "numbers-topic";
 
-    public static void main(final String[] args) throws Exception {
-        final Properties streamsConfiguration = new Properties();
-        // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
-        // against which the application is run.
-        streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "sum-lambda-example");
-        // Where to find Kafka broker(s).
-        streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        // Where to find the corresponding ZooKeeper ensemble.
-        streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
-        // Specify default (de)serializers for record keys and for record values.
-        streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.Integer().getClass().getName());
-        streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.Integer().getClass().getName());
-        streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, "/tmp/kafka-streams");
+  public static void main(final String[] args) throws Exception {
+    final Properties streamsConfiguration = new Properties();
+    // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
+    // against which the application is run.
+    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "sum-lambda-example");
+    // Where to find Kafka broker(s).
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    // Where to find the corresponding ZooKeeper ensemble.
+    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
+    // Specify default (de)serializers for record keys and for record values.
+    streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.Integer().getClass().getName());
+    streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.Integer().getClass().getName());
+    streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, "/tmp/kafka-streams");
 
-        final KStreamBuilder builder = new KStreamBuilder();
-        // We assume the input topic contains records where the values are Integers.
-        // We don't really care about the keys of the input records;  for simplicity, we assume them
-        // to be Integers, too, because we will re-key the stream later on, and the new key will be
-        // of type Integer.
-        final KStream<Integer, Integer> input = builder.stream(NUMBERS_TOPIC);
-        final KTable<Integer, Integer> sumOfOddNumbers = input
-            // We are only interested in odd numbers.
-            .filter((k, v) -> v % 2 != 0)
-            // We want to compute the total sum across ALL numbers, so we must re-key all records to the
-            // same key.  This re-keying is required because in Kafka Streams a data record is always a
-            // key-value pair, and KStream aggregations such as `reduceByKey` operate on a per-key basis.
-            // The actual new key (here: `1`) we pick here doesn't matter as long it is the same across
-            // all records.
-            .selectKey((k, v) -> 1)
-            // Add the numbers to compute the sum.
-            .reduceByKey((v1, v2) -> v1 + v2, "sum");
-        sumOfOddNumbers.to(SUM_OF_ODD_NUMBERS_TOPIC);
+    final KStreamBuilder builder = new KStreamBuilder();
+    // We assume the input topic contains records where the values are Integers.
+    // We don't really care about the keys of the input records;  for simplicity, we assume them
+    // to be Integers, too, because we will re-key the stream later on, and the new key will be
+    // of type Integer.
+    final KStream<Integer, Integer> input = builder.stream(NUMBERS_TOPIC);
+    final KTable<Integer, Integer> sumOfOddNumbers = input
+      // We are only interested in odd numbers.
+      .filter((k, v) -> v % 2 != 0)
+      // We want to compute the total sum across ALL numbers, so we must re-key all records to the
+      // same key.  This re-keying is required because in Kafka Streams a data record is always a
+      // key-value pair, and KStream aggregations such as `reduceByKey` operate on a per-key basis.
+      // The actual new key (here: `1`) we pick here doesn't matter as long it is the same across
+      // all records.
+      .selectKey((k, v) -> 1)
+      // Add the numbers to compute the sum.
+      .reduceByKey((v1, v2) -> v1 + v2, "sum");
+    sumOfOddNumbers.to(SUM_OF_ODD_NUMBERS_TOPIC);
 
-        final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
-        streams.start();
+    final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
+    streams.start();
 
-        // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
-        Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
-    }
+    // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
+    Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+  }
 
 }

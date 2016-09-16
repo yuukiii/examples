@@ -47,45 +47,45 @@ import java.util.stream.IntStream;
  */
 public class SumLambdaExampleDriver {
 
-    public static void main(final String[] args) throws Exception {
-        produceInput();
-        consumeOutput();
+  public static void main(final String[] args) throws Exception {
+    produceInput();
+    consumeOutput();
+  }
+
+  private static void consumeOutput() {
+    final Properties properties = new Properties();
+    properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, IntegerDeserializer.class);
+    properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, IntegerDeserializer.class);
+    properties.put(ConsumerConfig.GROUP_ID_CONFIG,
+      "sum-lambda-example-consumer");
+    properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    final KafkaConsumer<Integer, Integer> consumer = new KafkaConsumer<>(properties);
+    consumer.subscribe(Collections.singleton(SumLambdaExample.SUM_OF_ODD_NUMBERS_TOPIC));
+    while (true) {
+      final ConsumerRecords<Integer, Integer> records =
+        consumer.poll(Long.MAX_VALUE);
+
+      for (final ConsumerRecord<Integer, Integer> record : records) {
+        System.out.println("Current sum of odd numbers is:" + record.value());
+      }
     }
+  }
 
-    private static void consumeOutput() {
-        final Properties properties = new Properties();
-        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, IntegerDeserializer.class);
-        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, IntegerDeserializer.class);
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG,
-            "sum-lambda-example-consumer");
-        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        final KafkaConsumer<Integer, Integer> consumer = new KafkaConsumer<>(properties);
-        consumer.subscribe(Collections.singleton(SumLambdaExample.SUM_OF_ODD_NUMBERS_TOPIC));
-        while (true) {
-            final ConsumerRecords<Integer, Integer> records =
-                consumer.poll(Long.MAX_VALUE);
+  private static void produceInput() {
+    final Properties props = new Properties();
+    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class);
+    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class);
 
-            for (final ConsumerRecord<Integer, Integer> record : records) {
-                System.out.println("Current sum of odd numbers is:" + record.value());
-            }
-        }
-    }
+    final KafkaProducer<Integer, Integer> producer = new KafkaProducer<>(props);
 
-    private static void produceInput() {
-        final Properties props = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class);
+    IntStream.range(0, 100)
+      .mapToObj(val -> new ProducerRecord<>(SumLambdaExample.NUMBERS_TOPIC, val, val))
+      .forEach(producer::send);
 
-        final KafkaProducer<Integer, Integer> producer = new KafkaProducer<>(props);
-
-        IntStream.range(0, 100)
-            .mapToObj(val -> new ProducerRecord<>(SumLambdaExample.NUMBERS_TOPIC, val, val))
-            .forEach(producer::send);
-
-        producer.flush();
-    }
+    producer.flush();
+  }
 
 
 }

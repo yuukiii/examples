@@ -35,51 +35,51 @@ import java.util.Properties;
  * <p>
  * Note: The specific Avro binding is used for serialization/deserialization, where the {@code WikiFeed}
  * class is auto-generated from its Avro schema by the maven avro plugin. See {@code wikifeed.avsc}
- * under {@code src/main/avro/}.
+ * under {@code src/main/resources/avro/io/confluent/examples/streams/}.
  */
 public class WikipediaFeedAvroLambdaExample {
 
-    public static void main(final String[] args) throws Exception {
-        final Properties streamsConfiguration = new Properties();
+  public static void main(final String[] args) throws Exception {
+    final Properties streamsConfiguration = new Properties();
 
-        // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
-        // against which the application is run.
-        streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "wordcount-avro-lambda-example");
-        // Where to find Kafka broker(s).
-        streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        // Where to find the corresponding ZooKeeper ensemble.
-        streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
-        // Where to find the Confluent schema registry instance(s)
-        streamsConfiguration.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
-        // Specify default (de)serializers for record keys and for record values.
-        streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
+    // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
+    // against which the application is run.
+    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "wordcount-avro-lambda-example");
+    // Where to find Kafka broker(s).
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    // Where to find the corresponding ZooKeeper ensemble.
+    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
+    // Where to find the Confluent schema registry instance(s)
+    streamsConfiguration.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
+    // Specify default (de)serializers for record keys and for record values.
+    streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+    streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
 
-        final Serde<String> stringSerde = Serdes.String();
-        final Serde<Long> longSerde = Serdes.Long();
+    final Serde<String> stringSerde = Serdes.String();
+    final Serde<Long> longSerde = Serdes.Long();
 
-        final KStreamBuilder builder = new KStreamBuilder();
+    final KStreamBuilder builder = new KStreamBuilder();
 
-        // read the source stream
-        final KStream<String, WikiFeed> feeds = builder.stream("WikipediaFeed");
+    // read the source stream
+    final KStream<String, WikiFeed> feeds = builder.stream("WikipediaFeed");
 
-        // aggregate the new feed counts of by user
-        final KTable<String, Long> aggregated = feeds
-            // filter out old feeds
-            .filter((dummy, value) -> value.getIsNew())
-            // map the user id as key
-            .map((key, value) -> new KeyValue<>(value.getUser(), value))
-            // sum by key, need to override the serdes for String typed key
-            .countByKey(stringSerde, "Counts");
+    // aggregate the new feed counts of by user
+    final KTable<String, Long> aggregated = feeds
+      // filter out old feeds
+      .filter((dummy, value) -> value.getIsNew())
+      // map the user id as key
+      .map((key, value) -> new KeyValue<>(value.getUser(), value))
+      // sum by key, need to override the serdes for String typed key
+      .countByKey(stringSerde, "Counts");
 
-        // write to the result topic, need to override serdes
-        aggregated.to(stringSerde, longSerde, "WikipediaStats");
+    // write to the result topic, need to override serdes
+    aggregated.to(stringSerde, longSerde, "WikipediaStats");
 
-        final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
-        streams.start();
+    final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
+    streams.start();
 
-        // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
-        Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
-    }
+    // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
+    Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+  }
 
 }

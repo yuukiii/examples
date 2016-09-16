@@ -7,20 +7,20 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
-import org.apache.kafka.streams.kstream.KeyValueMapper;
 
 import java.util.Properties;
 
 /**
  * Demonstrates how to reset a Kafka Streams application to re-process its input data from scratch.
+ * See also <a href='http://docs.confluent.io/3.0.1/streams/developer-guide.html#application-reset-tool'>http://docs.confluent.io/3.0.1/streams/developer-guide.html#application-reset-tool</a>
  * <p>
  * The main purpose of the example is to explain the usage of the "Application Reset Tool".
- * Thus, we don’t put the focus on what this topology is actually doing&mdsash;the point is to have an example of a
+ * Thus, we don’t put the focus on what this topology is actually doing&mdash;the point is to have an example of a
  * typical topology that has input topics, intermediate topics, and output topics.
  * One important part in the code is the call to {@link KafkaStreams#cleanUp()}.
  * This call performs a local application (instance) reset and must be part in the code to make the application "reset ready".
  * <p>
- * <p>
+ * <br>
  * HOW TO RUN THIS EXAMPLE
  * <p>
  * 1) Start Zookeeper and Kafka. Please refer to <a href='http://docs.confluent.io/3.0.1/quickstart.html#quickstart'>CP3.0.1 QuickStart</a>.
@@ -75,20 +75,25 @@ import java.util.Properties;
  * }</pre>
  * 6) Now you can stop the Streams application via {@code Ctrl-C}.
  * <p>
- * 7) If you would restart this application again (and not add any new data the the input topic),
- * the application would idle and wait for new data as it resumes where it was stopped.
- * If you want to reprocess the input data that is already contained in the input topic,
- * you first need to <strong>reset</strong> your application as follows:
+ * 7) In this step we will <strong>reset</strong> the application.
+ * The effect is that, once the application has been restarted (which we are going to do in step 8),
+ * it will reprocess its input data by re-reading the input topic.
+ * To reset your application you must run:
  * <pre>
  * {@code
- * $ bin/kafka-streams-application-reset --application-id my-streams-app \
+ * $ bin/kafka-streams-application-reset --application-id application-reset-demo \
  *                                       --input-topics my-input-topic \
  *                                       --intermediate-topics rekeyed-topic
  * }</pre>
- * 8) You can now restart the application to reprocess the input topic from scratch.
- * For this, there is also a "local cleanup" required.
- * In this example application, you need to specify command line argument {@code --reset} to tell the application to
- * call {@link KafkaStreams#cleanUp()} before the application gets started.
+ * If you were to restart your application without resetting it,
+ * then the application would resume reading from the point where it was stopped in step 6
+ * (rather than re-reading the input topic).
+ * In this case, the restarted application would idle and wait for you to write new input data to its input topic.
+ * <p>
+ * 8) A full application reset also requires a "local cleanup".
+ * In this example application, you need to specify the command line argument {@code --reset}
+ * to tell the application to perform such a local cleanup by calling {@link KafkaStreams#cleanUp()}
+ * before it begins processing.
  * Thus, restart the application via:
  * <pre>
  * {@code
@@ -103,58 +108,49 @@ import java.util.Properties;
  */
 public class ApplicationResetExample {
 
-    public static void main(final String[] args) throws Exception {
-        // Kafka Streams configuration
-        final Properties streamsConfiguration = new Properties();
-        // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
-        // against which the application is run.
-        streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "my-streams-app");
-        // Where to find Kafka broker(s).
-        streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        // Where to find the corresponding ZooKeeper ensemble.
-        streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
-        // Specify default (de)serializers for record keys and for record values.
-        streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-        streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-        // make sure to consume the complete topic via "auto.offset.reset = earliest"
-        streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+  public static void main(final String[] args) throws Exception {
+    // Kafka Streams configuration
+    final Properties streamsConfiguration = new Properties();
+    // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
+    // against which the application is run.
+    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "application-reset-demo");
+    // Where to find Kafka broker(s).
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    // Where to find the corresponding ZooKeeper ensemble.
+    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
+    // Specify default (de)serializers for record keys and for record values.
+    streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+    streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+    // Read the topic from the very beginning if no previous consumer offsets are found for this app.
+    // Resetting an app will set any existing consumer offsets to zero,
+    // so setting this config combined with resetting will cause the application to re-process all the input data in the topic.
+    streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        final KafkaStreams streams = run(args, streamsConfiguration);
+    final KafkaStreams streams = run(args, streamsConfiguration);
 
-        // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            @Override
-            public void run() {
-                streams.close();
-            }
-        }));
+    // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
+    Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+  }
+
+  public static KafkaStreams run(final String[] args, final Properties streamsConfiguration) {
+    // Define the processing topology
+    final KStreamBuilder builder = new KStreamBuilder();
+    final KStream<String, String> input = builder.stream("my-input-topic");
+    input.selectKey((key, value) -> value.split(" ")[0])
+      .through("rekeyed-topic")
+      .countByKey("count")
+      .to(Serdes.String(), Serdes.Long(), "my-output-topic");
+
+    final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
+
+    // Delete the application's local state on reset
+    if (args.length > 0 && args[0].equals("--reset")) {
+      streams.cleanUp();
     }
 
-    public static KafkaStreams run(final String[] args, final Properties streamsConfiguration) {
-        // Define the processing topology
-        final KStreamBuilder builder = new KStreamBuilder();
-        final KStream<String, String> input = builder.stream("my-input-topic");
-        input.selectKey(
-            new KeyValueMapper<String, String, String>() {
-                @Override
-                public String apply(final String key, final String value) {
-                    return value.split(" ")[0];
-                }
-            })
-            .through("rekeyed-topic")
-            .countByKey("count")
-            .to(Serdes.String(), Serdes.Long(), "my-output-topic");
+    streams.start();
 
-        final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
-
-        // Delete the application's local state on reset
-        if (args.length > 0 && args[0].equals("--reset")) {
-            streams.cleanUp();
-        }
-
-        streams.start();
-
-        return streams;
-    }
+    return streams;
+  }
 
 }

@@ -47,7 +47,7 @@ import java.util.Properties;
  * whenever new types of Avro objects (in the form of GenericRecord) are being passed between
  * processing steps.
  * <p>
- * <p>
+ * <br>
  * HOW TO RUN THIS EXAMPLE
  * <p>
  * 1) Start Zookeeper, Kafka, and Confluent Schema Registry. Please refer to <a href='http://docs.confluent.io/3.0.1/quickstart.html#quickstart'>CP3.0.1 QuickStart</a>.
@@ -125,85 +125,85 @@ import java.util.Properties;
  */
 public class PageViewRegionLambdaExample {
 
-    public static void main(final String[] args) throws Exception {
-        final Properties streamsConfiguration = new Properties();
-        // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
-        // against which the application is run.
-        streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "pageview-region-lambda-example");
-        // Where to find Kafka broker(s).
-        streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        // Where to find the corresponding ZooKeeper ensemble.
-        streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
-        // Where to find the Confluent schema registry instance(s)
-        streamsConfiguration.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
-        // Specify default (de)serializers for record keys and for record values.
-        streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class);
-        streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+  public static void main(final String[] args) throws Exception {
+    final Properties streamsConfiguration = new Properties();
+    // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
+    // against which the application is run.
+    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "pageview-region-lambda-example");
+    // Where to find Kafka broker(s).
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    // Where to find the corresponding ZooKeeper ensemble.
+    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
+    // Where to find the Confluent schema registry instance(s)
+    streamsConfiguration.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
+    // Specify default (de)serializers for record keys and for record values.
+    streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+    streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class);
+    streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        final Serde<String> stringSerde = Serdes.String();
-        final Serde<Long> longSerde = Serdes.Long();
+    final Serde<String> stringSerde = Serdes.String();
+    final Serde<Long> longSerde = Serdes.Long();
 
-        final KStreamBuilder builder = new KStreamBuilder();
+    final KStreamBuilder builder = new KStreamBuilder();
 
-        // Create a stream of page view events from the PageViews topic, where the key of
-        // a record is assumed to be the user id (String) and the value an Avro GenericRecord
-        // that represents the full details of the page view event.  See `pageview.avsc` under
-        // `src/main/avro/` for the corresponding Avro schema.
-        final KStream<String, GenericRecord> views = builder.stream("PageViews");
+    // Create a stream of page view events from the PageViews topic, where the key of
+    // a record is assumed to be the user id (String) and the value an Avro GenericRecord
+    // that represents the full details of the page view event.  See `pageview.avsc` under
+    // `src/main/avro/` for the corresponding Avro schema.
+    final KStream<String, GenericRecord> views = builder.stream("PageViews");
 
-        final KStream<String, GenericRecord> viewsByUser = views
-            .map((dummy, record) ->
-                new KeyValue<>(record.get("user").toString(), record))
-            .through("PageViewsByUser");
+    final KStream<String, GenericRecord> viewsByUser = views
+      .map((dummy, record) ->
+        new KeyValue<>(record.get("user").toString(), record))
+      .through("PageViewsByUser");
 
-        // Create a changelog stream for user profiles from the UserProfiles topic,
-        // where the key of a record is assumed to be the user id (String) and its value
-        // an Avro GenericRecord.  See `userprofile.avsc` under `src/main/avro/` for the
-        // corresponding Avro schema.
-        final KTable<String, GenericRecord> userProfiles = builder.table("UserProfiles");
+    // Create a changelog stream for user profiles from the UserProfiles topic,
+    // where the key of a record is assumed to be the user id (String) and its value
+    // an Avro GenericRecord.  See `userprofile.avsc` under `src/main/avro/` for the
+    // corresponding Avro schema.
+    final KTable<String, GenericRecord> userProfiles = builder.table("UserProfiles");
 
-        final KTable<String, String> userRegions = userProfiles.mapValues(record ->
-            record.get("region").toString());
+    final KTable<String, String> userRegions = userProfiles.mapValues(record ->
+      record.get("region").toString());
 
-        // We must specify the Avro schemas for all intermediate (Avro) classes, if any.
-        // In this example, we want to create an intermediate GenericRecord to hold the view region.
-        // See `pageviewregion.avsc` under `src/main/avro/`.
-        final InputStream
-            pageViewRegionSchema =
-            PageViewRegionLambdaExample.class.getClassLoader()
-                .getResourceAsStream("avro/io/confluent/examples/streams/pageviewregion.avsc");
-        final Schema schema = new Schema.Parser().parse(pageViewRegionSchema);
+    // We must specify the Avro schemas for all intermediate (Avro) classes, if any.
+    // In this example, we want to create an intermediate GenericRecord to hold the view region.
+    // See `pageviewregion.avsc` under `src/main/avro/`.
+    final InputStream
+      pageViewRegionSchema =
+      PageViewRegionLambdaExample.class.getClassLoader()
+        .getResourceAsStream("avro/io/confluent/examples/streams/pageviewregion.avsc");
+    final Schema schema = new Schema.Parser().parse(pageViewRegionSchema);
 
-        final KTable<Windowed<String>, Long> viewsByRegion = viewsByUser
-            .leftJoin(userRegions, (view, region) -> {
-                GenericRecord viewRegion = new GenericData.Record(schema);
-                viewRegion.put("user", view.get("user"));
-                viewRegion.put("page", view.get("page"));
-                viewRegion.put("region", region);
-                return viewRegion;
-            })
-            .map((user, viewRegion) -> new KeyValue<>(viewRegion.get("region").toString(), viewRegion))
-            // count views by user, using hopping windows of size 5 minutes that advance every 1 minute
-            .countByKey(TimeWindows.of("GeoPageViewsWindow", 5 * 60 * 1000L).advanceBy(60 * 1000L));
+    final KTable<Windowed<String>, Long> viewsByRegion = viewsByUser
+      .leftJoin(userRegions, (view, region) -> {
+        GenericRecord viewRegion = new GenericData.Record(schema);
+        viewRegion.put("user", view.get("user"));
+        viewRegion.put("page", view.get("page"));
+        viewRegion.put("region", region);
+        return viewRegion;
+      })
+      .map((user, viewRegion) -> new KeyValue<>(viewRegion.get("region").toString(), viewRegion))
+      // count views by user, using hopping windows of size 5 minutes that advance every 1 minute
+      .countByKey(TimeWindows.of("GeoPageViewsWindow", 5 * 60 * 1000L).advanceBy(60 * 1000L));
 
-        // Note: The following operations would NOT be needed for the actual pageview-by-region
-        // computation, which would normally stop at the countByKey() above.  We use the operations
-        // below only to "massage" the output data so it is easier to inspect on the console via
-        // kafka-console-consumer.
-        final KStream<String, Long> viewsByRegionForConsole = viewsByRegion
-            // get rid of windows (and the underlying KTable) by transforming the KTable to a KStream
-            // and by also converting the record key from type `Windowed<String>` (which
-            // kafka-console-consumer can't print to console out-of-the-box) to `String`
-            .toStream((windowedRegion, count) -> windowedRegion.toString());
+    // Note: The following operations would NOT be needed for the actual pageview-by-region
+    // computation, which would normally stop at the countByKey() above.  We use the operations
+    // below only to "massage" the output data so it is easier to inspect on the console via
+    // kafka-console-consumer.
+    final KStream<String, Long> viewsByRegionForConsole = viewsByRegion
+      // get rid of windows (and the underlying KTable) by transforming the KTable to a KStream
+      // and by also converting the record key from type `Windowed<String>` (which
+      // kafka-console-consumer can't print to console out-of-the-box) to `String`
+      .toStream((windowedRegion, count) -> windowedRegion.toString());
 
-        viewsByRegionForConsole.to(stringSerde, longSerde, "PageViewsByRegion");
+    viewsByRegionForConsole.to(stringSerde, longSerde, "PageViewsByRegion");
 
-        final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
-        streams.start();
+    final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
+    streams.start();
 
-        // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
-        Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
-    }
+    // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
+    Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+  }
 
 }
