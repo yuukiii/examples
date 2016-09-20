@@ -1,11 +1,11 @@
 /**
  * Copyright 2016 Confluent Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -27,19 +27,18 @@ import org.apache.kafka.streams.kstream.Windowed;
 import java.util.Properties;
 
 /**
- * Demonstrates how to count things over time, using time windows.  In this specific example we
+ * Demonstrates how to count things over time, using time windows. In this specific example we
  * read from a user click stream and detect any such users as anomalous that have appeared more
  * than twice in the click stream during one minute.
- *
+ * <p>
  * Note: This example uses lambda expressions and thus works with Java 8+ only.
- *
+ * <p>
+ * <br>
  * HOW TO RUN THIS EXAMPLE
- *
- * 1) Start Zookeeper and Kafka. Please refer to <a href='http://docs.confluent.io/3.0.1/quickstart.html#quickstart'>CP3.0.1
- * QuickStart</a>.
- *
+ * <p>
+ * 1) Start Zookeeper and Kafka. Please refer to <a href='http://docs.confluent.io/3.0.1/quickstart.html#quickstart'>CP3.0.1 QuickStart</a>.
+ * <p>
  * 2) Create the input and output topics used by this example.
- *
  * <pre>
  * {@code
  * $ bin/kafka-topics --create --topic UserClicks \
@@ -48,33 +47,27 @@ import java.util.Properties;
  *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
  * $ bin/kafka-topics --create --topic AnomalousUsers \
  *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
- * }
- * </pre>
- *
- * Note: The above commands are for CP 3.0.1 only. For Apache Kafka it should be
- * `bin/kafka-topics.sh ...`.
- *
+ * }</pre>
+ * Note: The above commands are for CP 3.0.1 only. For Apache Kafka it should be {@code bin/kafka-topics.sh ...}.
+ * <p>
  * 3) Start this example application either in your IDE or on the command line.
- *
+ * <p>
  * If via the command line please refer to <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>.
  * Once packaged you can then run:
- *
  * <pre>
  * {@code
  * $ java -cp target/streams-examples-3.0.1-standalone.jar io.confluent.examples.streams.AnomalyDetectionLambdaExample
- * }
- * </pre>
- *
- * 4) Write some input data to the source topic (e.g. via `kafka-console-producer`.  The already
+ * }</pre>
+ * <p>
+ * 4) Write some input data to the source topic (e.g. via {@code kafka-console-producer}. The already
  * running example application (step 3) will automatically process this input data and write the
  * results to the output topic.
- *
  * <pre>
  * {@code
- * # Start the console producer.  You can then enter input data by writing some line of text,
- * # followed by ENTER.  The input data you enter should be some example usernames;  and because
+ * # Start the console producer. You can then enter input data by writing some line of text,
+ * # followed by ENTER.  The input data you enter should be some example usernames; and because
  * # this example is set to detect only such users as "anomalous" that appear at least three times
- * # during a 1-minute time window, you should enter at least one username three times -- otherwise
+ * # during a 1-minute time window, you should enter at least one username three times&mdash;otherwise
  * # this example won't produce any output data (cf. step 5).
  * #
  * #   alice<ENTER>
@@ -86,38 +79,30 @@ import java.util.Properties;
  * #
  * # Every line you enter will become the value of a single Kafka message.
  * $ bin/kafka-console-producer --broker-list localhost:9092 --topic UserClicks
- * }
- * </pre>
- *
- * 5) Inspect the resulting data in the output topic, e.g. via `kafka-console-consumer`.
- *
+ * }</pre>
+ * 5) Inspect the resulting data in the output topic, e.g. via {@code kafka-console-consumer}.
  * <pre>
  * {@code
  * $ bin/kafka-console-consumer --topic AnomalousUsers --from-beginning \
- *        --zookeeper localhost:2181 \
- *        --property print.key=true \
- *        --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
- * }
- * </pre>
- *
+ *                              --zookeeper localhost:2181 \
+ *                              --property print.key=true \
+ *                              --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
+ * }</pre>
  * You should see output data similar to:
- *
  * <pre>
  * {@code
  * [alice@1466521140000]	3
  * [alice@1466521140000]	4
- * }
- * </pre>
- *
+ * }</pre>
  * Here, the output format is "[USER@WINDOW_START_TIME] COUNT".
- *
- * 6) Once you're done with your experiments, you can stop this example via `Ctrl-C`.  If needed,
- * also stop the Kafka broker (`Ctrl-C`), and only then stop the ZooKeeper instance (`Ctrl-C`).
+ * <p>
+ * 6) Once you're done with your experiments, you can stop this example via {@code Ctrl-C}.  If needed,
+ * also stop the Kafka broker ({@code Ctrl-C}), and only then stop the ZooKeeper instance ({@code Ctrl-C}).
  */
 public class AnomalyDetectionLambdaExample {
 
-  public static void main(String[] args) throws Exception {
-    Properties streamsConfiguration = new Properties();
+  public static void main(final String[] args) throws Exception {
+    final Properties streamsConfiguration = new Properties();
     // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
     // against which the application is run.
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "anomaly-detection-lambda-example");
@@ -132,42 +117,42 @@ public class AnomalyDetectionLambdaExample {
     final Serde<String> stringSerde = Serdes.String();
     final Serde<Long> longSerde = Serdes.Long();
 
-    KStreamBuilder builder = new KStreamBuilder();
+    final KStreamBuilder builder = new KStreamBuilder();
 
     // Read the source stream.  In this example, we ignore whatever is stored in the record key and
     // assume the record value contains the username (and each record would represent a single
     // click by the corresponding user).
-    KStream<String, String> views = builder.stream("UserClicks");
+    final KStream<String, String> views = builder.stream("UserClicks");
 
-    KTable<Windowed<String>, Long> anomalousUsers = views
-        // Map the user name as key, because the subsequent counting is performed based on the key
-        .map((ignoredKey, username) -> new KeyValue<>(username, username))
-        // Required in 0.10.0 to re-partition the data because we re-keyed the stream in the `map`
-        // step.  Upcoming Kafka 0.10.1 does this automatically for you (no need for `through`).
-        .through("RekeyedIntermediateTopic")
-        // Count users, using one-minute tumbling windows
-        .countByKey(TimeWindows.of("UserCountWindow", 60 * 1000L))
-        // Get users whose one-minute count is >= 3
-        .filter((windowedUserId, count) -> count >= 3);
+    final KTable<Windowed<String>, Long> anomalousUsers = views
+      // Map the user name as key, because the subsequent counting is performed based on the key
+      .map((ignoredKey, username) -> new KeyValue<>(username, username))
+      // Required in 0.10.0 to re-partition the data because we re-keyed the stream in the `map`
+      // step.  Upcoming Kafka 0.10.1 does this automatically for you (no need for `through`).
+      .through("RekeyedIntermediateTopic")
+      // Count users, using one-minute tumbling windows
+      .countByKey(TimeWindows.of("UserCountWindow", 60 * 1000L))
+      // Get users whose one-minute count is >= 3
+      .filter((windowedUserId, count) -> count >= 3);
 
     // Note: The following operations would NOT be needed for the actual anomaly detection,
     // which would normally stop at the filter() above.  We use the operations below only to
     // "massage" the output data so it is easier to inspect on the console via
     // kafka-console-consumer.
-    KStream<String, Long> anomalousUsersForConsole = anomalousUsers
-        // get rid of windows (and the underlying KTable) by transforming the KTable to a KStream
-        .toStream()
-        // sanitize the output by removing null record values (again, we do this only so that the
-        // output is easier to read via kafka-console-consumer combined with LongDeserializer
-        // because LongDeserializer fails on null values, and even though we could configure
-        // kafka-console-consumer to skip messages on error the output still wouldn't look pretty)
-        .filter((windowedUserId, count) -> count != null)
-        .map((windowedUserId, count) -> new KeyValue<>(windowedUserId.toString(), count));
+    final KStream<String, Long> anomalousUsersForConsole = anomalousUsers
+      // get rid of windows (and the underlying KTable) by transforming the KTable to a KStream
+      .toStream()
+      // sanitize the output by removing null record values (again, we do this only so that the
+      // output is easier to read via kafka-console-consumer combined with LongDeserializer
+      // because LongDeserializer fails on null values, and even though we could configure
+      // kafka-console-consumer to skip messages on error the output still wouldn't look pretty)
+      .filter((windowedUserId, count) -> count != null)
+      .map((windowedUserId, count) -> new KeyValue<>(windowedUserId.toString(), count));
 
     // write to the result topic
     anomalousUsersForConsole.to(stringSerde, longSerde, "AnomalousUsers");
 
-    KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
+    final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();
 
     // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
