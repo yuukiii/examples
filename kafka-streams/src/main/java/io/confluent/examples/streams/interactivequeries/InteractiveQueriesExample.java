@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.confluent.examples.streams.queryablestate;
+package io.confluent.examples.streams.interactivequeries;
 
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -29,12 +29,12 @@ import java.util.Properties;
 
 
 /**
- * Demonstrates using the KafkaStreams API to locate and query State Stores (Queryable State). This
+ * Demonstrates using the KafkaStreams API to locate and query State Stores (Interactive Queries). This
  * example uses the same Topology as {@link io.confluent.examples.streams.WordCountLambdaExample} so
  * please see that for the full explanation of the topology.
  *
  * Note: This example uses Java 8 functionality and thus works with Java 8+ only.  But of course you
- * can use the Queryable State feature of Kafka Streams also with Java 7.
+ * can use the Interactive Queries feature of Kafka Streams also with Java 7.
  *
  * In this example, the input stream reads from a topic named "TextLinesTopic", where the values of
  * messages represent lines of text; and the histogram output is exposed via two State Stores:
@@ -75,7 +75,7 @@ import java.util.Properties;
  * <pre>
  * {@code
  * $ java -cp target/streams-examples-3.0.0-standalone.jar \
- *      io.confluent.examples.streams.queryablestate.QueryableStateExample 7070
+ *      io.confluent.examples.streams.interactivequeries.InteractiveQueriesExample 7070
  * }
  * </pre>
  *
@@ -86,12 +86,12 @@ import java.util.Properties;
  * <pre>
  * {@code
  * $ java -cp target/streams-examples-3.0.0-standalone.jar \
- *      io.confluent.examples.streams.queryablestate.QueryableStateExample 7071
+ *      io.confluent.examples.streams.interactivequeries.InteractiveQueriesExample 7071
  * }
  * </pre>
  *
  *
- * 4) Write some input data to the source topics (e.g. via {@link QueryableStateExampleDriver}). The
+ * 4) Write some input data to the source topics (e.g. via {@link InteractiveQueriesExampleDriver}). The
  * already running example application (step 3) will automatically process this input data
  *
  *
@@ -123,7 +123,7 @@ import java.util.Properties;
  *
  * Note: that the REST functionality is NOT part of Kafka Streams or its API. For demonstration
  * purposes of this example application, we decided to go with a simple, custom-built REST API that
- * uses the Queryable State API of Kafka Streams behind the scenes to expose the state stores of
+ * uses the Interactive Queries API of Kafka Streams behind the scenes to expose the state stores of
  * this application via REST.
  *
  * 6) Once you're done with your experiments, you can stop this example via `Ctrl-C`.  If needed,
@@ -132,7 +132,7 @@ import java.util.Properties;
  * If you like you can run multiple instances of this example by passing in a different port. You
  * can then experiment with seeing how keys map to different instances etc.
  */
-public class QueryableStateExample {
+public class InteractiveQueriesExample {
 
   static final String TEXT_LINES_TOPIC = "TextLinesTopic";
 
@@ -145,7 +145,7 @@ public class QueryableStateExample {
     Properties streamsConfiguration = new Properties();
     // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
     // against which the application is run.
-    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "queryable-state-example");
+    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "interactive-queries-example");
     // Where to find Kafka broker(s).
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
     // Where to find the corresponding ZooKeeper ensemble.
@@ -163,7 +163,7 @@ public class QueryableStateExample {
     streams.start();
 
     // Start the Restful proxy for servicing remote access to state stores
-    final QueryableStateRestService restService = startRestProxy(streams, port);
+    final InteractiveQueriesRestService restService = startRestProxy(streams, port);
 
     // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -177,12 +177,12 @@ public class QueryableStateExample {
   }
 
 
-  static QueryableStateRestService startRestProxy(final KafkaStreams streams, final int port)
+  static InteractiveQueriesRestService startRestProxy(final KafkaStreams streams, final int port)
       throws Exception {
-    final QueryableStateRestService
-        queryableStateRestService = new QueryableStateRestService(streams);
-    queryableStateRestService.start(port);
-    return queryableStateRestService;
+    final InteractiveQueriesRestService
+            interactiveQueriesRestService = new InteractiveQueriesRestService(streams);
+    interactiveQueriesRestService.start(port);
+    return interactiveQueriesRestService;
   }
 
   static KafkaStreams createStreams(final Properties streamsConfiguration) {

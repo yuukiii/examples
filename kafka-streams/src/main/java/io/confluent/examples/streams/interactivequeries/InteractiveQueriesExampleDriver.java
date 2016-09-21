@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.confluent.examples.streams.queryablestate;
+package io.confluent.examples.streams.interactivequeries;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -25,8 +25,8 @@ import java.util.Random;
 
 
 /**
- * This is a sample driver for the {@link QueryableStateExample}.
- * To run this driver please first refer to the instructions in {@link QueryableStateExample}.
+ * This is a sample driver for the {@link InteractiveQueriesExample}.
+ * To run this driver please first refer to the instructions in {@link InteractiveQueriesExample}.
  * You can then run this class directly in your IDE or via the command line.
  *
  * To run via the command line you might want to package as a fatjar first. Please refer to:
@@ -35,12 +35,12 @@ import java.util.Random;
  * Once packaged you can then run:
  * <pre>
  * {@code
- * $ java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.queryablestate.QueryableStateExampleDriver
+ * $ java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.interactivequeries.InteractiveQueriesExampleDriver
  * }
  * </pre>
  * You should terminate with Ctrl-C
  */
-public class QueryableStateExampleDriver {
+public class InteractiveQueriesExampleDriver {
 
   public static void main(String [] args) throws Exception {
     final List<String> inputValues = Arrays.asList("hello world",
@@ -72,16 +72,16 @@ public class QueryableStateExampleDriver {
     // our step-by-step instructions always work right from the start (otherwise users may run into
     // HTTP 404 errors when querying the latest value for a key, for example, until the right input
     // data was sent to the topic).
-    producer.send(new ProducerRecord<>(QueryableStateExample.TEXT_LINES_TOPIC,
-        inputValues.get(0), inputValues.get(0)));
+    producer.send(new ProducerRecord<>(InteractiveQueriesExample.TEXT_LINES_TOPIC,
+                                       inputValues.get(0), inputValues.get(0)));
 
     // every 500 milliseconds produce one of the lines of text from inputValues to the
     // TextLinesTopic
     final Random random = new Random();
     while (true) {
       final int i = random.nextInt(inputValues.size());
-      producer.send(new ProducerRecord<>(QueryableStateExample.TEXT_LINES_TOPIC,
-                                                       inputValues.get(i), inputValues.get(i)));
+      producer.send(new ProducerRecord<>(InteractiveQueriesExample.TEXT_LINES_TOPIC,
+                                         inputValues.get(i), inputValues.get(i)));
       Thread.sleep(500L);
     }
   }

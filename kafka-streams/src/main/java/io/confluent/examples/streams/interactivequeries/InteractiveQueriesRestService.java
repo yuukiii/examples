@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.confluent.examples.streams.queryablestate;
+package io.confluent.examples.streams.interactivequeries;
 
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
@@ -29,7 +29,6 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -44,17 +43,17 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 /**
- *  A simple REST proxy that runs embedded in the {@link QueryableStateExample}. This is used to
- *  demonstrate how a developer can use the Queryable State APIs exposed by Kafka Streams to
+ *  A simple REST proxy that runs embedded in the {@link InteractiveQueriesExample}. This is used to
+ *  demonstrate how a developer can use the Interactive Queries APIs exposed by Kafka Streams to
  *  locate and query the State Stores within a Kafka Streams Application.
  */
 @Path("state")
-public class QueryableStateRestService {
+public class InteractiveQueriesRestService {
 
   private final KafkaStreams streams;
   private Server jettyServer;
 
-  QueryableStateRestService(final KafkaStreams streams) {
+  InteractiveQueriesRestService(final KafkaStreams streams) {
     this.streams = streams;
   }
 

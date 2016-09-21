@@ -11,14 +11,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.confluent.examples.streams.queryablestate;
+package io.confluent.examples.streams.interactivequeries;
 
 import java.util.Objects;
 import java.util.Set;
 
 /**
  * A simple bean that can be JSON serialized via Jersey. Represents a KafkaStreams instance
- * that has a set of state stores. See {@link QueryableStateRestService} for how it is used.
+ * that has a set of state stores. See {@link InteractiveQueriesRestService} for how it is used.
  *
  * We use this JavaBean based approach as it fits nicely with JSON serialization provided by
  * jax-rs/jersey

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.confluent.examples.streams.queryablestate;
+package io.confluent.examples.streams.interactivequeries;
 
 import com.google.common.collect.Sets;
 
@@ -50,26 +50,26 @@ import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 /**
- * End-to-end integration test for {@link QueryableStateExample}. Demonstrates
- * how you can programmatically query the REST API exposed by {@link QueryableStateRestService}
+ * End-to-end integration test for {@link InteractiveQueriesExample}. Demonstrates
+ * how you can programmatically query the REST API exposed by {@link InteractiveQueriesRestService}
  */
-public class QueryableStateExampleTest {
+public class InteractiveQueriesExampleTest {
 
   @ClassRule
   public static final EmbeddedSingleNodeKafkaCluster CLUSTER = new EmbeddedSingleNodeKafkaCluster();
   public static final String WORD_COUNT =
-      "queryable-state-wordcount-example-word-count-repartition";
+      "interactive-queries-wordcount-example-word-count-repartition";
   public static final String WINDOWED_WORD_COUNT =
-      "queryable-state-wordcount-example-windowed-word-count-repartition";
+      "interactive-queries-wordcount-example-windowed-word-count-repartition";
 
   @Rule
   public final TemporaryFolder temp = new TemporaryFolder();
   private KafkaStreams kafkaStreams;
-  private QueryableStateRestService proxy;
+  private InteractiveQueriesRestService proxy;
 
   @BeforeClass
   public static void createTopic() {
-    CLUSTER.createTopic(QueryableStateExample.TEXT_LINES_TOPIC, 2, 1);
+    CLUSTER.createTopic(InteractiveQueriesExample.TEXT_LINES_TOPIC, 2, 1);
     // The next two topics don't need to be created as they would be auto-created
     // by Kafka Streams, but it just makes the test more reliable if they already exist
     // as creating the topics causes a rebalance which closes the stores etc. So it makes
@@ -98,7 +98,7 @@ public class QueryableStateExampleTest {
   }
 
   @Test
-  public void shouldDemonstrateQueryableState() throws Exception {
+  public void shouldDemonstrateInteractiveQueries() throws Exception {
     final List<String> inputValues = Arrays.asList("hello",
         "world",
         "world",
@@ -114,18 +114,18 @@ public class QueryableStateExampleTest {
     producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     IntegrationTestUtils
-        .produceValuesSynchronously(QueryableStateExample.TEXT_LINES_TOPIC, inputValues,
-            producerConfig);
+        .produceValuesSynchronously(InteractiveQueriesExample.TEXT_LINES_TOPIC, inputValues,
+                                    producerConfig);
 
     // Race condition caveat:  This two-step approach of finding a free port but not immediately
     // binding to it may cause occasional errors.
     final int port = randomFreeLocalPort();
     final String baseUrl = "http://localhost:" + port + "/state";
 
-    kafkaStreams = QueryableStateExample.createStreams(
+    kafkaStreams = InteractiveQueriesExample.createStreams(
         createStreamConfig(CLUSTER.bootstrapServers(), port, "one"));
     kafkaStreams.start();
-    proxy = QueryableStateExample.startRestProxy(kafkaStreams, port);
+    proxy = InteractiveQueriesExample.startRestProxy(kafkaStreams, port);
 
     final Client client = ClientBuilder.newClient();
 
@@ -256,7 +256,7 @@ public class QueryableStateExampleTest {
     // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
     // against which the application is run.
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG,
-        "queryable-state-wordcount-example");
+        "interactive-queries-wordcount-example");
     // Where to find Kafka broker(s).
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootStrap);
     // Where to find the corresponding ZooKeeper ensemble.

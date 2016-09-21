@@ -11,13 +11,13 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.confluent.examples.streams.queryablestate;
+package io.confluent.examples.streams.interactivequeries;
 
 import java.util.Objects;
 
 /**
- * A simple bean used by {@link QueryableStateRestService} when responding to
- * {@link QueryableStateRestService#byKey(String, String)}.
+ * A simple bean used by {@link InteractiveQueriesRestService} when responding to
+ * {@link InteractiveQueriesRestService#byKey(String, String)}.
  *
  * We use this JavaBean based approach as it fits nicely with JSON serialization provided by
  * jax-rs/jersey

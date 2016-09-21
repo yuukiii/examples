@@ -76,7 +76,7 @@ There are two kinds of examples:
   and enabling client authentication so that the Kafka Streams application authenticates itself to the Kafka brokers)
 * [StateStoresInTheDSLIntegrationTest](src/main/java/io/confluent/examples/streams/StateStoresInTheDSLIntegrationTest.java) (Java 8+)
   -- demonstrates how to use state stores in the Kafka Streams DSL
-* [QueryableStateExample](src/main/java/io/confluent/examples/streams/queryablestate/QueryableStateExample.java) (Java 8+)
+* [InteractiveQueriesExample](src/main/java/io/confluent/examples/streams/interactivequeries/InteractiveQueriesExample.java) (Java 8+)
   -- demonstrates how to use a REST proxy to locate and query State Stores in a Kafka Streams
   application.
 * And [further examples](src/main/java/io/confluent/examples/streams/).
