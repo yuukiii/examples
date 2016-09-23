@@ -77,8 +77,9 @@ There are two kinds of examples:
 * [StateStoresInTheDSLIntegrationTest](src/main/java/io/confluent/examples/streams/StateStoresInTheDSLIntegrationTest.java) (Java 8+)
   -- demonstrates how to use state stores in the Kafka Streams DSL
 * [InteractiveQueriesExample](src/main/java/io/confluent/examples/streams/interactivequeries/InteractiveQueriesExample.java) (Java 8+)
-  -- demonstrates how to use a REST proxy to locate and query State Stores in a Kafka Streams
-  application.
+  -- demonstrates the the Interactive Queries feature to locate and query state stores of a Kafka Streams application
+  from other applications; here, we opted to use a REST API to implement the required RPC layer to allow applications to
+  talk to each other
 * And [further examples](src/main/java/io/confluent/examples/streams/).
 
 We also provide several **integration tests**, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka
