@@ -23,9 +23,12 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.LongDeserializer;
+import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.streams.kstream.Windowed;
+import org.apache.kafka.streams.kstream.internals.WindowedDeserializer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,21 +38,19 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 /**
- * This is a sample driver for the {@link PageViewRegionExample} and
- * {@link PageViewRegionLambdaExample}
- * To run this driver please first refer to the instructions in {@link PageViewRegionExample} or
- * {@link PageViewRegionLambdaExample}.
+ * This is a sample driver for the {@link TopArticlesLambdaExample} and
+ * To run this driver please first refer to the instructions in {@link TopArticlesLambdaExample}
  * You can then run this class directly in your IDE or via the command line.
  *
  * To run via the command line you might want to package as a fatjar first. Please refer to:
  * <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>
  *
  * Once packaged you can then run:
- * java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.PageViewRegionExampleDriver
+ * java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.TopArticlesLambdaExample
  *
  * You should terminate with Ctrl-C
  */
-public class PageViewRegionExampleDriver {
+public class TopArticlesExampleDriver {
 
   public static void main(String[] args) throws IOException {
     produceInputs();
@@ -59,7 +60,8 @@ public class PageViewRegionExampleDriver {
   private static void produceInputs() throws IOException {
     final String[] users = {"erica", "bob", "joe", "damian", "tania", "phil", "sam",
         "lauren", "joseph"};
-    final String[] regions = {"europe", "usa", "asia", "africa"};
+    final String[] industries = {"engineering", "telco", "finance", "health", "science"};
+    final String[] pages = {"index.html", "news.html", "contact.html", "about.html", "stuff.html"};
 
     final Properties props = new Properties();
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
@@ -72,52 +74,50 @@ public class PageViewRegionExampleDriver {
 
     final GenericRecordBuilder pageViewBuilder =
         new GenericRecordBuilder(loadSchema("pageview.avsc"));
-    final GenericRecordBuilder userProfileBuilder =
-        new GenericRecordBuilder(loadSchema("userprofile.avsc"));
-
-    final String pageViewsTopic = "PageViews";
-    final String userProfilesTopic = "UserProfiles";
 
     final Random random = new Random();
     for (String user : users) {
-      userProfileBuilder.set("experience", "some");
-      userProfileBuilder.set("region", regions[random.nextInt(regions.length)]);
-      producer.send(new ProducerRecord<>(userProfilesTopic, user, userProfileBuilder.build()));
+      pageViewBuilder.set("industry", industries[random.nextInt(industries.length)]);
+      pageViewBuilder.set("flags", "ARTICLE");
       // For each user generate some page views
       IntStream.range(0, random.nextInt(10))
           .mapToObj(value -> {
             pageViewBuilder.set("user", user);
-            pageViewBuilder.set("page", "index.html");
+            pageViewBuilder.set("page", pages[random.nextInt(pages.length)]);
             return pageViewBuilder.build();
           }).forEach(
-          record -> producer.send(new ProducerRecord<>(pageViewsTopic, null, record))
+          record -> producer.send(new ProducerRecord<>(TopArticlesLambdaExample.PAGE_VIEWS, null, record))
       );
     }
     producer.flush();
   }
 
   private static void consumeOutput() {
-    final String resultTopic = "PageViewsByRegion";
     final Properties consumerProperties = new Properties();
     consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
     consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
+    consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+              StringDeserializer.class);
+    consumerProperties.put("schema.registry.url", "http://localhost:8081");
     consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG,
-        "pageview-region-lambda-example-consumer");
+        "top-articles-lambda-example-consumer");
     consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-    final KafkaConsumer<String, Long> consumer = new KafkaConsumer<>(consumerProperties);
+    final Deserializer<Windowed<String>> windowedDeserializer = new WindowedDeserializer<>(Serdes.String().deserializer());
+    final KafkaConsumer<Windowed<String>, String> consumer = new KafkaConsumer<>(consumerProperties,
+                                                                                 windowedDeserializer,
+                                                                                 Serdes.String().deserializer());
 
-    consumer.subscribe(Collections.singleton(resultTopic));
+    consumer.subscribe(Collections.singleton(TopArticlesLambdaExample.TOP_NEWS_PER_INDUSTRY_TOPIC));
     while (true) {
-      ConsumerRecords<String, Long> consumerRecords = consumer.poll(Long.MAX_VALUE);
-      for (ConsumerRecord<String, Long> consumerRecord : consumerRecords) {
-        System.out.println(consumerRecord.key() + ":" + consumerRecord.value());
+      ConsumerRecords<Windowed<String>, String> consumerRecords = consumer.poll(Long.MAX_VALUE);
+      for (ConsumerRecord<Windowed<String>, String> consumerRecord : consumerRecords) {
+        System.out.println(consumerRecord.key().key() + "@" + consumerRecord.key().window().start() +  "=" + consumerRecord.value());
       }
     }
   }
 
-  private static Schema loadSchema(String name) throws IOException {
-    try (InputStream input = PageViewRegionLambdaExample.class.getClassLoader()
+  static Schema loadSchema(String name) throws IOException {
+    try (InputStream input = TopArticlesLambdaExample.class.getClassLoader()
         .getResourceAsStream("avro/io/confluent/examples/streams/" + name)) {
       return new Schema.Parser().parse(input);
     }

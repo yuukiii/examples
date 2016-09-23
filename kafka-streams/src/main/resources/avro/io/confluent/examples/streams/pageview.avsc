@@ -4,6 +4,7 @@
  "fields": [
      {"name": "user", "type": "string"},
      {"name": "page", "type": "string"},
-     {"name": "industry", "type": "string"}
+     {"name": "industry", "type": "string"},
+     {"name": "flags", "type": ["null", "string"], "default": null}
  ]
 }

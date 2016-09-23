@@ -18,11 +18,13 @@ package io.confluent.examples.streams;
 import io.confluent.examples.streams.utils.GenericAvroSerde;
 import io.confluent.examples.streams.utils.PriorityQueueSerde;
 import io.confluent.examples.streams.utils.WindowedSerde;
+import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.util.Utf8;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -34,127 +36,208 @@ import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.kstream.Windowed;
 
-import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Properties;
 
 /**
- * Create a data feed of the top 100 news articles per industry, ranked by click-through-rate
- * (assuming this is for the past hour).
+ *
+ * In this example, we count the TopN articles from a stream of page views (aka clickstreams) that
+ * reads from a topic named "PageViews". We filter the PageViews stream so that we only consider
+ * articles and the map the key to effectively nullify the user, such that the we can count page
+ * views by (page, industry). The count per (page, industry) are then grouped by industry and
+ * aggregated into a PriorityQueue with descending order. Finally we perform a mapValues to fetch
+ * the top 100 articles per industry.
  *
  * Note: The generic Avro binding is used for serialization/deserialization.  This means the
  * appropriate Avro schema files must be provided for each of the "intermediate" Avro classes, i.e.
  * whenever new types of Avro objects (in the form of GenericRecord) are being passed between
  * processing steps.
  *
- * Note: This example uses lambda expressions and thus works with Java 8+ only.
+ * HOW TO RUN THIS EXAMPLE
+ *
+ * 1) Start Zookeeper, Kafka, and Confluent Schema Registry.
+ *    Please refer to <a href='http://docs.confluent.io/3.0.0/quickstart.html#quickstart'>CP3.0.0
+ *    QuickStart</a>.
+ *
+ * 2) Create the input/intermediate/output topics used by this example.
+ *
+ * <pre>
+ * {@code
+ * $ bin/kafka-topics --create --topic PageViews \
+ *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
+ * $ bin/kafka-topics --create --topic TopNewsPerIndustry \
+ *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
+ * }
+ * </pre>*
+ *
+ * Note: The above commands are for CP 3.0.0 only. For Apache Kafka it should be
+ * `bin/kafka-topics.sh ...`.
+ *
+ * 3) Start this example application either in your IDE or on the command line.
+ *
+ * If via the command line please refer to <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>.
+ * Once packaged you can then run:
+ *
+ * <pre>
+ * {@code
+ * $ java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.TopArticlesLambdaExample
+ * }
+ * </pre>
+ *
+ * 4) Write some input data to the source topics (e.g. via {@link TopArticlesExampleDriver}).
+ * The already running example application (step 3) will automatically process this input data and
+ * write the results to the output topic. The {@link TopArticlesExampleDriver} will print the
+ * results from the output topic
+ *
+ * <pre>
+ * {@code
+ * # Here: Write input data using the example driver.  Once the driver has stopped generating data,
+ * # you can terminate it via `Ctrl-C`.
+ * $ java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.TopArticlesExampleDriver
+ * }
+ * </pre>
+
  */
 public class TopArticlesLambdaExample {
 
-    private static boolean isArticle(GenericRecord record) {
-        String flags = (String) record.get("flags");
+  private static final String SCHEMA_REGISTRY_URL = "http://localhost:8081";
+  static final String TOP_NEWS_PER_INDUSTRY_TOPIC = "TopNewsPerIndustry";
+  static final String PAGE_VIEWS = "PageViews";
 
-        return flags.contains("ART");
+  private static boolean isArticle(GenericRecord record) {
+    final Utf8 flags = (Utf8) record.get("flags");
+    if (flags == null) {
+      return false;
     }
+    return flags.toString().contains("ARTICLE");
+  }
 
-    public static void main(String[] args) throws Exception {
-        Properties streamsConfiguration = new Properties();
-        // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
-        // against which the application is run.
-        streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "top-articles-lambda-example");
-        // Where to find Kafka broker(s).
-        streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        // Where to find the corresponding ZooKeeper ensemble.
-        streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
-        // Where to find the Confluent schema registry instance(s)
-        streamsConfiguration.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
-        // Specify default (de)serializers for record keys and for record values.
-        streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class);
+  public static void main(String[] args) throws Exception {
+    KafkaStreams streams = buildTopArticlesStream("localhost:9092",
+                                                  "localhost:2181",
+                                                  SCHEMA_REGISTRY_URL);
+    streams.start();
 
-        final Serde<String> stringSerde = Serdes.String();
-        final Serde<GenericRecord> avroSerde = new GenericAvroSerde();
-        final Serde<Windowed<String>> windowedStringSerde = new WindowedSerde<>(stringSerde);
+    // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
+    Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+  }
 
-        KStreamBuilder builder = new KStreamBuilder();
+  static KafkaStreams buildTopArticlesStream(final String bootstrapServers,
+                                                     final String zkConnect,
+                                                     final String schemaRegistryUrl) throws IOException {
+    Properties streamsConfiguration = new Properties();
+    // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
+    // against which the application is run.
+    streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "top-articles-lambda-example");
+    // Where to find Kafka broker(s).
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+    // Where to find the corresponding ZooKeeper ensemble.
+    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, zkConnect);
+    // Where to find the Confluent schema registry instance(s)
+    streamsConfiguration
+        .put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+    // Specify default (de)serializers for record keys and for record values.
+    streamsConfiguration
+        .put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+    streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class);
+    streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 1000);
 
-        KStream<byte[], GenericRecord> views = builder.stream("PageViews");
+    final Serde<String> stringSerde = Serdes.String();
+    final Serde<GenericRecord> avroSerde = new GenericAvroSerde(
+        new CachedSchemaRegistryClient(schemaRegistryUrl, 100),
+        Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
+                                 schemaRegistryUrl));
+    final Serde<Windowed<String>> windowedStringSerde = new WindowedSerde<>(stringSerde);
 
-        KStream<GenericRecord, GenericRecord> articleViews = views
-                // filter only article pages
-                .filter((dummy, record) -> isArticle(record))
-                // map <page id, industry> as key
-                .map((dummy, article) -> new KeyValue<>(article, article));
+    final KStreamBuilder builder = new KStreamBuilder();
 
-        Schema schema = new Schema.Parser().parse(new File("pageviewstats.avsc"));
+    final KStream<byte[], GenericRecord> views = builder.stream(PAGE_VIEWS);
 
-        KTable<Windowed<GenericRecord>, Long> viewCounts = articleViews
-                // count the clicks per hour, using tumbling windows with a size of one hour
-                .groupByKey(avroSerde, avroSerde)
-                .count(TimeWindows.of(60 * 60 * 1000L), "PageViewCountStore");
+    final InputStream
+        statsSchema =
+        TopArticlesLambdaExample.class.getClassLoader()
+            .getResourceAsStream("avro/io/confluent/examples/streams/pageviewstats.avsc");
+    final Schema schema = new Schema.Parser().parse(statsSchema);
 
-        KTable<Windowed<String>, PriorityQueue<GenericRecord>> allViewCounts = viewCounts
-            .groupBy(
-                // the selector
-                (windowedArticle, count) -> {
-                  // project on the industry field for key
-                  Windowed<String> windowedIndustry =
-                      new Windowed<>((String) windowedArticle.key().get("industry"), windowedArticle.window());
-                  // add the page into the value
-                  GenericRecord viewStats = new GenericData.Record(schema);
-                  viewStats.put("page", "pageId");
-                  viewStats.put("industry", "industryName");
-                  viewStats.put("count", count);
-                  return new KeyValue<>(windowedIndustry, viewStats);
-                },
-                windowedStringSerde,
-                avroSerde
-            ).aggregate(
-                        // the initializer
-                        () -> {
-                            Comparator<GenericRecord> comparator =
-                                (o1, o2) -> (int) ((Long) o1.get("count") - (Long) o2.get("count"));
-                            return new PriorityQueue<>(comparator);
-                        },
+    final KStream<GenericRecord, GenericRecord> articleViews = views
+        // filter only article pages
+        .filter((dummy, record) -> isArticle(record))
+        // map <page id, industry> as key by making user the same for each record
+        .map((dummy, article) -> {
+          final GenericRecord clone = new GenericData.Record(article.getSchema());
+          clone.put("user", "user");
+          clone.put("page", article.get("page"));
+          clone.put("industry", article.get("industry"));
+          return new KeyValue<>(clone, clone);
+        });
 
-                        // the "add" aggregator
-                        (windowedIndustry, record, queue) -> {
-                            queue.add(record);
-                            return queue;
-                        },
+    final KTable<Windowed<GenericRecord>, Long> viewCounts = articleViews
+        // count the clicks per hour, using tumbling windows with a size of one hour
+        .groupByKey(avroSerde, avroSerde)
+        .count(TimeWindows.of(60 * 60 * 1000L), "PageViewCountStore");
 
-                        // the "remove" aggregator
-                        (windowedIndustry, record, queue) -> {
-                            queue.remove(record);
-                            return queue;
-                        },
+    final Comparator<GenericRecord> comparator =
+        (o1, o2) -> (int) ((Long) o2.get("count") - (Long) o1.get("count"));
 
-                        new PriorityQueueSerde<>(),
-                        "AllArticles"
-                );
+    final KTable<Windowed<String>, PriorityQueue<GenericRecord>> allViewCounts = viewCounts
+        .groupBy(
+            // the selector
+            (windowedArticle, count) -> {
+              // project on the industry field for key
+              Windowed<String> windowedIndustry =
+                  new Windowed<>(windowedArticle.key().get("industry").toString(),
+                                 windowedArticle.window());
+              // add the page into the value
+              GenericRecord viewStats = new GenericData.Record(schema);
+              viewStats.put("page", windowedArticle.key().get("page"));
+              viewStats.put("user", "user");
+              viewStats.put("industry", windowedArticle.key().get("industry"));
+              viewStats.put("count", count);
+              return new KeyValue<>(windowedIndustry, viewStats);
+            },
+            windowedStringSerde,
+            avroSerde
+        ).aggregate(
+            // the initializer
+            () -> new PriorityQueue<>(comparator),
 
-        int topN = 100;
-        KTable<Windowed<String>, String> topViewCounts = allViewCounts
-                .mapValues(queue -> {
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < topN; i++) {
-                        GenericRecord record = queue.poll();
-                        if (record == null)
-                            break;
-                        sb.append((String) record.get("page"));
-                        sb.append("\n");
-                    }
-                    return sb.toString();
-                });
+            // the "add" aggregator
+            (windowedIndustry, record, queue) -> {
+              queue.add(record);
+              return queue;
+            },
 
-        topViewCounts.to(windowedStringSerde, stringSerde, "TopNewsPerIndustry");
+            // the "remove" aggregator
+            (windowedIndustry, record, queue) -> {
+              queue.remove(record);
+              return queue;
+            },
 
-        KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
-        streams.start();
+            new PriorityQueueSerde<>(comparator, avroSerde),
+            "AllArticles"
+        );
 
-        // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
-        Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
-    }
+    int topN = 100;
+    final KTable<Windowed<String>, String> topViewCounts = allViewCounts
+        .mapValues(queue -> {
+          StringBuilder sb = new StringBuilder();
+          for (int i = 0; i < topN; i++) {
+            GenericRecord record = queue.poll();
+            if (record == null) {
+              break;
+            }
+            sb.append(record.get("page").toString());
+            sb.append("\n");
+          }
+          return sb.toString();
+        });
+
+    topViewCounts.to(windowedStringSerde, stringSerde, TOP_NEWS_PER_INDUSTRY_TOPIC);
+    return new KafkaStreams(builder, streamsConfiguration);
+  }
 
 }
