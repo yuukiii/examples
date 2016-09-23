@@ -160,7 +160,7 @@ public class UserCountsPerRegionLambdaIntegrationTest {
     List<KeyValue<String, Long>> actualClicksPerRegion = IntegrationTestUtils.waitUntilMinKeyValueRecordsReceived(consumerConfig,
         outputTopic, expectedUsersPerRegion.size());
     streams.close();
-    assertThat(actualClicksPerRegion).containsExactlyElementsOf(expectedUsersPerRegion);
+    assertThat(actualClicksPerRegion).containsOnlyElementsOf(expectedUsersPerRegion);
   }
 
 }
