@@ -35,7 +35,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -58,7 +60,10 @@ public class TopArticlesLambdaExampleTest {
   public static final EmbeddedSingleNodeKafkaCluster CLUSTER = new EmbeddedSingleNodeKafkaCluster();
   private final String [] users = {"jo", "lauren", "tim", "sam"};
   private final Random random = new Random();
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
   private KafkaStreams streams;
+
 
   @BeforeClass
   public static void createTopics() {
@@ -71,7 +76,8 @@ public class TopArticlesLambdaExampleTest {
     streams =
         TopArticlesLambdaExample.buildTopArticlesStream(CLUSTER.bootstrapServers(),
                                                         CLUSTER.zookeeperConnect(),
-                                                        CLUSTER.schemaRegistryUrl());
+                                                        CLUSTER.schemaRegistryUrl(),
+                                                        temporaryFolder.newFolder().getPath());
   }
 
   @After
