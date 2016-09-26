@@ -5,6 +5,7 @@ import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.Serializer;
 
+import java.util.Comparator;
 import java.util.Map;
 import java.util.PriorityQueue;
 
@@ -18,9 +19,12 @@ public class PriorityQueueSerde<T> implements Serde<PriorityQueue<T>> {
 
   /**
    * Constructor used by Kafka Streams.
+   * @param comparator
+   * @param avroSerde
    */
-  public PriorityQueueSerde() {
-    inner = Serdes.serdeFrom(new PriorityQueueSerializer<>(), new PriorityQueueDeserializer<>());
+  public PriorityQueueSerde(final Comparator<T> comparator, final Serde<T> valueSerde) {
+    inner = Serdes.serdeFrom(new PriorityQueueSerializer<>(comparator, valueSerde.serializer()),
+                             new PriorityQueueDeserializer<>(comparator, valueSerde.deserializer()));
   }
 
   @Override
