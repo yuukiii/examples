@@ -45,7 +45,8 @@ import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder}
   * $ bin/kafka-topics --create --topic OriginalAndUppercasedTopic --zookeeper localhost:2181 --partitions 1 --replication-factor 1
   * }}}
   *
-  * Note: The above commands are the Confluent Platform. For Apache Kafka it should be `bin/kafka-topics.sh ...`.
+  * Note: The above commands are for the Confluent Platform. For Apache Kafka it should be
+  * `bin/kafka-topics.sh ...`.
   *
   * 3) Start this example application either in your IDE or on the command line.
   *

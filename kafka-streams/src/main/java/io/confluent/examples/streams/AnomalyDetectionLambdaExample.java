@@ -48,7 +48,7 @@ import java.util.Properties;
  * }
  * </pre>
  *
- * Note: The above commands are the Confluent Platform. For Apache Kafka it should be
+ * Note: The above commands are for the Confluent Platform. For Apache Kafka it should be
  * `bin/kafka-topics.sh ...`.
  *
  * 3) Start this example application either in your IDE or on the command line.

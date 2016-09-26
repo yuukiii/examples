@@ -1,4 +1,4 @@
-# Kafka Streams examples [![Build Status](https://travis-ci.org/confluentinc/examples.svg?branch=master)](https://travis-ci.org/confluentinc/examples)
+# Kafka Streams examples [![Build Status](https://travis-ci.org/confluentinc/examples.svg?branch=kafka-0.10.0.1-cp-3.0.1)](https://travis-ci.org/confluentinc/examples)
 
 This sub-folder contains code examples that demonstrate how to implement real-time processing applications using Kafka
 Streams, which is a new stream processing library included with the [Apache Kafka](http://kafka.apache.org/) open source
@@ -275,7 +275,7 @@ $ mvn test    # But no tests yet!
 
 | Branch (this repo)                                                             | Apache Kafka      | Confluent Platform | Notes                                                                                 |
 | -------------------------------------------------------------------------------|-------------------|--------------------|---------------------------------------------------------------------------------------|
-| [master](../../../tree/master/kafka-streams)                                   | 0.10.1.0-SNAPSHOT | 3.0.1              | You must manually build the `trunk` version of Apache Kafka.  See instructions above. |
+| [master](../../../tree/master/kafka-streams)                                   | 0.10.1.0-SNAPSHOT | 3.1.0-SNAPSHOT     | You must manually build the `trunk` version of Apache Kafka.  See instructions above. |
 | [kafka-0.10.0.1-cp-3.0.1](../../../tree/kafka-0.10.0.1-cp-3.0.1/kafka-streams) | 0.10.0.1(-cp1)    | 3.0.1              | Works out of the box                                                                  |
 | [kafka-0.10.0.0-cp-3.0.0](../../../tree/kafka-0.10.0.0-cp-3.0.0/kafka-streams) | 0.10.0.0(-cp1)    | 3.0.0              | Works out of the box                                                                  |
 
