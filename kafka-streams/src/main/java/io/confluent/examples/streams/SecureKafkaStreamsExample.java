@@ -40,7 +40,7 @@ import java.util.Properties;
  *
  * Tip: The configuration of this VM follows the instructions at <a href="http://www.confluent.io/blog/apache-kafka-security-authorization-authentication-encryption">Apache
  * Kafka Security 101</a>.  We recommend to read this article as well as <a
- * href="http://docs.confluent.io/3.0.0/kafka/security.html">Kafka Security</a> to understand how
+ * href="http://docs.confluent.io/current/kafka/security.html">Kafka Security</a> to understand how
  * you can install a secure Kafka cluster yourself.
  *
  * 1) Start a secure ZooKeeper instance and a secure Kafka broker.
@@ -98,14 +98,14 @@ import java.util.Properties;
  * {@code
  * [vagrant@kafka ~]$ git clone https://github.com/confluentinc/examples.git
  * [vagrant@kafka ~]$ cd examples/kafka-streams
- * [vagrant@kafka ~]$ git checkout kafka-0.10.0.0-cp-3.0.0
+ * [vagrant@kafka ~]$ git checkout master
  *
  * # Build and package the examples.  We skip the test suite because running the test suite
  * # requires more main memory than is available to the Vagrant VM by default.
  * [vagrant@kafka ~]$ mvn clean -DskipTests=true package
  *
  * # Now we can start this example application
- * [vagrant@kafka ~]$ java -cp target/streams-examples-3.0.0-standalone.jar \
+ * [vagrant@kafka ~]$ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar \
  *                             io.confluent.examples.streams.SecureKafkaStreamsExample
  * }
  * </pre>

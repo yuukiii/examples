@@ -36,7 +36,7 @@ import java.util.stream.IntStream;
  * <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>
  *
  * Once packaged you can then run:
- * java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.SumLambdaExampleDriver
+ * java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.SumLambdaExampleDriver
  *
  * You should terminate with Ctrl-C
  * Please refer to {@link SumLambdaExample} for instructions on running the example.

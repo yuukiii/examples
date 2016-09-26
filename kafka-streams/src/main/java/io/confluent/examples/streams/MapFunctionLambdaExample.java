@@ -35,8 +35,7 @@ import java.util.Properties;
  *
  * HOW TO RUN THIS EXAMPLE
  *
- * 1) Start Zookeeper and Kafka. Please refer to <a href='http://docs.confluent.io/3.0.0/quickstart.html#quickstart'>CP3.0.0
- * QuickStart</a>.
+ * 1) Start Zookeeper and Kafka. Please refer to <a href='http://docs.confluent.io/current/quickstart.html#quickstart'>QuickStart</a>.
  *
  * 2) Create the input and output topics used by this example.
  *
@@ -51,7 +50,7 @@ import java.util.Properties;
  * }
  * </pre>
  *
- * Note: The above commands are for CP 3.0.0 only. For Apache Kafka it should be
+ * Note: The above commands are the Confluent Platform. For Apache Kafka it should be
  * `bin/kafka-topics.sh ...`.
  *
  * 3) Start this example application either in your IDE or on the command line.
@@ -61,7 +60,7 @@ import java.util.Properties;
  *
  * <pre>
  * {@code
- * $ java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.MapFunctionLambdaExample
+ * $ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.MapFunctionLambdaExample
  * }
  * </pre>
  *

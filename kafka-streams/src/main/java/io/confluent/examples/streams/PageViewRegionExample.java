@@ -54,7 +54,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
  * HOW TO RUN THIS EXAMPLE
  *
  * 1) Start Zookeeper, Kafka, and Confluent Schema Registry. Please refer to <a
- * href='http://docs.confluent.io/3.0.0/quickstart.html#quickstart'>CP3.0.0 QuickStart</a>.
+ * href='http://docs.confluent.io/current/quickstart.html#quickstart'>QuickStart</a>.
  *
  * 2) Create the input/intermediate/output topics used by this example.
  *
@@ -71,7 +71,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
  * }
  * </pre>*
  *
- * Note: The above commands are for CP 3.0.0 only. For Apache Kafka it should be
+ * Note: The above commands are the Confluent Platform. For Apache Kafka it should be
  * `bin/kafka-topics.sh ...`.
  *
  * 3) Start this example application either in your IDE or on the command line.
@@ -81,7 +81,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
  *
  * <pre>
  * {@code
- * $ java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.PageViewRegionLambdaExample
+ * $ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.PageViewRegionLambdaExample
  * }
  * </pre>
  *
@@ -93,7 +93,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
  * {@code
  * # Here: Write input data using the example driver.  Once the driver has stopped generating data,
  * # you can terminate it via `Ctrl-C`.
- * $ java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.PageViewRegionExampleDriver
+ * $ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.PageViewRegionExampleDriver
  * }
  * </pre>
  *
