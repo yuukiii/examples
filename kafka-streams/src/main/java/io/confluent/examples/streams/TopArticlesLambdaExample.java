@@ -47,10 +47,10 @@ import java.util.Properties;
  *
  * In this example, we count the TopN articles from a stream of page views (aka clickstreams) that
  * reads from a topic named "PageViews". We filter the PageViews stream so that we only consider
- * articles and the map the key to effectively nullify the user, such that the we can count page
- * views by (page, industry). The count per (page, industry) are then grouped by industry and
- * aggregated into a PriorityQueue with descending order. Finally we perform a mapValues to fetch
- * the top 100 articles per industry.
+ * pages of type article, and then map the recored key to effectively nullify the user, such that
+ * the we can count page views by (page, industry). The counts per (page, industry) are then
+ * grouped by industry and aggregated into a PriorityQueue with descending order. Finally we
+ * perform a mapValues to fetch the top 100 articles per industry.
  *
  * Note: The generic Avro binding is used for serialization/deserialization.  This means the
  * appropriate Avro schema files must be provided for each of the "intermediate" Avro classes, i.e.
@@ -60,8 +60,7 @@ import java.util.Properties;
  * HOW TO RUN THIS EXAMPLE
  *
  * 1) Start Zookeeper, Kafka, and Confluent Schema Registry.
- *    Please refer to <a href='http://docs.confluent.io/3.0.0/quickstart.html#quickstart'>CP3.0.0
- *    QuickStart</a>.
+ *    Please refer to <a href='http://docs.confluent.io/current/quickstart.html#quickstart'>QuickStart</a>.
  *
  * 2) Create the input/intermediate/output topics used by this example.
  *
@@ -74,7 +73,7 @@ import java.util.Properties;
  * }
  * </pre>*
  *
- * Note: The above commands are for CP 3.0.0 only. For Apache Kafka it should be
+ * Note: The above commands are for CP 3.1.0 only. For Apache Kafka it should be
  * `bin/kafka-topics.sh ...`.
  *
  * 3) Start this example application either in your IDE or on the command line.
@@ -84,7 +83,7 @@ import java.util.Properties;
  *
  * <pre>
  * {@code
- * $ java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.TopArticlesLambdaExample
+ * $ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.TopArticlesLambdaExample
  * }
  * </pre>
  *
@@ -97,7 +96,8 @@ import java.util.Properties;
  * {@code
  * # Here: Write input data using the example driver.  Once the driver has stopped generating data,
  * # you can terminate it via `Ctrl-C`.
- * $ java -cp target/streams-examples-3.0.0-standalone.jar io.confluent.examples.streams.TopArticlesExampleDriver
+ * $ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar io.confluent.examples.streams
+ * .TopArticlesExampleDriver
  * }
  * </pre>
 
