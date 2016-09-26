@@ -58,7 +58,7 @@ import static io.confluent.examples.streams.WikipediaFeedAvroExample.WIKIPEDIA_S
  * }
  * </pre>
  *
- * Note: The above commands are for CP 3.1.0 only. For Apache Kafka it should be
+ * Note: The above commands are for CP 3.0.1 only. For Apache Kafka it should be
  * `bin/kafka-topics.sh ...`.
  *
  * 3) Start this example application either in your IDE or on the command line.
