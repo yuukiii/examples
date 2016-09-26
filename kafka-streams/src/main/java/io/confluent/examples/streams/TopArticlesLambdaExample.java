@@ -47,10 +47,10 @@ import java.util.Properties;
  *
  * In this example, we count the TopN articles from a stream of page views (aka clickstreams) that
  * reads from a topic named "PageViews". We filter the PageViews stream so that we only consider
- * articles and the map the key to effectively nullify the user, such that the we can count page
- * views by (page, industry). The count per (page, industry) are then grouped by industry and
- * aggregated into a PriorityQueue with descending order. Finally we perform a mapValues to fetch
- * the top 100 articles per industry.
+ * pages of type article, and then map the recored key to effectively nullify the user, such that
+ * the we can count page views by (page, industry). The counts per (page, industry) are then
+ * grouped by industry and aggregated into a PriorityQueue with descending order. Finally we
+ * perform a mapValues to fetch the top 100 articles per industry.
  *
  * Note: The generic Avro binding is used for serialization/deserialization.  This means the
  * appropriate Avro schema files must be provided for each of the "intermediate" Avro classes, i.e.
