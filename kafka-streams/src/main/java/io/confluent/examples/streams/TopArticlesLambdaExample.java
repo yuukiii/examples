@@ -119,7 +119,8 @@ public class TopArticlesLambdaExample {
   public static void main(String[] args) throws Exception {
     KafkaStreams streams = buildTopArticlesStream("localhost:9092",
                                                   "localhost:2181",
-                                                  SCHEMA_REGISTRY_URL);
+                                                  SCHEMA_REGISTRY_URL,
+                                                  "/tmp/kafka-streams");
     streams.start();
 
     // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
@@ -127,8 +128,9 @@ public class TopArticlesLambdaExample {
   }
 
   static KafkaStreams buildTopArticlesStream(final String bootstrapServers,
-                                                     final String zkConnect,
-                                                     final String schemaRegistryUrl) throws IOException {
+                                             final String zkConnect,
+                                             final String schemaRegistryUrl,
+                                             final String stateDir) throws IOException {
     Properties streamsConfiguration = new Properties();
     // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
     // against which the application is run.
@@ -145,6 +147,7 @@ public class TopArticlesLambdaExample {
         .put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class);
     streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 1000);
+    streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, stateDir);
 
     final Serde<String> stringSerde = Serdes.String();
     final Serde<GenericRecord> avroSerde = new GenericAvroSerde(

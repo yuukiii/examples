@@ -31,6 +31,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.kstream.internals.WindowedDeserializer;
+import org.apache.kafka.test.TestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -71,7 +72,8 @@ public class TopArticlesLambdaExampleTest {
     streams =
         TopArticlesLambdaExample.buildTopArticlesStream(CLUSTER.bootstrapServers(),
                                                         CLUSTER.zookeeperConnect(),
-                                                        CLUSTER.schemaRegistryUrl());
+                                                        CLUSTER.schemaRegistryUrl(),
+                                                        TestUtils.tempDirectory().getPath());
   }
 
   @After
