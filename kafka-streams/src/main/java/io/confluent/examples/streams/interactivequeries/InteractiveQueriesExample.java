@@ -109,7 +109,8 @@ import java.util.Properties;
  * # List app instances that currently manage (parts of) state store "word-count"
  * http://localhost:7070/state/instances/word-count
  *
- * # Get all key-value records of state store "word-count" across all instances
+ * # Get all key-value records from the "word-count" state store hosted on a the instance running
+ * # localhost:7070
  * http://localhost:7070/state/keyvalues/word-count/all
  *
  * # Find the app instance that contains key "hello" (if it exists) for the state store "word-count"
