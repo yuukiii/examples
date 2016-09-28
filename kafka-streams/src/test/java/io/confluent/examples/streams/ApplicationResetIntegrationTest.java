@@ -139,7 +139,7 @@ public class ApplicationResetIntegrationTest {
     // Step 6: Verify the application's output data.
     //
     final List<KeyValue<String, Long>> resultRerun = IntegrationTestUtils.waitUntilMinKeyValueRecordsReceived(consumerConfig, outputTopic, inputValues.size());
-    assertThat(result).isEqualTo(expectedResult);
+    assertThat(resultRerun).isEqualTo(expectedResult);
 
     streams.close();
   }
