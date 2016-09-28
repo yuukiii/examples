@@ -13,14 +13,12 @@
  */
 package io.confluent.examples.streams.interactivequeries;
 
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.apache.kafka.streams.state.ReadOnlyWindowStore;
-import org.apache.kafka.streams.state.StreamsMetadata;
 import org.apache.kafka.streams.state.WindowStoreIterator;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -30,10 +28,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
@@ -51,10 +47,12 @@ import javax.ws.rs.core.MediaType;
 public class InteractiveQueriesRestService {
 
   private final KafkaStreams streams;
+  private final MetadataService metadataService;
   private Server jettyServer;
 
   InteractiveQueriesRestService(final KafkaStreams streams) {
     this.streams = streams;
+    this.metadataService = new MetadataService(streams);
   }
 
   /**
@@ -159,9 +157,7 @@ public class InteractiveQueriesRestService {
   @Path("/instances")
   @Produces(MediaType.APPLICATION_JSON)
   public List<HostStoreInfo> streamsMetadata() {
-    // Get metadata for all of the instances of this Kafka Streams application
-    final Collection<StreamsMetadata> metadata = streams.allMetadata();
-    return mapInstancesToHostStoreInfo(metadata);
+    return metadataService.streamsMetadata();
   }
 
   /**
@@ -174,9 +170,7 @@ public class InteractiveQueriesRestService {
   @Path("/instances/{storeName}")
   @Produces(MediaType.APPLICATION_JSON)
   public List<HostStoreInfo> streamsMetadataForStore(@PathParam("storeName") String store) {
-    // Get metadata for all of the instances of this Kafka Streams application hosting the store
-    final Collection<StreamsMetadata> metadata = streams.allMetadataForStore(store);
-    return mapInstancesToHostStoreInfo(metadata);
+    return metadataService.streamsMetadataForStore(store);
   }
 
   /**
@@ -191,24 +185,7 @@ public class InteractiveQueriesRestService {
   @Produces(MediaType.APPLICATION_JSON)
   public HostStoreInfo streamsMetadataForStoreAndKey(@PathParam("storeName") String store,
                                                      @PathParam("key") String key) {
-    // Get metadata for the instances of this Kafka Streams application hosting the store and
-    // potentially the value for key
-    final StreamsMetadata metadata = streams.metadataForKey(store, key, new StringSerializer());
-    if (metadata == null) {
-      throw new NotFoundException();
-    }
-
-    return new HostStoreInfo(metadata.host(),
-                             metadata.port(),
-                             metadata.stateStoreNames());
-  }
-
-  private List<HostStoreInfo> mapInstancesToHostStoreInfo(
-      final Collection<StreamsMetadata> metadatas) {
-    return metadatas.stream().map(metadata -> new HostStoreInfo(metadata.host(),
-                                                                metadata.port(),
-                                                                metadata.stateStoreNames()))
-        .collect(Collectors.toList());
+    return metadataService.streamsMetadataForStoreAndKey(store, key);
   }
 
   /**

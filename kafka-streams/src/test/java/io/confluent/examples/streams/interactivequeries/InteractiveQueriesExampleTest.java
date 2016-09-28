@@ -90,7 +90,7 @@ public class InteractiveQueriesExampleTest {
 
   }
 
-  private static int randomFreeLocalPort() throws IOException {
+  public static int randomFreeLocalPort() throws IOException {
     ServerSocket s = new ServerSocket(0);
     int port = s.getLocalPort();
     s.close();
