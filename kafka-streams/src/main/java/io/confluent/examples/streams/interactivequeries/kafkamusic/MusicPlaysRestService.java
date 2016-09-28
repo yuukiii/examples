@@ -64,7 +64,7 @@ public class MusicPlaysRestService {
 
     // Lookup the KeyValueStore with the provided storeName
     final ReadOnlyKeyValueStore<String, KafkaMusicExample.TopFiveSongs> topFiveByGenre = streams.store
-        (KafkaMusicExample.TOP_FIVE_SONGS_GENRE, QueryableStoreTypes
+        (KafkaMusicExample.TOP_FIVE_SONGS_BY_GENRE_STORE, QueryableStoreTypes
         .<String, KafkaMusicExample.TopFiveSongs>keyValueStore());
 
     return topFiveSongs(genre.toLowerCase(), topFiveByGenre);
@@ -78,7 +78,7 @@ public class MusicPlaysRestService {
 
     // Lookup the KeyValueStore with the provided storeName
     final ReadOnlyKeyValueStore<String, KafkaMusicExample.TopFiveSongs> topFive = streams.store
-        (KafkaMusicExample.TOP_FIVE_SONGS, QueryableStoreTypes
+        (KafkaMusicExample.TOP_FIVE_SONGS_STORE, QueryableStoreTypes
             .<String, KafkaMusicExample.TopFiveSongs>keyValueStore());
 
     return topFiveSongs(KafkaMusicExample.TOP_FIVE_KEY, topFive);

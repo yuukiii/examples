@@ -66,7 +66,7 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
  * to keep track of the number of times each song has been played.
  *
  * Next, we group the songPlayCounts Kable by genre and aggregate into another KTable with the
- * state store, top-five-songs-genre, to track the top five songs by genre. Subsequently, we
+ * state store, top-five-songs-by-genre, to track the top five songs by genre. Subsequently, we
  * group the same songPlayCounts KTable such that all song plays end up in the same partition. We
  * use this to aggregate the overall top five songs played into the state store, top-five.
  *
@@ -144,7 +144,7 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
  *
  * # Find the app instance that contains the chart for the "punk" genre (if it exists) for the
  * state store "top-five-songs-genre"
- * http://localhost:7070/kafka-music/instance/top-five-songs-genre/punk
+ * http://localhost:7070/kafka-music/instance/top-five-songs-by-genre/punk
  *
  * # Get the latest top five for the genre "punk"
  * http://localhost:7070/kafka-music/charts/genre/punk
@@ -169,12 +169,12 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 public class KafkaMusicExample {
 
   private static final Long MIN_CHARTABLE_DURATION = 30 * 1000L;
-  private static final String SONG_PLAY_COUNT = "song-play-count";
+  private static final String SONG_PLAY_COUNT_STORE = "song-play-count";
   static final String PLAY_EVENTS = "play-events";
   static final String ALL_SONGS = "all-songs";
   static final String SONG_FEED = "song-feed";
-  static final String TOP_FIVE_SONGS_GENRE = "top-five-songs-genre";
-  static final String TOP_FIVE_SONGS = "top-five-songs";
+  static final String TOP_FIVE_SONGS_BY_GENRE_STORE = "top-five-songs-by-genre";
+  static final String TOP_FIVE_SONGS_STORE = "top-five-songs";
   static final String TOP_FIVE_KEY = "all";
 
   public static void main(String[] args) throws Exception {
@@ -284,7 +284,7 @@ public class KafkaMusicExample {
 
     // create a state store to track song play counts
     final KTable<Song, Long> songPlayCounts = songPlays.groupBy((key, value) -> value, songSerde, songSerde)
-        .count(SONG_PLAY_COUNT);
+        .count(SONG_PLAY_COUNT_STORE);
 
     final TopFiveSerde topFiveSerde = new TopFiveSerde();
 
@@ -307,7 +307,7 @@ public class KafkaMusicExample {
                      return aggregate;
                    },
                    topFiveSerde,
-                   TOP_FIVE_SONGS_GENRE
+                   TOP_FIVE_SONGS_BY_GENRE_STORE
         );
 
     // group all song plays into a single bucket so we can create an overall
@@ -327,7 +327,7 @@ public class KafkaMusicExample {
                      return aggregate;
                    },
                    topFiveSerde,
-                   TOP_FIVE_SONGS
+                   TOP_FIVE_SONGS_STORE
         );
 
     return new KafkaStreams(builder, streamsConfiguration);

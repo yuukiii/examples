@@ -79,8 +79,8 @@ public class KafkaMusicExampleTest {
     // they would normally be created by KafkaStreams.
     CLUSTER.createTopic("kafka-music-charts-song-play-count-changelog");
     CLUSTER.createTopic("kafka-music-charts-song-play-count-repartition");
-    CLUSTER.createTopic("kafka-music-charts-top-five-songs-genre-changelog");
-    CLUSTER.createTopic("kafka-music-charts-top-five-songs-genre-repartition");
+    CLUSTER.createTopic("kafka-music-charts-top-five-songs-by-genre-changelog");
+    CLUSTER.createTopic("kafka-music-charts-top-five-songs-by-genre-repartition");
     CLUSTER.createTopic("kafka-music-charts-top-five-songs-changelog");
     CLUSTER.createTopic("kafka-music-charts-top-five-songs-repartition");
     CLUSTER.createTopic("kafka-music-charts-KSTREAM-MAP-0000000004-repartition");
@@ -227,7 +227,7 @@ public class KafkaMusicExampleTest {
 
     // wait until the StreamsMetadata is available as this indicates that
     // KafkaStreams initialization has occurred
-    TestUtils.waitForCondition(() -> !StreamsMetadata.NOT_AVAILABLE.equals(streams.allMetadataForStore(KafkaMusicExample.TOP_FIVE_SONGS)),
+    TestUtils.waitForCondition(() -> !StreamsMetadata.NOT_AVAILABLE.equals(streams.allMetadataForStore(KafkaMusicExample.TOP_FIVE_SONGS_STORE)),
                                MAX_WAIT_MS,
                                "StreamsMetadata should be available");
 
