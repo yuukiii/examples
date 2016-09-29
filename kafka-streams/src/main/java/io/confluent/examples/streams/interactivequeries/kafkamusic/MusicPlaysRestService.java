@@ -14,6 +14,7 @@
 package io.confluent.examples.streams.interactivequeries.kafkamusic;
 
 import org.apache.kafka.common.serialization.LongSerializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
@@ -34,8 +35,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import io.confluent.examples.streams.avro.Song;
 import io.confluent.examples.streams.interactivequeries.HostStoreInfo;
@@ -50,7 +51,7 @@ import io.confluent.examples.streams.interactivequeries.MetadataService;
 public class MusicPlaysRestService {
 
   private final KafkaStreams streams;
-  private final int port;
+  private final int myPort;
   private final MetadataService metadataService;
   private final Client client = ClientBuilder.newClient();
   private Server jettyServer;
@@ -59,7 +60,7 @@ public class MusicPlaysRestService {
 
   MusicPlaysRestService(final KafkaStreams streams, final int port) {
     this.streams = streams;
-    this.port = port;
+    this.myPort = port;
     this.metadataService = new MetadataService(streams);
   }
 
@@ -69,7 +70,22 @@ public class MusicPlaysRestService {
   @Produces(MediaType.APPLICATION_JSON)
   public List<SongPlayCountBean> genreCharts(@PathParam("genre") final String genre) {
 
-    // Lookup the KeyValueStore with the provided storeName
+    // The genre might be hosted on another instance. We need to find which instance it is on
+    // and then perform a remote lookup if necessary.
+    final HostStoreInfo
+        host =
+        metadataService.streamsMetadataForStoreAndKey(KafkaMusicExample.TOP_FIVE_SONGS_BY_GENRE_STORE, genre, new
+            StringSerializer());
+
+    // genre is on another instance. call the other instance to fetch the data.
+    if (host.getPort() != myPort) {
+      return client.target("http://localhost:" + host.getPort() + "/kafka-music/charts/genre/" + genre)
+          .request(MediaType.APPLICATION_JSON_TYPE)
+          .get(new GenericType<List<SongPlayCountBean>>() {
+          });
+    }
+
+    // genre is on this instance
     final ReadOnlyKeyValueStore<String, KafkaMusicExample.TopFiveSongs> topFiveByGenre = streams.store
         (KafkaMusicExample.TOP_FIVE_SONGS_BY_GENRE_STORE, QueryableStoreTypes
         .<String, KafkaMusicExample.TopFiveSongs>keyValueStore());
@@ -82,8 +98,22 @@ public class MusicPlaysRestService {
   @Path("/charts/top-five")
   @Produces(MediaType.APPLICATION_JSON)
   public List<SongPlayCountBean> topFive() {
+    // The top-five might be hosted elsewhere. There is only one 1 partition with data
+    // so we need to first find where it is and then we can do a local or remote lookup.
+    final HostStoreInfo
+        host =
+        metadataService.streamsMetadataForStoreAndKey(KafkaMusicExample.TOP_FIVE_SONGS_STORE, KafkaMusicExample
+            .TOP_FIVE_KEY, new StringSerializer());
 
-    // Lookup the KeyValueStore with the provided storeName
+    // top-five is hosted on another instance
+    if (host.getPort() != myPort) {
+      return client.target("http://localhost:" + host.getPort() + "/kafka-music/charts/top-five/")
+          .request(MediaType.APPLICATION_JSON_TYPE)
+          .get(new GenericType<List<SongPlayCountBean>>() {
+          });
+    }
+
+    // top-five is hosted locally. so lookup in local store
     final ReadOnlyKeyValueStore<String, KafkaMusicExample.TopFiveSongs> topFive = streams.store
         (KafkaMusicExample.TOP_FIVE_SONGS_STORE, QueryableStoreTypes
             .<String, KafkaMusicExample.TopFiveSongs>keyValueStore());
@@ -109,7 +139,7 @@ public class MusicPlaysRestService {
 
       // if the song is not hosted on this instance then we need to lookup it up
       // on the instance it is on.
-      if (host.getPort() != port) {
+      if (host.getPort() != myPort) {
         final SongBean song =
             client.target("http://localhost:" + host.getPort() + "/kafka-music/song/" +
                           songPlayCount.getSongId())
@@ -167,14 +197,14 @@ public class MusicPlaysRestService {
   }
 
   /**
-   * Start an embedded Jetty Server on the given port
+   * Start an embedded Jetty Server
    * @throws Exception
    */
   void start() throws Exception {
     ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
     context.setContextPath("/");
 
-    jettyServer = new Server(port);
+    jettyServer = new Server(myPort);
     jettyServer.setHandler(context);
 
     ResourceConfig rc = new ResourceConfig();
