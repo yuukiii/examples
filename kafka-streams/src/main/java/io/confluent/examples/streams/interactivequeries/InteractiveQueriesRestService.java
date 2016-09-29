@@ -13,6 +13,7 @@
  */
 package io.confluent.examples.streams.interactivequeries;
 
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
@@ -185,7 +186,7 @@ public class InteractiveQueriesRestService {
   @Produces(MediaType.APPLICATION_JSON)
   public HostStoreInfo streamsMetadataForStoreAndKey(@PathParam("storeName") String store,
                                                      @PathParam("key") String key) {
-    return metadataService.streamsMetadataForStoreAndKey(store, key);
+    return metadataService.streamsMetadataForStoreAndKey(store, key, new StringSerializer());
   }
 
   /**

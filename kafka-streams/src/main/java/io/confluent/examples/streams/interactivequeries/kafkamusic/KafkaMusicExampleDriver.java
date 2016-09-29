@@ -45,8 +45,8 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
  * Once packaged you can then run:
  * <pre>
  * {@code
- * $ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar io.confluent.examples.streams
- * .interactivequeries.kafkamusic.KafkaMusicExampleDriver
+ * $ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar \
+ *      io.confluent.examples.streams.interactivequeries.kafkamusic.KafkaMusicExampleDriver
  * }
  * </pre>
  * You should terminate with Ctrl-C

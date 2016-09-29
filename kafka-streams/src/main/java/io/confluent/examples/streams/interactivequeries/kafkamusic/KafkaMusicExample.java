@@ -47,13 +47,17 @@ import io.confluent.examples.streams.utils.SpecificAvroSerde;
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 
 /**
- * Demonstrates using the KafkaStreams API to locate and query State Stores (Interactive Queries).
+ * Demonstrates how to locate and query state stores (Interactive Queries).
+ *
+ * This application continuously computes the latest Top 5 music charts based on song play events
+ * collected in real-time in a Kafka topic. This charts data is maintained in a continuously updated
+ * state store that can be queried interactively via a REST API.
  *
  * Note: This example uses Java 8 functionality and thus works with Java 8+ only.  But of course you
  * can use the Interactive Queries feature of Kafka Streams also with Java 7.
  *
  * The topology in this example is modelled on a (very) simple streaming music service. It has 2
- * input topics, song-feed, and play-events.
+ * input topics: song-feed and play-events.
  *
  * The song-feed topic contains all of the songs available in the streaming service and is read
  * as a KTable with all songs being stored in the all-songs state store.
@@ -65,20 +69,14 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
  * the song and count them into a KTable, songPlayCounts, and a state store, song-play-count,
  * to keep track of the number of times each song has been played.
  *
- * Next, we group the songPlayCounts Kable by genre and aggregate into another KTable with the
+ * Next, we group the songPlayCounts KTable by genre and aggregate into another KTable with the
  * state store, top-five-songs-by-genre, to track the top five songs by genre. Subsequently, we
  * group the same songPlayCounts KTable such that all song plays end up in the same partition. We
  * use this to aggregate the overall top five songs played into the state store, top-five.
  *
- *
- * Note: Before running this example you must 1) create the source topic (e.g. via `kafka-topics
- * --create ...`), then 2) start this example and 3) write some data to the source topic (e.g. via
- * `kafka-console-producer`). Otherwise you won't see any data arriving in the output topic.
- *
- *
  * HOW TO RUN THIS EXAMPLE
  *
- * 1) Start Zookeeper and Kafka. Please refer to <a href='http://docs.confluent.io/current/quickstart.html#quickstart'>QuickStart</a>.
+ * 1) Start Zookeeper, Kafka, and Confluent Schema Registry. Please refer to <a href='http://docs.confluent.io/current/quickstart.html#quickstart'>QuickStart</a>.
  *
  * 2) Create the input and output topics used by this example.
  *
@@ -106,7 +104,7 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
  * <pre>
  * {@code
  * $ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar \
- *      io.confluent.examples.streams.interactivequeries.kafkamusic.KakfaMusicExample 7070
+ *      io.confluent.examples.streams.interactivequeries.kafkamusic.KafkaMusicExample 7070
  * }
  * </pre>
  *
@@ -117,7 +115,7 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
  * <pre>
  * {@code
  * $ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar \
- *      io.confluent.examples.streams.interactivequeries.kafkamusic.KakfaMusicExample 7071
+ *      io.confluent.examples.streams.interactivequeries.kafkamusic.KafkaMusicExample 7071
  * }
  * </pre>
  *
@@ -201,8 +199,8 @@ public class KafkaMusicExample {
     // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
       try {
-        streams.close();
         restService.stop();
+        streams.close();
       } catch (Exception e) {
         // ignored
       }
@@ -234,9 +232,10 @@ public class KafkaMusicExample {
     // instance and discover locations of stores.
     streamsConfiguration.put(StreamsConfig.APPLICATION_SERVER_CONFIG, "localhost:" + applicationServerPort);
     streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, stateDir);
-    // Set to earliest so we don't miss any data that arrived int the topics before the process
+    // Set to earliest so we don't miss any data that arrived in the topics before the process
     // started
     streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    // Set the commit interval to 500ms so that any changes are flushed frequently.
     streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 500);
 
     final CachedSchemaRegistryClient
@@ -271,7 +270,7 @@ public class KafkaMusicExample {
 
     // Accept play events that have a duration >= the minimum
     final KStream<Long, PlayEvent> playsBySongId =
-        playEvents.filter((key, value) -> value.getDuration() >= MIN_CHARTABLE_DURATION)
+        playEvents.filter((region, eveny) -> eveny.getDuration() >= MIN_CHARTABLE_DURATION)
             // repartition based on song id
             .map((key, value) -> KeyValue.pair(value.getSongId(), value));
 
@@ -283,15 +282,18 @@ public class KafkaMusicExample {
                                                                  playEventSerde);
 
     // create a state store to track song play counts
-    final KTable<Song, Long> songPlayCounts = songPlays.groupBy((key, value) -> value, songSerde, songSerde)
+    final KTable<Song, Long> songPlayCounts = songPlays.groupBy((songId, song) -> song, songSerde, songSerde)
         .count(SONG_PLAY_COUNT_STORE);
 
     final TopFiveSerde topFiveSerde = new TopFiveSerde();
 
-    // group by genre so we can build top five charts for each genre
-    songPlayCounts.groupBy((key, value) ->
-                               KeyValue.pair(key.getGenre().toLowerCase(),
-                                             new SongPlayCount(key.getId(), value)),
+
+    // Compute the top five charts for each genre. The results of this computation will continuously update the state
+    // store "top-five-songs-by-genre", and this state store can then be queried interactively via a REST API (cf.
+    // MusicPlaysRestService) for the latest charts per genre.
+    songPlayCounts.groupBy((song, plays) ->
+                               KeyValue.pair(song.getGenre().toLowerCase(),
+                                             new SongPlayCount(song.getId(), plays)),
                            Serdes.String(),
                            songPlayCountSerde)
         // aggregate into a TopFiveSongs instance that will keep track
@@ -310,11 +312,12 @@ public class KafkaMusicExample {
                    TOP_FIVE_SONGS_BY_GENRE_STORE
         );
 
-    // group all song plays into a single bucket so we can create an overall
-    // top five chart
-    songPlayCounts.groupBy((key, value) ->
+    // Compute the top five chart. The results of this computation will continuously update the state
+    // store "top-five-songs", and this state store can then be queried interactively via a REST API (cf.
+    // MusicPlaysRestService) for the latest charts per genre.
+    songPlayCounts.groupBy((song, plays) ->
                                KeyValue.pair(TOP_FIVE_KEY,
-                                             new SongPlayCount(key.getId(), value)),
+                                             new SongPlayCount(song.getId(), plays)),
                            Serdes.String(),
                            songPlayCountSerde)
         .aggregate(TopFiveSongs::new,

@@ -13,6 +13,7 @@
  */
 package io.confluent.examples.streams.interactivequeries.kafkamusic;
 
+import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
@@ -31,7 +32,10 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import io.confluent.examples.streams.avro.Song;
 import io.confluent.examples.streams.interactivequeries.HostStoreInfo;
@@ -48,7 +52,10 @@ public class MusicPlaysRestService {
   private final KafkaStreams streams;
   private final int port;
   private final MetadataService metadataService;
+  private final Client client = ClientBuilder.newClient();
   private Server jettyServer;
+  private LongSerializer serializer = new LongSerializer();
+
 
   MusicPlaysRestService(final KafkaStreams streams, final int port) {
     this.streams = streams;
@@ -95,11 +102,44 @@ public class MusicPlaysRestService {
     }
     final List<SongPlayCountBean> results = new ArrayList<>();
     value.forEach(songPlayCount -> {
-      final Song song = songStore.get(songPlayCount.getSongId());
-      results.add(new SongPlayCountBean(song.getArtist(),song.getAlbum(), song.getName(),
-                                        songPlayCount.getPlays()));
+      final HostStoreInfo
+          host =
+          metadataService.streamsMetadataForStoreAndKey(KafkaMusicExample.ALL_SONGS, songPlayCount
+              .getSongId(), serializer);
+
+      // if the song is not hosted on this instance then we need to lookup it up
+      // on the instance it is on.
+      if (host.getPort() != port) {
+        final SongBean song =
+            client.target("http://localhost:" + host.getPort() + "/kafka-music/song/" +
+                          songPlayCount.getSongId())
+                .request(MediaType.APPLICATION_JSON_TYPE)
+                .get(SongBean.class);
+        results.add(new SongPlayCountBean(song.getArtist(),song.getAlbum(), song.getName(),
+                                          songPlayCount.getPlays()));
+      } else {
+        final Song song = songStore.get(songPlayCount.getSongId());
+        results.add(new SongPlayCountBean(song.getArtist(),song.getAlbum(), song.getName(),
+                                          songPlayCount.getPlays()));
+      }
+
+
     });
     return results;
+  }
+
+  @GET()
+  @Path("/song/{id}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public SongBean song(@PathParam("id") Long songId) {
+    final ReadOnlyKeyValueStore<Long, Song> songStore = streams.store(KafkaMusicExample.ALL_SONGS,
+                                                                      QueryableStoreTypes.<Long, Song>keyValueStore());
+    final Song song = songStore.get(songId);
+    if (song == null) {
+      throw new NotFoundException();
+    }
+
+    return new SongBean(song.getArtist(), song.getAlbum(), song.getName());
   }
 
   /**
@@ -124,21 +164,6 @@ public class MusicPlaysRestService {
   @Produces(MediaType.APPLICATION_JSON)
   public List<HostStoreInfo> streamsMetadataForStore(@PathParam("storeName") String store) {
     return metadataService.streamsMetadataForStore(store);
-  }
-
-  /**
-   * Find the metadata for the instance of this Kafka Streams Application that has the given
-   * store and would have the given key if it exists.
-   * @param store   Store to find
-   * @param key     The key to find
-   * @return {@link HostStoreInfo}
-   */
-  @GET()
-  @Path("/instance/{storeName}/{key}")
-  @Produces(MediaType.APPLICATION_JSON)
-  public HostStoreInfo streamsMetadataForStoreAndKey(@PathParam("storeName") String store,
-                                                     @PathParam("key") String key) {
-    return metadataService.streamsMetadataForStoreAndKey(store, key);
   }
 
   /**

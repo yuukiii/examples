@@ -16,6 +16,7 @@
  */
 package io.confluent.examples.streams.interactivequeries;
 
+import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.state.StreamsMetadata;
@@ -31,6 +32,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+/**
+ * Looks up StreamsMetadata from KafkaStreams and converts the results
+ * into Beans that can be JSON serialized via Jersey.
+ */
 public class MetadataService {
 
   private final KafkaStreams streams;
@@ -68,11 +73,12 @@ public class MetadataService {
    * @param key     The key to find
    * @return {@link HostStoreInfo}
    */
-  public HostStoreInfo streamsMetadataForStoreAndKey(final String store,
-                                                     final String key) {
+  public <K> HostStoreInfo streamsMetadataForStoreAndKey(final String store,
+                                                         final K key,
+                                                         final Serializer<K> serializer) {
     // Get metadata for the instances of this Kafka Streams application hosting the store and
     // potentially the value for key
-    final StreamsMetadata metadata = streams.metadataForKey(store, key, new StringSerializer());
+    final StreamsMetadata metadata = streams.metadataForKey(store, key, serializer);
     if (metadata == null) {
       throw new NotFoundException();
     }
