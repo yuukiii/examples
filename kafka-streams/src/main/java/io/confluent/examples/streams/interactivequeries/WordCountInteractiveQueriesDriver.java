@@ -25,8 +25,8 @@ import java.util.Random;
 
 
 /**
- * This is a sample driver for the {@link InteractiveQueriesExample}.
- * To run this driver please first refer to the instructions in {@link InteractiveQueriesExample}.
+ * This is a sample driver for the {@link WordCountInteractiveQueriesExample}.
+ * To run this driver please first refer to the instructions in {@link WordCountInteractiveQueriesExample}.
  * You can then run this class directly in your IDE or via the command line.
  *
  * To run via the command line you might want to package as a fatjar first. Please refer to:
@@ -40,7 +40,7 @@ import java.util.Random;
  * </pre>
  * You should terminate with Ctrl-C
  */
-public class InteractiveQueriesExampleDriver {
+public class WordCountInteractiveQueriesDriver {
 
   public static void main(String [] args) throws Exception {
     final List<String> inputValues = Arrays.asList("hello world",
@@ -72,7 +72,7 @@ public class InteractiveQueriesExampleDriver {
     // our step-by-step instructions always work right from the start (otherwise users may run into
     // HTTP 404 errors when querying the latest value for a key, for example, until the right input
     // data was sent to the topic).
-    producer.send(new ProducerRecord<>(InteractiveQueriesExample.TEXT_LINES_TOPIC,
+    producer.send(new ProducerRecord<>(WordCountInteractiveQueriesExample.TEXT_LINES_TOPIC,
                                        inputValues.get(0), inputValues.get(0)));
 
     // every 500 milliseconds produce one of the lines of text from inputValues to the
@@ -80,7 +80,7 @@ public class InteractiveQueriesExampleDriver {
     final Random random = new Random();
     while (true) {
       final int i = random.nextInt(inputValues.size());
-      producer.send(new ProducerRecord<>(InteractiveQueriesExample.TEXT_LINES_TOPIC,
+      producer.send(new ProducerRecord<>(WordCountInteractiveQueriesExample.TEXT_LINES_TOPIC,
                                          inputValues.get(i), inputValues.get(i)));
       Thread.sleep(500L);
     }

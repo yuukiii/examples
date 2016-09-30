@@ -76,10 +76,13 @@ There are two kinds of examples:
   and enabling client authentication so that the Kafka Streams application authenticates itself to the Kafka brokers)
 * [StateStoresInTheDSLIntegrationTest](src/main/java/io/confluent/examples/streams/StateStoresInTheDSLIntegrationTest.java) (Java 8+)
   -- demonstrates how to use state stores in the Kafka Streams DSL
-* [InteractiveQueriesExample](src/main/java/io/confluent/examples/streams/interactivequeries/InteractiveQueriesExample.java) (Java 8+)
-  -- demonstrates the the Interactive Queries feature to locate and query state stores of a Kafka Streams application
+* [WordCountInteractiveQueriesExample](src/main/java/io/confluent/examples/streams/interactivequeries/WordCountInteractiveQueriesExample.java) (Java 8+)
+  -- demonstrates the Interactive Queries feature to locate and query state stores of a Kafka Streams application
   from other applications; here, we opted to use a REST API to implement the required RPC layer to allow applications to
   talk to each other
+* [KafkaMusicExample](src/main/java/io/confluent/examples/streams/interactivequeries/kafkamusic/KafkaMusicExample.java) (Java 8+)
+  -- demonstrates the building of a simple music charts application. Uses the Interactive Queries feature to query the state stores to get
+  the latest top five songs. Demonstrates locating the KafkaStreams instance for a store and key and retrieving the values via a REST API
 * And [further examples](src/main/java/io/confluent/examples/streams/).
 
 We also provide several **integration tests**, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka

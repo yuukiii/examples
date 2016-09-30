@@ -90,7 +90,7 @@ import java.util.Properties;
  * </pre>
  *
  *
- * 4) Write some input data to the source topics (e.g. via {@link InteractiveQueriesExampleDriver}). The
+ * 4) Write some input data to the source topics (e.g. via {@link WordCountInteractiveQueriesDriver}). The
  * already running example application (step 3) will automatically process this input data
  *
  *
@@ -132,7 +132,7 @@ import java.util.Properties;
  * If you like you can run multiple instances of this example by passing in a different port. You
  * can then experiment with seeing how keys map to different instances etc.
  */
-public class InteractiveQueriesExample {
+public class WordCountInteractiveQueriesExample {
 
   static final String TEXT_LINES_TOPIC = "TextLinesTopic";
 
@@ -163,7 +163,7 @@ public class InteractiveQueriesExample {
     streams.start();
 
     // Start the Restful proxy for servicing remote access to state stores
-    final InteractiveQueriesRestService restService = startRestProxy(streams, port);
+    final WordCountInteractiveQueriesRestService restService = startRestProxy(streams, port);
 
     // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -177,12 +177,12 @@ public class InteractiveQueriesExample {
   }
 
 
-  static InteractiveQueriesRestService startRestProxy(final KafkaStreams streams, final int port)
+  static WordCountInteractiveQueriesRestService startRestProxy(final KafkaStreams streams, final int port)
       throws Exception {
-    final InteractiveQueriesRestService
-            interactiveQueriesRestService = new InteractiveQueriesRestService(streams);
-    interactiveQueriesRestService.start(port);
-    return interactiveQueriesRestService;
+    final WordCountInteractiveQueriesRestService
+        wordCountInteractiveQueriesRestService = new WordCountInteractiveQueriesRestService(streams);
+    wordCountInteractiveQueriesRestService.start(port);
+    return wordCountInteractiveQueriesRestService;
   }
 
   static KafkaStreams createStreams(final Properties streamsConfiguration) {
