@@ -27,6 +27,7 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.state.HostInfo;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -195,7 +196,7 @@ public class KafkaMusicExample {
     streams.start();
 
     // Start the Restful proxy for servicing remote access to state stores
-    final MusicPlaysRestService restService = startRestProxy(streams, port);
+    final MusicPlaysRestService restService = startRestProxy(streams, new HostInfo("localhost", port));
 
     // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -208,10 +209,10 @@ public class KafkaMusicExample {
     }));
   }
 
-  static MusicPlaysRestService startRestProxy(final KafkaStreams streams, final int port)
+  static MusicPlaysRestService startRestProxy(final KafkaStreams streams, final HostInfo hostInfo)
       throws Exception {
     final MusicPlaysRestService
-        interactiveQueriesRestService = new MusicPlaysRestService(streams, port);
+        interactiveQueriesRestService = new MusicPlaysRestService(streams, hostInfo);
     interactiveQueriesRestService.start();
     return interactiveQueriesRestService;
   }

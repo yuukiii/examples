@@ -23,6 +23,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.state.HostInfo;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.apache.kafka.streams.state.StreamsMetadata;
@@ -95,7 +96,7 @@ public class KafkaMusicExampleTest {
                                               CLUSTER.schemaRegistryUrl(),
                                               appServerPort,
                                               TestUtils.tempDirectory().getPath());
-    restProxy = KafkaMusicExample.startRestProxy(streams, appServerPort);
+    restProxy = KafkaMusicExample.startRestProxy(streams, new HostInfo("localhost", appServerPort));
   }
 
   @After
