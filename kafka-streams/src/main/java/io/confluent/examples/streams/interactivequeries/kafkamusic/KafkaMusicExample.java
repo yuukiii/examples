@@ -140,11 +140,6 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
  * # List app instances that currently manage (parts of) state store "song-play-count"
  * http://localhost:7070/kafka-music/instances/song-play-count
  *
- *
- * # Find the app instance that contains the chart for the "punk" genre (if it exists) for the
- * state store "top-five-songs-genre"
- * http://localhost:7070/kafka-music/instance/top-five-songs-by-genre/punk
- *
  * # Get the latest top five for the genre "punk"
  * http://localhost:7070/kafka-music/charts/genre/punk
  *
