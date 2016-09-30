@@ -40,18 +40,18 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 /**
- *  A simple REST proxy that runs embedded in the {@link InteractiveQueriesExample}. This is used to
+ *  A simple REST proxy that runs embedded in the {@link WordCountInteractiveQueriesExample}. This is used to
  *  demonstrate how a developer can use the Interactive Queries APIs exposed by Kafka Streams to
  *  locate and query the State Stores within a Kafka Streams Application.
  */
 @Path("state")
-public class InteractiveQueriesRestService {
+public class WordCountInteractiveQueriesRestService {
 
   private final KafkaStreams streams;
   private final MetadataService metadataService;
   private Server jettyServer;
 
-  InteractiveQueriesRestService(final KafkaStreams streams) {
+  WordCountInteractiveQueriesRestService(final KafkaStreams streams) {
     this.streams = streams;
     this.metadataService = new MetadataService(streams);
   }

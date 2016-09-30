@@ -50,10 +50,10 @@ import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 /**
- * End-to-end integration test for {@link InteractiveQueriesExample}. Demonstrates
- * how you can programmatically query the REST API exposed by {@link InteractiveQueriesRestService}
+ * End-to-end integration test for {@link WordCountInteractiveQueriesExample}. Demonstrates
+ * how you can programmatically query the REST API exposed by {@link WordCountInteractiveQueriesRestService}
  */
-public class InteractiveQueriesExampleTest {
+public class WordCountInteractiveQueriesExampleTest {
 
   @ClassRule
   public static final EmbeddedSingleNodeKafkaCluster CLUSTER = new EmbeddedSingleNodeKafkaCluster();
@@ -65,11 +65,11 @@ public class InteractiveQueriesExampleTest {
   @Rule
   public final TemporaryFolder temp = new TemporaryFolder();
   private KafkaStreams kafkaStreams;
-  private InteractiveQueriesRestService proxy;
+  private WordCountInteractiveQueriesRestService proxy;
 
   @BeforeClass
   public static void createTopic() {
-    CLUSTER.createTopic(InteractiveQueriesExample.TEXT_LINES_TOPIC, 2, 1);
+    CLUSTER.createTopic(WordCountInteractiveQueriesExample.TEXT_LINES_TOPIC, 2, 1);
     // The next two topics don't need to be created as they would be auto-created
     // by Kafka Streams, but it just makes the test more reliable if they already exist
     // as creating the topics causes a rebalance which closes the stores etc. So it makes
@@ -114,7 +114,7 @@ public class InteractiveQueriesExampleTest {
     producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     IntegrationTestUtils
-        .produceValuesSynchronously(InteractiveQueriesExample.TEXT_LINES_TOPIC, inputValues,
+        .produceValuesSynchronously(WordCountInteractiveQueriesExample.TEXT_LINES_TOPIC, inputValues,
                                     producerConfig);
 
     // Race condition caveat:  This two-step approach of finding a free port but not immediately
@@ -122,10 +122,10 @@ public class InteractiveQueriesExampleTest {
     final int port = randomFreeLocalPort();
     final String baseUrl = "http://localhost:" + port + "/state";
 
-    kafkaStreams = InteractiveQueriesExample.createStreams(
+    kafkaStreams = WordCountInteractiveQueriesExample.createStreams(
         createStreamConfig(CLUSTER.bootstrapServers(), port, "one"));
     kafkaStreams.start();
-    proxy = InteractiveQueriesExample.startRestProxy(kafkaStreams, port);
+    proxy = WordCountInteractiveQueriesExample.startRestProxy(kafkaStreams, port);
 
     final Client client = ClientBuilder.newClient();
 

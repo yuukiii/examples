@@ -54,7 +54,7 @@ import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
 import io.confluent.examples.streams.utils.SpecificAvroSerializer;
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 
-import static io.confluent.examples.streams.interactivequeries.InteractiveQueriesExampleTest.randomFreeLocalPort;
+import static io.confluent.examples.streams.interactivequeries.WordCountInteractiveQueriesExampleTest.randomFreeLocalPort;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 

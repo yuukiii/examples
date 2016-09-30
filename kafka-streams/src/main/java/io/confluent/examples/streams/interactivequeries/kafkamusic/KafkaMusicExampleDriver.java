@@ -18,7 +18,6 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,7 +28,6 @@ import java.util.Random;
 
 import io.confluent.examples.streams.avro.PlayEvent;
 import io.confluent.examples.streams.avro.Song;
-import io.confluent.examples.streams.interactivequeries.InteractiveQueriesExample;
 import io.confluent.examples.streams.utils.SpecificAvroSerializer;
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 

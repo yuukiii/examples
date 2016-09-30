@@ -158,7 +158,8 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
  * this application via REST.
  *
  * 6) Once you're done with your experiments, you can stop this example via `Ctrl-C`.  If needed,
- * also stop the Kafka broker (`Ctrl-C`), and only then stop the ZooKeeper instance (`Ctrl-C`).
+ * also stop the Schema Registry (`Ctrl-C`), the Kafka broker (`Ctrl-C`), and only then stop the ZooKeeper instance
+ * (`Ctrl-C`).
  *
  * If you like you can run multiple instances of this example by passing in a different port. You
  * can then experiment with seeing how keys map to different instances etc.
