@@ -271,7 +271,7 @@ public class KafkaMusicExample {
 
     // Accept play events that have a duration >= the minimum
     final KStream<Long, PlayEvent> playsBySongId =
-        playEvents.filter((region, eveny) -> eveny.getDuration() >= MIN_CHARTABLE_DURATION)
+        playEvents.filter((region, event) -> event.getDuration() >= MIN_CHARTABLE_DURATION)
             // repartition based on song id
             .map((key, value) -> KeyValue.pair(value.getSongId(), value));
 
