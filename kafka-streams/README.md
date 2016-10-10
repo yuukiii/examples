@@ -83,6 +83,8 @@ There are two kinds of examples:
 * [KafkaMusicExample](src/main/java/io/confluent/examples/streams/interactivequeries/kafkamusic/KafkaMusicExample.java) (Java 8+)
   -- demonstrates the building of a simple music charts application. Uses the Interactive Queries feature to query the state stores to get
   the latest top five songs. Demonstrates locating the KafkaStreams instance for a store and key and retrieving the values via a REST API
+* [ApplicationResetExample](src/main/java/io/confluent/examples/streams/ApplicationResetExample.java) (Java 8+)
+  -- demonstrates the usage of the application reset tool (`bin/kafka-streams-application-reset`)
 * And [further examples](src/main/java/io/confluent/examples/streams/).
 
 We also provide several **integration tests**, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka
