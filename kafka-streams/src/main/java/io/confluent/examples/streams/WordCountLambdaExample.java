@@ -98,7 +98,11 @@ import java.util.regex.Pattern;
  * }
  * </pre>
  *
- * You should see output data similar to:
+ * You should see output data similar to below: (note exact sequence will depend on
+ * how fast you type the above sentences. If you type them slowly, you are likely
+ * to get each update, e.g., kafka 1, kafka 2, kafka 3. If you type them fast, you
+ * are likely to get fewer updates, e.g., just kafka 3. This is because the commit interval
+ * is set to 10 seconds. Anything typed within that interval will be compacted in memory).
  *
  * <pre>
  * {@code
@@ -109,7 +113,6 @@ import java.util.regex.Pattern;
  * streams  2
  * lead     1
  * to       1
- * kafka    2
  * join     1
  * kafka    3
  * summit   1
@@ -133,6 +136,8 @@ public class WordCountLambdaExample {
     // Specify default (de)serializers for record keys and for record values.
     streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+    // use a commit interval of 10 seconds, i.e., records should be cached for at most this time
+    streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
 
     // Set up serializers and deserializers, which we will use for overriding the default serdes
     // specified above.

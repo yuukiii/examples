@@ -88,16 +88,8 @@ public class UserCountsPerRegionLambdaIntegrationTest {
     );
 
     List<KeyValue<String, Long>> expectedUsersPerRegion = Arrays.asList(
-        new KeyValue<>("asia", 1L),   // +1 to asia via ("alice", "asia")
-        new KeyValue<>("europe", 1L), // +1 to europe via ("bob", "europe")
-        // Then ("alice", "europe") is processed, which will result in two downstream updates
-        // because this data record means Alice moved from Asia to Europe.
-        new KeyValue<>("asia", 0L),   // -1 to asia
-        new KeyValue<>("europe", 2L), // +1 to europe
-        // Then ("bob", "asia") is processed, which will result in two downstream updates
-        // because this data record means Bob moved from Europe to Asia.
-        new KeyValue<>("europe", 1L), // -1 to europe
-        new KeyValue<>("asia", 1L)    // +1 to asia
+        new KeyValue<>("europe", 1L), // in the end, Alice is in europe
+        new KeyValue<>("asia", 1L)    // in the end, Bob is in asia
     );
 
     //
@@ -112,7 +104,8 @@ public class UserCountsPerRegionLambdaIntegrationTest {
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zookeeperConnect());
     streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-    streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 1);
+    // use a commit interval of 10 seconds, i.e., records should be cached for at most this time
+    streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
     streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
     // Explicitly place the state directory under /tmp so that we can remove it via

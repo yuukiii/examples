@@ -148,7 +148,7 @@ public class TopArticlesLambdaExample {
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class);
     streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 1000);
     streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, stateDir);
-
+    streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
     final Serde<String> stringSerde = Serdes.String();
     final Serde<GenericRecord> avroSerde = new GenericAvroSerde(
         new CachedSchemaRegistryClient(schemaRegistryUrl, 100),

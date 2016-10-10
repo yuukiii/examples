@@ -59,7 +59,7 @@ public class SumLambdaIntegrationTest {
   @Test
   public void shouldSumEvenNumbers() throws Exception {
     List<Integer> inputValues = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-    List<Integer> expectedValues = Arrays.asList(2, 6, 12, 20, 30);
+    List<Integer> expectedValues = Arrays.asList(30);
 
     //
     // Step 1: Configure and start the processor topology.
@@ -72,7 +72,8 @@ public class SumLambdaIntegrationTest {
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zookeeperConnect());
     streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.Integer().getClass().getName());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.Integer().getClass().getName());
-    streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 1);
+    // use a commit interval of 10 seconds, i.e., records should be cached for at most this time
+    streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
     streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     // Explicitly place the state directory under /tmp so that we can remove it via
     // `purgeLocalStreamsState` below.  Once Streams is updated to expose the effective
