@@ -74,7 +74,7 @@ There are two kinds of examples:
 * [SecureKafkaStreamsExample](src/main/java/io/confluent/examples/streams/SecureKafkaStreamsExample.java) (Java 7+)
   -- demonstrates how to configure Kafka Streams for secure stream processing (here: encrypting data-in-transit
   and enabling client authentication so that the Kafka Streams application authenticates itself to the Kafka brokers)
-* [StateStoresInTheDSLIntegrationTest](src/main/java/io/confluent/examples/streams/StateStoresInTheDSLIntegrationTest.java) (Java 8+)
+* [StateStoresInTheDSLIntegrationTest](src/test/java/io/confluent/examples/streams/StateStoresInTheDSLIntegrationTest.java) (Java 8+)
   -- demonstrates how to use state stores in the Kafka Streams DSL
 * [WordCountInteractiveQueriesExample](src/main/java/io/confluent/examples/streams/interactivequeries/WordCountInteractiveQueriesExample.java) (Java 8+)
   -- demonstrates the Interactive Queries feature to locate and query state stores of a Kafka Streams application
