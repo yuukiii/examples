@@ -148,6 +148,8 @@ public class TopArticlesLambdaExample {
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class);
     streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 1000);
     streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, stateDir);
+    // Records should be flushed every 10 seconds. This is less than the default
+    // in order to keep this example interactive.
     streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
     final Serde<String> stringSerde = Serdes.String();
     final Serde<GenericRecord> avroSerde = new GenericAvroSerde(

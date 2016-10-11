@@ -110,7 +110,8 @@ public class SumLambdaExample {
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.Integer().getClass().getName());
     streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, "/tmp/kafka-streams");
-    // use a commit interval of 10 seconds, i.e., records should be cached for at most this time
+    // Records should be flushed every 10 seconds. This is less than the default
+    // in order to keep this example interactive.
     streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
 
     KStreamBuilder builder = new KStreamBuilder();

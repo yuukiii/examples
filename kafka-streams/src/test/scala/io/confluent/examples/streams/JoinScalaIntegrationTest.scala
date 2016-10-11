@@ -103,7 +103,8 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
       p.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zookeeperConnect())
       p.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       p.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
-      // use a commit interval of 10 seconds, i.e., records should be cached for at most this time
+      // The commit interval for flushing records to state stores and downstream must be lower than
+      // this integration test's timeout (30 secs) to ensure we observe the expected processing results.
       p.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "10000")
       p.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
