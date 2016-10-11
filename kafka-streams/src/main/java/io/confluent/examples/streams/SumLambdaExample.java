@@ -84,17 +84,6 @@ import java.util.Properties;
  *
  * <pre>
  * {@code
- *    1
- *    4
- *    9
- *   16
- *   25
- *   36
- *   49
- *  ...
- * 2209
- * 2304
- * 2401
  * 2500
  * }
  * </pre>
@@ -121,6 +110,9 @@ public class SumLambdaExample {
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.Integer().getClass().getName());
     streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, "/tmp/kafka-streams");
+    // Records should be flushed every 10 seconds. This is less than the default
+    // in order to keep this example interactive.
+    streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
 
     KStreamBuilder builder = new KStreamBuilder();
     // We assume the input topic contains records where the values are Integers.

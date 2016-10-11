@@ -101,8 +101,6 @@ import java.util.Properties;
  *
  * <pre>
  * {@code
- * asia     2     # because Alice and Chao are currently in Asia
- * europe   2     # because Dave and Alice (who moved from Asia to Europe) are currently in Europe
  * americas 2     # because Bob and Eve are currently in Americas
  * asia     2     # because Chao and Fang are currently in Asia
  * europe   3     # because Dave, Alice, and Gandalf are currently in Europe
@@ -126,6 +124,9 @@ public class UserRegionLambdaExample {
     // Specify default (de)serializers for record keys and for record values.
     streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+    // Records should be flushed every 10 seconds. This is less than the default
+    // in order to keep this example interactive.
+    streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
 
     final Serde<String> stringSerde = Serdes.String();
     final Serde<Long> longSerde = Serdes.Long();

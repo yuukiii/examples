@@ -68,13 +68,10 @@ class WordCountScalaIntegrationTest extends AssertionsForJUnit {
 
     val expectedWordCounts: Seq[KeyValue[String, Long]] = Seq(
       ("hello", 1L),
-      ("kafka", 1L),
-      ("streams", 1L),
       ("all", 1L),
       ("streams", 2L),
       ("lead", 1L),
       ("to", 1L),
-      ("kafka", 2L),
       ("join", 1L),
       ("kafka", 3L),
       ("summit", 1L)
@@ -90,7 +87,9 @@ class WordCountScalaIntegrationTest extends AssertionsForJUnit {
       p.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zookeeperConnect())
       p.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       p.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
-      p.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "1")
+      // The commit interval for flushing records to state stores and downstream must be lower than
+      // this integration test's timeout (30 secs) to ensure we observe the expected processing results.
+      p.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "10000")
       p.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
       // Explicitly place the state directory under /tmp so that we can remove it via
       // `purgeLocalStreamsState` below.  Once Streams is updated to expose the effective

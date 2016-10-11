@@ -111,26 +111,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
  *
  * <pre>
  * {@code
- * [africa@1466515140000]  1
- * [africa@1466515080000]  1
- * [africa@1466514900000]  1
- * [africa@1466515020000]  1
- * [africa@1466514960000]  1
- * [africa@1466514900000]  2
- * [africa@1466514960000]  2
- * [africa@1466515020000]  2
- * [africa@1466515080000]  2
  * [africa@1466515140000]  2
- * [asia@1466515140000]  1
- * [asia@1466515080000]  1
- * [asia@1466514900000]  1
- * [asia@1466515020000]  1
- * [asia@1466514960000]  1
- * [asia@1466514900000]  2
- * [asia@1466514960000]  2
- * [asia@1466515020000]  2
- * [asia@1466515080000]  2
- * [asia@1466515140000]  2
  * [asia@1466514900000]  3
  * ...
  * }
@@ -159,6 +140,9 @@ public class PageViewRegionExample {
     streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class);
     streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    // Records should be flushed every 10 seconds. This is less than the default
+    // in order to keep this example interactive.
+    streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
 
     final Serde<String> stringSerde = Serdes.String();
     final Serde<Long> longSerde = Serdes.Long();

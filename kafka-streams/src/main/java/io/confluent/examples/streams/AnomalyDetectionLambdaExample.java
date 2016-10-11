@@ -101,7 +101,6 @@ import java.util.Properties;
  *
  * <pre>
  * {@code
- * [alice@1466521140000]	3
  * [alice@1466521140000]	4
  * }
  * </pre>
@@ -125,6 +124,9 @@ public class AnomalyDetectionLambdaExample {
     // Specify default (de)serializers for record keys and for record values.
     streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+    // Set the commit interval to 500ms so that any changes are flushed frequently. The low latency
+    // would be important for anomaly detection.
+    streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 500);
 
     final Serde<String> stringSerde = Serdes.String();
     final Serde<Long> longSerde = Serdes.Long();

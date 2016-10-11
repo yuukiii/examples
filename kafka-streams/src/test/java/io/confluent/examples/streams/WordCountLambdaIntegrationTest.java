@@ -73,13 +73,10 @@ public class WordCountLambdaIntegrationTest {
     );
     List<KeyValue<String, Long>> expectedWordCounts = Arrays.asList(
         new KeyValue<>("hello", 1L),
-        new KeyValue<>("kafka", 1L),
-        new KeyValue<>("streams", 1L),
         new KeyValue<>("all", 1L),
         new KeyValue<>("streams", 2L),
         new KeyValue<>("lead", 1L),
         new KeyValue<>("to", 1L),
-        new KeyValue<>("kafka", 2L),
         new KeyValue<>("join", 1L),
         new KeyValue<>("kafka", 3L),
         new KeyValue<>("summit", 1L),
@@ -106,7 +103,9 @@ public class WordCountLambdaIntegrationTest {
     streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zookeeperConnect());
     streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-    streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 1);
+    // The commit interval for flushing records to state stores and downstream must be lower than
+    // this integration test's timeout (30 secs) to ensure we observe the expected processing results.
+    streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
     streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     // Explicitly place the state directory under /tmp so that we can remove it via
     // `purgeLocalStreamsState` below.  Once Streams is updated to expose the effective

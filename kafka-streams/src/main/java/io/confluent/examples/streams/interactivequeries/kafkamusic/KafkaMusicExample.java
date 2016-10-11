@@ -232,7 +232,8 @@ public class KafkaMusicExample {
     // Set to earliest so we don't miss any data that arrived in the topics before the process
     // started
     streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-    // Set the commit interval to 500ms so that any changes are flushed frequently.
+    // Set the commit interval to 500ms so that any changes are flushed frequently and the top five
+    // charts are updated with low latency.
     streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 500);
 
     final CachedSchemaRegistryClient
