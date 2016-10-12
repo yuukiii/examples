@@ -24,36 +24,35 @@ import java.util.Properties;
 
 /**
  * Demonstrates how to configure Kafka Streams for secure stream processing.
- *
+ * <p>
  * This example showcases how to perform secure stream processing by configuring a Kafka Streams
  * application to 1. encrypt data-in-transit when communicating with its target Kafka cluster and 2.
  * enable client authentication (i.e. the Kafka Streams application authenticates itself to the
  * Kafka brokers).  The actual stream processing of the application is trivial and not the focus in
  * this specific example: the application will simply write its input data as-is to an output
  * topic.
- *
+ * <p>
+ * <br>
  * HOW TO RUN THIS EXAMPLE
- *
- * This example requires running a secure Kafka cluster.  Because setting up such a secure cluster
+ * <p>
+ * This example requires running a secure Kafka cluster. Because setting up such a secure cluster
  * is a bit more involved, we will use https://github.com/confluentinc/securing-kafka-blog, which
  * provides a pre-configured virtual machine that is deployed via Vagrant.
- *
- * Tip: The configuration of this VM follows the instructions at <a href="http://www.confluent.io/blog/apache-kafka-security-authorization-authentication-encryption">Apache
- * Kafka Security 101</a>.  We recommend to read this article as well as <a
- * href="http://docs.confluent.io/current/kafka/security.html">Kafka Security</a> to understand how
- * you can install a secure Kafka cluster yourself.
- *
+ * <p>
+ * Tip: The configuration of this VM follows the instructions at <a href="http://www.confluent.io/blog/apache-kafka-security-authorization-authentication-encryption">Apache Kafka Security 101</a>.
+ * We recommend to read this article as well as <a href="http://docs.confluent.io/current/kafka/security.html">Kafka Security</a>
+ * to understand how you can install a secure Kafka cluster yourself.
+ * <p>
  * 1) Start a secure ZooKeeper instance and a secure Kafka broker.
- *
- * Follow the README instructions at https://github.com/confluentinc/securing-kafka-blog.
- *
+ * <p>
+ * Follow the README instructions at <a href="https://github.com/confluentinc/securing-kafka-blog">https://github.com/confluentinc/securing-kafka-blog</a>.
+ * <p>
  * You must follow the instructions all the way until you have started secure ZooKeeper and secure
- * Kafka via the command `sudo /usr/sbin/start-zk-and-kafka` from within the VM.
- *
+ * Kafka via the command {@code sudo /usr/sbin/start-zk-and-kafka} from within the VM.
+ * <p>
  * At this point you have a VM running, and inside this VM runs a secure single-node Kafka cluster.
- *
+ * <p>
  * 2) Within the VM: create the input and output topics used by this example.
- *
  * <pre>
  * {@code
  * # If you haven't done so already, connect from your host machine (e.g. your laptop) to the
@@ -69,13 +68,10 @@ import java.util.Properties;
  *                                 --zookeeper localhost:2181 --partitions 1 --replication-factor 1
  * [vagrant@kafka ~]$ kafka-topics --create --topic secure-output \
  *                                 --zookeeper localhost:2181 --partitions 1 --replication-factor 1
- * }
- * </pre>
- *
- * Note on "authentication failure":  If you attempt to create a topic right after you started
- * ZooKeeper and Kafka via `sudo /usr/sbin/start-zk-and-kafka`, you may temporarily run into the
+ * }</pre>
+ * Note on "authentication failure": If you attempt to create a topic right after you started
+ * ZooKeeper and Kafka via {@code sudo /usr/sbin/start-zk-and-kafka}, you may temporarily run into the
  * following error:
- *
  * <pre>
  * {@code
  * ERROR An error: (java.security.PrivilegedActionException: javax.security.sasl.SaslException:
@@ -85,15 +81,12 @@ import java.util.Properties;
  *   Zookeeper Client will go to AUTH_FAILED state.
  * Exception in thread "main" org.I0Itec.zkclient.exception.ZkAuthFailedException: Authentication
  * failure
- * }
- * </pre>
- *
+ * }</pre>
  * If this happens, just wait a minute so that ZooKeeper can finish its startup, then try again.
- *
+ * <p>
  * 3) Within the VM: build this example application.
- *
+ * <p>
  * Once packaged you can then run:
- *
  * <pre>
  * {@code
  * [vagrant@kafka ~]$ git clone https://github.com/confluentinc/examples.git
@@ -107,17 +100,13 @@ import java.util.Properties;
  * # Now we can start this example application
  * [vagrant@kafka ~]$ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar \
  *                             io.confluent.examples.streams.SecureKafkaStreamsExample
- * }
- * </pre>
- *
- * 4) Write some input data to the source topic (e.g. via `kafka-console-producer`.  The already
+ * }</pre>
+ * 4) Write some input data to the source topic (e.g. via {@code kafka-console-producer}). The already
  * running example application (step 3) will automatically process this input data and write the
  * results as-is (i.e. unmodified) to the output topic.
- *
  * <pre>
  * {@code
- * # Start the console producer.  You can then enter input data by writing some line of text,
- * # followed by ENTER.
+ * # Start the console producer. You can then enter input data by writing some line of text, followed by ENTER.
  * #
  * #   kafka streams<ENTER>
  * #   ships with<ENTER>
@@ -126,39 +115,30 @@ import java.util.Properties;
  * # Every line you enter will become the value of a single Kafka message.
  * $ kafka-console-producer --broker-list localhost:9093 --topic secure-input \
  *                          --producer.config /etc/kafka/producer_ssl.properties
- * }
- * </pre>
- *
- * 5) Inspect the resulting data in the output topic, e.g. via `kafka-console-consumer`.
- *
+ * }</pre>
+ * 5) Inspect the resulting data in the output topic, e.g. via {@code kafka-console-consumer}.
  * <pre>
  * {@code
- * $ kafka-console-consumer --new-consumer --bootstrap-server localhost:9093
- *                          --topic secure-output \
- *                          --consumer.config /etc/kafka/consumer_ssl.properties \
- *                          --from-beginning
- * }
- * </pre>
- *
+ * $ kafka-console-consumer --topic secure-output --from-beginning \
+ *                          --new-consumer --bootstrap-server localhost:9093 \
+ *                          --consumer.config /etc/kafka/consumer_ssl.properties
+ * }</pre>
  * You should see output data similar to:
- *
  * <pre>
  * {@code
  * kafka streams
  * ships with
  * important security features
- * }
- * </pre>
- *
- * 6) Once you're done with your experiments, you can stop this example via `Ctrl-C`.
- *
+ * }</pre>
+ * 6) Once you're done with your experiments, you can stop this example via {@code Ctrl-C}.
+ * <p>
  * If you also want to shut down the secure ZooKeeper and Kafka instances, please follow the README
- * instructions at https://github.com/confluentinc/securing-kafka-blog.
+ * instructions at <a href="https://github.com/confluentinc/securing-kafka-blog">https://github.com/confluentinc/securing-kafka-blog</a>.
  */
 public class SecureKafkaStreamsExample {
 
-  public static void main(String[] args) throws Exception {
-    Properties streamsConfiguration = new Properties();
+  public static void main(final String[] args) throws Exception {
+    final Properties streamsConfiguration = new Properties();
     // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
     // against which the application is run.
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "secure-kafka-streams-app");
@@ -184,10 +164,10 @@ public class SecureKafkaStreamsExample {
     streamsConfiguration.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, "test1234");
     streamsConfiguration.put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, "test1234");
 
-    KStreamBuilder builder = new KStreamBuilder();
+    final KStreamBuilder builder = new KStreamBuilder();
     // Write the input data as-is to the output topic.
     builder.stream("secure-input").to("secure-output");
-    KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
+    final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
     streams.start();
 
     // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
