@@ -75,6 +75,8 @@ There are two kinds of examples:
 * [SecureKafkaStreamsExample](src/main/java/io/confluent/examples/streams/SecureKafkaStreamsExample.java)
   -- demonstrates how to configure Kafka Streams for secure stream processing (here: encrypting data-in-transit
   and enabling client authentication so that the Kafka Streams application authenticates itself to the Kafka brokers)
+* [ApplicationResetExample](src/main/java/io/confluent/examples/streams/ApplicationResetExample.java) (Java 8+)
+  -- demonstrates the usage of the application reset tool (`bin/kafka-streams-application-reset`)
 * And [further examples](src/main/java/io/confluent/examples/streams/).
 
 We also provide several **integration tests**, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka
