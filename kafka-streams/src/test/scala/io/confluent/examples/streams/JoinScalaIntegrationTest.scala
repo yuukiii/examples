@@ -181,12 +181,8 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
       p.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
       p
     }
-    // Scala-Java interoperability: to convert `userRegions, `userClicks`, `expectedClicksPerRegion`
-    // (which have type `Seq`) to the appropriate Java collections, which we achieve via this import.
-    // (We wouldn't need to convert if we modified the Java-focused `IntegrationTestUtils` to be
-    // more Scala friendly or if we provided Scala-focused test utilities.)
-    import scala.collection.convert.wrapAsJava._
-    IntegrationTestUtils.produceKeyValuesSynchronously(userRegionsTopic, userRegions, userRegionsProducerConfig)
+    import collection.JavaConverters._
+    IntegrationTestUtils.produceKeyValuesSynchronously(userRegionsTopic, userRegions.asJava, userRegionsProducerConfig)
 
     //
     // Step 3: Publish some user click events.
@@ -200,7 +196,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
       p.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[LongSerializer])
       p
     }
-    IntegrationTestUtils.produceKeyValuesSynchronously(userClicksTopic, userClicks, userClicksProducerConfig)
+    IntegrationTestUtils.produceKeyValuesSynchronously(userClicksTopic, userClicks.asJava, userClicksProducerConfig)
 
     //
     // Step 4: Verify the application's output data.
@@ -217,7 +213,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     val actualClicksPerRegion: java.util.List[KeyValue[String, Long]] = IntegrationTestUtils.waitUntilMinKeyValueRecordsReceived(consumerConfig,
       outputTopic, expectedClicksPerRegion.size)
     streams.close()
-    assertThat(actualClicksPerRegion).containsExactlyElementsOf(expectedClicksPerRegion)
+    assertThat(actualClicksPerRegion).containsExactlyElementsOf(expectedClicksPerRegion.asJava)
   }
 
 }

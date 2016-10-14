@@ -140,12 +140,8 @@ class WordCountScalaIntegrationTest extends AssertionsForJUnit {
       p.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
       p
     }
-    // Scala-Java interoperability: to convert `inputTextLines, `expectedWordCounts` (which have
-    // type `Seq`) to the appropriate Java collections, which we achieve via this import.
-    // (We wouldn't need to convert if we modified the Java-focused `IntegrationTestUtils` to be
-    // more Scala friendly or if we provided Scala-focused test utilities.)
-    import scala.collection.convert.wrapAsJava._
-    IntegrationTestUtils.produceValuesSynchronously(inputTopic, inputTextLines, producerConfig)
+    import collection.JavaConverters._
+    IntegrationTestUtils.produceValuesSynchronously(inputTopic, inputTextLines.asJava, producerConfig)
 
     //
     // Step 3: Verify the application's output data.
@@ -162,7 +158,7 @@ class WordCountScalaIntegrationTest extends AssertionsForJUnit {
     val actualWordCounts: java.util.List[KeyValue[String, Long]] =
       IntegrationTestUtils.waitUntilMinKeyValueRecordsReceived(consumerConfig, outputTopic, expectedWordCounts.size)
     streams.close()
-    assertThat(actualWordCounts).containsExactlyElementsOf(expectedWordCounts)
+    assertThat(actualWordCounts).containsExactlyElementsOf(expectedWordCounts.asJava)
   }
 
 }
