@@ -92,8 +92,8 @@ results (using the standard Kafka consumer client).
 * [PassThroughIntegrationTest](src/test/java/io/confluent/examples/streams/PassThroughIntegrationTest.java)
 * [SumLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/SumLambdaIntegrationTest.java)
 * [UserCountsPerRegionLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/UserCountsPerRegionLambdaIntegrationTest.java)
-* [GenericAvroIntegrationTest.java](src/test/java/io/confluent/examples/streams/GenericAvroIntegrationTest.java)
-* [SpecificAvroIntegrationTest.java](src/test/java/io/confluent/examples/streams/SpecificAvroIntegrationTest.java)
+* [GenericAvroIntegrationTest](src/test/java/io/confluent/examples/streams/GenericAvroIntegrationTest.java)
+* [SpecificAvroIntegrationTest](src/test/java/io/confluent/examples/streams/SpecificAvroIntegrationTest.java)
 
 
 <a name="examples-scala"/>
@@ -114,6 +114,8 @@ results (using the standard Kafka consumer client).
 
 * [JoinScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/JoinScalaIntegrationTest.scala)
 * [WordCountScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/WordCountScalaIntegrationTest.scala)
+* [GenericAvroScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/GenericAvroScalaIntegrationTest.scala)
+* [SpecificAvroScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/SpecificAvroScalaIntegrationTest.scala)
 
 
 <a name="requirements"/>
