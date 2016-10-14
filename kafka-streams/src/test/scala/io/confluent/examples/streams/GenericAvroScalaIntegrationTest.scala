@@ -53,10 +53,13 @@ class GenericAvroScalaIntegrationTest extends AssertionsForJUnit {
   @Test
   def shouldRoundTripGenericAvroDataThroughKafka() {
     val schema: Schema = new Schema.Parser().parse(getClass.getResourceAsStream("/avro/io/confluent/examples/streams/wikifeed.avsc"))
-    val record: GenericRecord = new GenericData.Record(schema)
-    record.put("user", "alice")
-    record.put("is_new", true)
-    record.put("content", "lorem ipsum")
+    val record: GenericRecord = {
+      val r = new GenericData.Record(schema)
+      r.put("user", "alice")
+      r.put("is_new", true)
+      r.put("content", "lorem ipsum")
+      r
+    }
     val inputValues: Seq[GenericRecord] = Seq(record)
 
     //
