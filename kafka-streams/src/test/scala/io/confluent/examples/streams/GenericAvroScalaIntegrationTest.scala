@@ -90,12 +90,15 @@ class GenericAvroScalaIntegrationTest extends AssertionsForJUnit {
     // However, in the code below we intentionally override the default serdes in `to()` to
     // demonstrate how you can construct and configure a generic Avro serde manually.
     val stringSerde: Serde[String] = Serdes.String
-    val genericAvroSerde: Serde[GenericRecord] = new GenericAvroSerde
-    // Note how we must manually call `configure()` on this serde to configure the schema registry
-    // url.  This is different from the case of setting default serdes (see `streamsConfiguration`
-    // above), which will be auto-configured based on the `StreamsConfiguration` instance.
-    val isKeySerde: Boolean = false
-    genericAvroSerde.configure(Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, CLUSTER.schemaRegistryUrl), isKeySerde)
+    val genericAvroSerde: Serde[GenericRecord] = {
+      val gas = new GenericAvroSerde
+      // Note how we must manually call `configure()` on this serde to configure the schema registry
+      // url.  This is different from the case of setting default serdes (see `streamsConfiguration`
+      // above), which will be auto-configured based on the `StreamsConfiguration` instance.
+      val isKeySerde: Boolean = false
+      gas.configure(Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, CLUSTER.schemaRegistryUrl), isKeySerde)
+      gas
+    }
 
     val stream: KStream[String, GenericRecord] = builder.stream(inputTopic)
     stream.to(stringSerde, genericAvroSerde, outputTopic)
