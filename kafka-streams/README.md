@@ -134,7 +134,7 @@ results (using the standard Kafka consumer client).
 
 ## Apache Kafka
 
-The code in this repository requires Apache Kafka 0.10.0+ because from this point onwards Kafka includes its
+The code in this repository requires Apache Kafka 0.10+ because from this point onwards Kafka includes its
 [Kafka Streams](https://github.com/apache/kafka/tree/trunk/streams) library.
 See [Version Compatibility Matrix](#version-compatibility) for further details, as different branches of this
 repository may have different Kafka requirements.
