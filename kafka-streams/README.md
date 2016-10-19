@@ -156,6 +156,59 @@ repository may have different Kafka requirements.
 > $ ./gradlew clean installAll
 > ```
 
+To add the Kafka Streams library to your application when using Confluent Platform and `maven` (see [pom.xml](pom.xml)
+and
+[Kafka Streams: libraries and maven artifacts](http://docs.confluent.io/current/streams/developer-guide.html#libraries-and-maven-artifacts)
+for details):
+
+```xml
+<!-- pom.xml -->
+<repositories>
+  <repository>
+    <id>confluent</id>
+    <url>http://packages.confluent.io/maven/</url>
+  </repository>
+</repositories>
+
+<dependencies>
+  <dependency>
+    <groupId>org.apache.kafka</groupId>
+    <artifactId>kafka-streams</artifactId>
+    <version>0.10.1.0-SNAPSHOT</version>
+  </dependency>
+  <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-clients</artifactId>
+      <version>0.10.1.0-SNAPSHOT</version>
+  </dependency>
+</dependencies>
+```
+
+To add the Kafka Streams library to your application when using Confluent Platform and `gradle`:
+
+```
+repositories {
+  maven { url "http://packages.confluent.io/maven/" }
+}
+
+dependencies {
+    compile "org.apache.kafka:kafka-streams:0.10.1.0-SNAPSHOT"
+    compile "org.apache.kafka:kafka-clients:0.10.1.0-SNAPSHOT"
+}
+```
+
+To add the Kafka Streams library to your application when using Confluent Platform and `sbt` (Scala):
+
+```scala
+resolvers ++= Seq(
+  "confluent-repository" at "http://packages.confluent.io/maven/"
+)
+
+libraryDependencies ++= Seq(
+  "org.apache.kafka" % "kafka-streams" % "0.10.1.0-SNAPSHOT",
+  "org.apache.kafka" % "kafka-clients" % "0.10.1.0-SNAPSHOT"
+)
+```
 
 <a name="requirements-confluent-platform"/>
 
