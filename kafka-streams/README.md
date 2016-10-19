@@ -18,6 +18,7 @@ Table of Contents
 * [Packaging and running the examples](#packaging-and-running)
 * [Development](#development)
 * [Version Compatibility Matrix](#version-compatibility)
+* [Documentation](#documentation)
 
 ---
 
@@ -288,3 +289,14 @@ $ mvn test    # But no tests yet!
 
 The `master` branch of this repository represents active development, and may require additional steps on your side to
 make it compile.  Check this README as well as [pom.xml](pom.xml) for any such information.
+
+
+<a name="documentation"/>
+
+# Documentation
+
+For more information about Kafka and Kafka Streams we recommend to read:
+
+* [Confluent documentation](http://docs.confluent.io/current/), notably the extensive chapter on
+  [Kafka Streams](http://docs.confluent.io/current/streams/)
+* [Apache Kafka documentation](http://kafka.apache.org/documentation)
