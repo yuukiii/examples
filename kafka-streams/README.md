@@ -160,7 +160,7 @@ repository may have different Kafka requirements.
 
 ## Confluent Platform
 
-The code in this repository requires Confluent Platform 3.0.x.
+The code in this repository requires Confluent Platform 3.1.x.
 See [Version Compatibility Matrix](#version-compatibility) for further details, as different branches of this
 repository may have different Confluent Platform requirements.
 
