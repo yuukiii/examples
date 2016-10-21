@@ -118,8 +118,7 @@ class WordCountScalaIntegrationTest extends AssertionsForJUnit {
 
     val wordCounts: KStream[String, JLong] = textLines
         .flatMapValues(value => value.toLowerCase.split("\\W+").toIterable.asJava)
-        .map((key, word) => new KeyValue(word, word))
-        .groupByKey()
+        .groupBy((key, word) => word)
         .count("Counts")
         .toStream()
 
