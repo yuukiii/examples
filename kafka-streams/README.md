@@ -174,12 +174,12 @@ for details):
   <dependency>
     <groupId>org.apache.kafka</groupId>
     <artifactId>kafka-streams</artifactId>
-    <version>0.10.1.0-SNAPSHOT</version>
+    <version>0.10.1.0-cp1</version>
   </dependency>
   <dependency>
       <groupId>org.apache.kafka</groupId>
       <artifactId>kafka-clients</artifactId>
-      <version>0.10.1.0-SNAPSHOT</version>
+      <version>0.10.1.0-cp1</version>
   </dependency>
 </dependencies>
 ```
@@ -192,8 +192,8 @@ repositories {
 }
 
 dependencies {
-    compile "org.apache.kafka:kafka-streams:0.10.1.0-SNAPSHOT"
-    compile "org.apache.kafka:kafka-clients:0.10.1.0-SNAPSHOT"
+    compile "org.apache.kafka:kafka-streams:0.10.1.0-cp1"
+    compile "org.apache.kafka:kafka-clients:0.10.1.0-cp1"
 }
 ```
 
@@ -205,8 +205,8 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.apache.kafka" % "kafka-streams" % "0.10.1.0-SNAPSHOT",
-  "org.apache.kafka" % "kafka-clients" % "0.10.1.0-SNAPSHOT"
+  "org.apache.kafka" % "kafka-streams" % "0.10.1.0-cp1",
+  "org.apache.kafka" % "kafka-clients" % "0.10.1.0-cp1"
 )
 ```
 
@@ -301,7 +301,7 @@ Kafka Streams examples via:
 #
 $ mvn clean package
 
-# >>> Creates target/streams-examples-3.1.0-SNAPSHOT-standalone.jar
+# >>> Creates target/streams-examples-3.1.0-standalone.jar
 ```
 
 You can now run the example applications as follows:
@@ -309,7 +309,7 @@ You can now run the example applications as follows:
 ```shell
 # Run an example application from the standalone jar.
 # Here: `WordCountLambdaExample`
-$ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar \
+$ java -cp target/streams-examples-3.1.0-standalone.jar \
   io.confluent.examples.streams.WordCountLambdaExample
 ```
 
@@ -336,7 +336,7 @@ $ mvn test    # But no tests yet!
 
 | Branch (this repo)                                                             | Apache Kafka      | Confluent Platform | Notes                                                                                 |
 | -------------------------------------------------------------------------------|-------------------|--------------------|---------------------------------------------------------------------------------------|
-| [master](../../../tree/master/kafka-streams)                                   | 0.10.1.0-SNAPSHOT | 3.1.0-SNAPSHOT     | You must manually build the `trunk` version of Apache Kafka.  See instructions above. |
+| [master](../../../tree/master/kafka-streams)                                   | 0.10.1.0-cp1 | 3.1.0     | You must manually build the `trunk` version of Apache Kafka.  See instructions above. |
 | [kafka-0.10.0.1-cp-3.0.1](../../../tree/kafka-0.10.0.1-cp-3.0.1/kafka-streams) | 0.10.0.1(-cp1)    | 3.0.1              | Works out of the box                                                                  |
 | [kafka-0.10.0.0-cp-3.0.0](../../../tree/kafka-0.10.0.0-cp-3.0.0/kafka-streams) | 0.10.0.0(-cp1)    | 3.0.0              | Works out of the box                                                                  |
 
