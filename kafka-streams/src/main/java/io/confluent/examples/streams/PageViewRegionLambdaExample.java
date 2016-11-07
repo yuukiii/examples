@@ -72,7 +72,7 @@ import java.util.Properties;
  * Once packaged you can then run:
  * <pre>
  * {@code
- * $ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.PageViewRegionLambdaExample
+ * $ java -cp target/streams-examples-3.1.0-standalone.jar io.confluent.examples.streams.PageViewRegionLambdaExample
  * }</pre>
  * 4) Write some input data to the source topics (e.g. via {@link PageViewRegionExampleDriver}).
  * The already running example application (step 3) will automatically process this input data and
@@ -81,7 +81,7 @@ import java.util.Properties;
  * {@code
  * # Here: Write input data using the example driver. Once the driver has stopped generating data,
  * # you can terminate it via `Ctrl-C`.
- * $ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.PageViewRegionExampleDriver
+ * $ java -cp target/streams-examples-3.1.0-standalone.jar io.confluent.examples.streams.PageViewRegionExampleDriver
  * }</pre>
  * 5) Inspect the resulting data in the output topic, e.g. via {@code kafka-console-consumer}.
  * <pre>

@@ -59,7 +59,7 @@ import java.util.regex.Pattern;
  * Once packaged you can then run:
  * <pre>
  * {@code
- * $ java -cp target/streams-examples-3.1.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.WordCountLambdaExample
+ * $ java -cp target/streams-examples-3.1.0-standalone.jar io.confluent.examples.streams.WordCountLambdaExample
  * }</pre>
  * 4) Write some input data to the source topics (e.g. via {@code kafka-console-producer}). The already
  * running example application (step 3) will automatically process this input data and write the
