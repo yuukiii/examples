@@ -344,17 +344,6 @@ The `master` branch of this repository represents active development, and may re
 make it compile.  Check this README as well as [pom.xml](pom.xml) for any such information.
 
 
-<a name="documentation"/>
-
-# Documentation
-
-For more information about Kafka and Kafka Streams we recommend to read:
-
-* [Confluent documentation](http://docs.confluent.io/current/), notably the extensive chapter on
-  [Kafka Streams](http://docs.confluent.io/current/streams/)
-* [Apache Kafka documentation](http://kafka.apache.org/documentation)
-
-
 <a name="help"/>
 
 # Where to find help
