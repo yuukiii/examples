@@ -18,7 +18,7 @@ Table of Contents
 * [Packaging and running the examples](#packaging-and-running)
 * [Development](#development)
 * [Version Compatibility Matrix](#version-compatibility)
-* [Documentation](#documentation)
+* [Where to find help](#help)
 
 ---
 
@@ -354,3 +354,25 @@ For more information about Kafka and Kafka Streams we recommend to read:
 * [Confluent documentation](http://docs.confluent.io/current/), notably the extensive chapter on
   [Kafka Streams](http://docs.confluent.io/current/streams/)
 * [Apache Kafka documentation](http://kafka.apache.org/documentation)
+
+
+<a name="help"/>
+
+# Where to find help
+
+* Looking for documentation on Apache Kafka's Streams API?
+    * We recommend to read the [Kafka Streams chapter](http://docs.confluent.io/current/streams/) in the
+      [Confluent Platform documentation](http://docs.confluent.io/current/).
+    * Watch our video talk
+      [Introducing Kafka Streams, the new stream processing library of Apache Kafka](https://www.youtube.com/watch?v=o7zSLNiTZbA)
+      ([slides](http://www.slideshare.net/MichaelNoll4/introducing-kafka-streams-the-new-stream-processing-library-of-apache-kafka-berlin-buzzwords-2016))
+* Running into problems to use the demos and examples in this project?
+    * First, you should check our [FAQ wiki](https://github.com/confluentinc/examples/wiki/FAQ).
+    * If the FAQ doesn't help you, [create a new GitHub issue](https://github.com/confluentinc/examples/issues).
+* Want to ask a question?
+    * For general questions about Apache Kafka and Confluent Platform, please head over to the
+      [Confluent mailing list](https://groups.google.com/forum/?pli=1#!forum/confluent-platform)
+      or to the [Apache Kafka mailing lists](http://kafka.apache.org/contact).
+    * For questions about the demos and examples in this repository:
+        * Please check our [FAQ wiki](https://github.com/confluentinc/examples/wiki/FAQ) for an answer first.
+        * If the FAQ doesn't help you, [create a new GitHub issue](https://github.com/confluentinc/examples/issues).
