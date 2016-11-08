@@ -326,7 +326,7 @@ This project uses the standard maven lifecycle and commands such as:
 
 ```shell
 $ mvn compile # This also generates Java classes from the Avro schemas
-$ mvn test    # But no tests yet!
+$ mvn test    # Runs unit and integration tests
 ```
 
 
