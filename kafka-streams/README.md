@@ -358,7 +358,7 @@ make it compile.  Check this README as well as [pom.xml](pom.xml) for any such i
 * Running into problems to use the demos and examples in this project?
     * First, you should check our [FAQ wiki](https://github.com/confluentinc/examples/wiki/FAQ).
     * If the FAQ doesn't help you, [create a new GitHub issue](https://github.com/confluentinc/examples/issues).
-* Want to ask a question?
+* Want to ask a question, report a bug in Kafka or its Kafka Streams API, request a new Kafka feature?
     * For general questions about Apache Kafka and Confluent Platform, please head over to the
       [Confluent mailing list](https://groups.google.com/forum/?pli=1#!forum/confluent-platform)
       or to the [Apache Kafka mailing lists](http://kafka.apache.org/contact).
