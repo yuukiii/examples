@@ -139,12 +139,13 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     // lived in "asia") because, at the time her first user-click record is being received and
     // subsequently processed in the `leftJoin`, the latest region update for "alice" is "europe"
     // (which overrides her previous region value of "asia").
-    val userRegionsTable: KTable[String, String] =  builder.table(stringSerde, stringSerde, userRegionsTopic, "UserRegionsStore")
+    val userRegionsTable: KTable[String, String] = builder.table(stringSerde, stringSerde, userRegionsTopic, "UserRegionsStore")
 
     // Compute the number of clicks per region, e.g. "europe" -> 13L.
     //
     // The resulting KTable is continuously being updated as new data records are arriving in the
     // input KStream `userClicksStream` and input KTable `userRegionsTable`.
+    import FunctionImplicits.BinaryFunctionToReducer
     val clicksPerRegion: KTable[String, JLong] = userClicksStream
         // Join the stream against the table.
         //
@@ -158,7 +159,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
         .map((user: String, regionWithClicks: (String, JLong)) => new KeyValue[String, JLong](regionWithClicks._1, regionWithClicks._2))
         // Compute the total per region by summing the individual click counts per region.
         .groupByKey(stringSerde, longSerde)
-        .reduce((firstClicks: JLong, secondClicks: JLong) => firstClicks + secondClicks, "ClicksPerRegionUnwindowedScala")
+        .reduce((firstClicks: JLong, secondClicks: JLong) => firstClicks + secondClicks: JLong, "ClicksPerRegionUnwindowedScala")
 
     // Write the (continuously updating) results to the output topic.
     clicksPerRegion.to(stringSerde, longSerde, outputTopic)
