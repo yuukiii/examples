@@ -14,7 +14,6 @@
 
 package io.confluent.examples.streams
 
-import java.lang.{Long => JLong}
 import java.util.Properties
 
 import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster
@@ -94,7 +93,15 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     // Step 1: Configure and start the processor topology.
     //
     val stringSerde: Serde[String] = Serdes.String()
-    val longSerde: Serde[JLong] = Serdes.Long()
+    // We want to use `Long` (which refers to `scala.Long`) throughout this code.  However, Kafka
+    // ships only with serdes for `java.lang.Long`.  The "trick" below works because there is no
+    // `scala.Long` at runtime (in most cases, `scala.Long` is just the primitive `long`), and
+    // because Scala converts between `long` and `java.lang.Long` automatically.
+    //
+    // If you want to see how you work from Scala against Kafka's (Java-based) Streams API without
+    // using this trick, take a look at `WordCountScalaIntegrationTest` where we explicitly use
+    // `java.lang.Long` (renamed to `JLong`).
+    val longSerde: Serde[Long] = Serdes.Long().asInstanceOf[Serde[Long]]
 
     val streamsConfiguration: Properties = {
       val p = new Properties()
@@ -126,7 +133,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     //
     // Because this is a KStream ("record stream"), multiple records for the same user will be
     // considered as separate click-count events, each of which will be added to the total count.
-    val userClicksStream: KStream[String, JLong] = builder.stream(stringSerde, longSerde, userClicksTopic)
+    val userClicksStream: KStream[String, Long] = builder.stream(stringSerde, longSerde, userClicksTopic)
 
     // This KTable contains information such as "alice" -> "europe".
     //
@@ -146,7 +153,7 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     // The resulting KTable is continuously being updated as new data records are arriving in the
     // input KStream `userClicksStream` and input KTable `userRegionsTable`.
     import FunctionImplicits.BinaryFunctionToReducer
-    val clicksPerRegion: KTable[String, JLong] = userClicksStream
+    val clicksPerRegion: KTable[String, Long] = userClicksStream
         // Join the stream against the table.
         //
         // Null values possible: In general, null values are possible for region (i.e. the value of
@@ -154,12 +161,12 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
         // fallback region "UNKNOWN").  In this specific example this is not really needed because
         // we know, based on the test setup, that all users have appropriate region entries at the
         // time we perform the join.
-        .leftJoin(userRegionsTable, (clicks: JLong, region: String) => (if (region == null) "UNKNOWN" else region, clicks))
+        .leftJoin(userRegionsTable, (clicks: Long, region: String) => (if (region == null) "UNKNOWN" else region, clicks))
         // Change the stream from <user> -> <region, clicks> to <region> -> <clicks>
-        .map((user: String, regionWithClicks: (String, JLong)) => new KeyValue[String, JLong](regionWithClicks._1, regionWithClicks._2))
+        .map((user: String, regionWithClicks: (String, Long)) => new KeyValue[String, Long](regionWithClicks._1, regionWithClicks._2))
         // Compute the total per region by summing the individual click counts per region.
         .groupByKey(stringSerde, longSerde)
-        .reduce((firstClicks: JLong, secondClicks: JLong) => firstClicks + secondClicks: JLong, "ClicksPerRegionUnwindowedScala")
+        .reduce((firstClicks: Long, secondClicks: Long) => firstClicks + secondClicks: Long, "ClicksPerRegionUnwindowedScala")
 
     // Write the (continuously updating) results to the output topic.
     clicksPerRegion.to(stringSerde, longSerde, outputTopic)
