@@ -76,6 +76,7 @@ public class PageViewRegionExampleDriver {
     final String userProfilesTopic = "UserProfiles";
 
     final Random random = new Random();
+    pageViewBuilder.set("industry", "eng");
     for (final String user : users) {
       userProfileBuilder.set("experience", "some");
       userProfileBuilder.set("region", regions[random.nextInt(regions.length)]);
