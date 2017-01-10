@@ -45,7 +45,7 @@ import java.util.stream.IntStream;
  * Once packaged you can then run:
  * <pre>
  * {@code
- * $ java -cp target/streams-examples-3.1.1-standalone.jar io.confluent.examples.streams.PageViewRegionExampleDriver
+ * $ java -cp target/streams-examples-3.1.2-standalone.jar io.confluent.examples.streams.PageViewRegionExampleDriver
  * }</pre>
  * You should terminate with {@code Ctrl-C}.
  */
