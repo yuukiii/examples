@@ -90,6 +90,8 @@ There are two kinds of examples:
   within topologies defined via the DSL
 * [ApplicationResetExample](src/main/java/io/confluent/examples/streams/ApplicationResetExample.java) (Java 8+)
   -- demonstrates the usage of the application reset tool (`bin/kafka-streams-application-reset`)
+* [GlobalKTablesExample](src/main/java/io/confluent/examples/streams/GlobalKTablesExample.java) (Java 8+)
+    -- demonstrates joining between `KStream` and `GlobalKTable`.
 * And [further examples](src/main/java/io/confluent/examples/streams/).
 
 We also provide several **integration tests**, which demonstrate end-to-end data pipelines.  Here, we spawn embedded Kafka
@@ -107,7 +109,9 @@ results (using the standard Kafka consumer client).
 * [SumLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/SumLambdaIntegrationTest.java)
 * [UserCountsPerRegionLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/UserCountsPerRegionLambdaIntegrationTest.java)
 * [GenericAvroIntegrationTest](src/test/java/io/confluent/examples/streams/GenericAvroIntegrationTest.java)
-* [SpecificAvroIntegrationTest](src/test/java/io/confluent/examples/streams/SpecificAvroIntegrationTest.java)
+* [SpecificAvroIntegrationTest](src/test/java/io/confluent/examples/streams/interactiveSpecificAvroIntegrationTest.java)
+* [KafkaMusicExampleTest](src/test/java/io/confluent/examples/streams/io.confluent.examples.streams.interactivequeries.kafkamusic/KafkaMusicExampleTest)
+* [GlobalKTableExampleTest](src/test/java/io/confluent/examples/streams/io.confluent.examples.streams.GlobalKTableExampleTest)
 
 
 <a name="examples-scala"/>
@@ -179,12 +183,12 @@ for details):
   <dependency>
     <groupId>org.apache.kafka</groupId>
     <artifactId>kafka-streams</artifactId>
-    <version>0.10.1.0-SNAPSHOT</version>
+    <version>0.10.2.0-SNAPSHOT</version>
   </dependency>
   <dependency>
       <groupId>org.apache.kafka</groupId>
       <artifactId>kafka-clients</artifactId>
-      <version>0.10.1.0-SNAPSHOT</version>
+      <version>0.10.2.0-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
@@ -197,8 +201,8 @@ repositories {
 }
 
 dependencies {
-    compile "org.apache.kafka:kafka-streams:0.10.1.0-SNAPSHOT"
-    compile "org.apache.kafka:kafka-clients:0.10.1.0-SNAPSHOT"
+    compile "org.apache.kafka:kafka-streams:0.10.2.0-SNAPSHOT"
+    compile "org.apache.kafka:kafka-clients:0.10.2.0-SNAPSHOT"
 }
 ```
 
@@ -210,8 +214,8 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.apache.kafka" % "kafka-streams" % "0.10.1.0-SNAPSHOT",
-  "org.apache.kafka" % "kafka-clients" % "0.10.1.0-SNAPSHOT"
+  "org.apache.kafka" % "kafka-streams" % "0.10.2.0-SNAPSHOT",
+  "org.apache.kafka" % "kafka-clients" % "0.10.2.0-SNAPSHOT"
 )
 ```
 
