@@ -31,6 +31,7 @@ import org.apache.kafka.streams.kstream.Transformer;
 import org.apache.kafka.streams.kstream.TransformerSupplier;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.processor.ProcessorSupplier;
+import org.apache.kafka.streams.state.KeyValueStore;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -75,6 +76,14 @@ public class MixAndMatchLambdaIntegrationTest {
     CLUSTER.createTopic(outputTopic);
   }
 
+  private static class AnonymizeIpAddressSupplier implements TransformerSupplier<byte[], String,
+      KeyValue<byte[], String>> {
+
+    @Override
+    public Transformer<byte[], String, KeyValue<byte[], String>> get() {
+      return new AnonymizeIpAddressProcessor();
+    }
+  }
   /**
    * Performs rudimentary anonymization of IPv4 address in the input data.
    * You should use this for demonstration purposes only.
@@ -147,7 +156,7 @@ public class MixAndMatchLambdaIntegrationTest {
     KStream<byte[], String> input = builder.stream(inputTopic);
     KStream<byte[], String> uppercasedAndAnonymized = input
         .mapValues(String::toUpperCase)
-        .transform(AnonymizeIpAddressProcessor::new);
+        .transform(new AnonymizeIpAddressSupplier());
     uppercasedAndAnonymized.to(outputTopic);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);

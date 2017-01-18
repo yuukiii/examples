@@ -2,6 +2,7 @@ package io.confluent.examples.streams.kafka;
 
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkConnection;
+import org.apache.kafka.common.network.ListenerName;
 import org.apache.kafka.common.protocol.SecurityProtocol;
 import org.apache.kafka.common.utils.Time;
 import org.junit.rules.TemporaryFolder;
@@ -85,7 +86,8 @@ public class KafkaEmbedded {
    * You can use this to tell Kafka producers and consumers how to connect to this instance.
    */
   public String brokerList() {
-    return String.join(":", kafka.config().hostName(), Integer.toString(kafka.boundPort(SecurityProtocol.PLAINTEXT)));
+    return String.join(":", kafka.config().hostName(), Integer.toString(kafka.boundPort(ListenerName.forSecurityProtocol(SecurityProtocol
+                                                                                            .PLAINTEXT))));
   }
 
 
