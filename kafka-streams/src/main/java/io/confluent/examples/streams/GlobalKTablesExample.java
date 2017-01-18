@@ -153,7 +153,7 @@ public class GlobalKTablesExample {
                                                                                                        order));
 
     // Join the enriched customer order stream with the product global table. As this is global table
-    // we can use a non-key based join with out needing to repartition the input stream
+    // we can use a non-key based join without needing to repartition the input stream
     final KStream<Long, EnrichedOrder> enrichedOrdersStream = customerOrdersStream.join(products,
                                                                         (orderId, customerOrder) -> customerOrder
                                                                             .productId(),
