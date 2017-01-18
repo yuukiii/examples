@@ -153,17 +153,21 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
     // The resulting KTable is continuously being updated as new data records are arriving in the
     // input KStream `userClicksStream` and input KTable `userRegionsTable`.
     import FunctionImplicits.BinaryFunctionToReducer
-    val clicksPerRegion: KTable[String, Long] = userClicksStream
-        // Join the stream against the table.
-        //
-        // Null values possible: In general, null values are possible for region (i.e. the value of
-        // the KTable we are joining against) so we must guard against that (here: by setting the
-        // fallback region "UNKNOWN").  In this specific example this is not really needed because
-        // we know, based on the test setup, that all users have appropriate region entries at the
-        // time we perform the join.
-        .leftJoin(userRegionsTable, (clicks: Long, region: String) => (if (region == null) "UNKNOWN" else region, clicks))
-        // Change the stream from <user> -> <region, clicks> to <region> -> <clicks>
-        .map((user: String, regionWithClicks: (String, Long)) => new KeyValue[String, Long](regionWithClicks._1, regionWithClicks._2))
+    val userClicksJoinRegion : KStream[String, (String, Long)] = userClicksStream
+      // Join the stream against the table.
+      //
+      // Null values possible: In general, null values are possible for region (i.e. the value of
+      // the KTable we are joining against) so we must guard against that (here: by setting the
+      // fallback region "UNKNOWN").  In this specific example this is not really needed because
+      // we know, based on the test setup, that all users have appropriate region entries at the
+      // time we perform the join.
+      .leftJoin(userRegionsTable, (clicks: Long, region: String) => (if (region == null) "UNKNOWN" else region, clicks))
+    val clicksByRegion : KStream[String, Long] = userClicksJoinRegion
+      // Change the stream from <user> -> <region, clicks> to <region> -> <clicks>
+      .map((user: String, regionWithClicks: (String, Long)) => new KeyValue[String, Long](
+      regionWithClicks._1, regionWithClicks._2))
+
+    val clicksPerRegion: KTable[String, Long] = clicksByRegion
         // Compute the total per region by summing the individual click counts per region.
         .groupByKey(stringSerde, longSerde)
         .reduce((firstClicks: Long, secondClicks: Long) => firstClicks + secondClicks: Long, "ClicksPerRegionUnwindowedScala")
