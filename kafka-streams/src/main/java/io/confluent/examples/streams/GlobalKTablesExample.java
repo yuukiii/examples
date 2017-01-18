@@ -91,6 +91,15 @@ public class GlobalKTablesExample {
   static final String PRODUCT_STORE = "product-store";
   static final String ENRICHED_ORDER_TOPIC = "enriched-order";
 
+  public static void main(String[] args) {
+    final KafkaStreams
+        streams =
+        createStreams("localhost:9092", "http://localhost:8081", "/tmp/kafka-streams-global-tables");
+    // start processing
+    streams.start();
+    // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> streams.close()));
+  }
 
   public static KafkaStreams createStreams(final String bootstrapServers,
                                            final String schemaRegistryUrl,
