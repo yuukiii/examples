@@ -79,15 +79,15 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
  * You should see output data similar to:
  * <pre>
  * {@code
- * jo@1484823406597->1484823406597 = 1
- * bill@1484823466597->1484823466597 = 1
- * sarah@1484823526597->1484823526597 = 1
- * jo@1484825207597->1484825207597 = 1
- * bill@1484823466597->1484825206597 = 2
- * sarah@1484827006597->1484827006597 = 1
- * jo@1484823406597->1484825207597 = 3
- * bill@1484828806597->1484828806597 = 1
- * sarah@1484827006597->1484827186597 = 2
+ * jo@1484823406597->1484823406597 = 1          # new session for jo created
+ * bill@1484823466597->1484823466597 = 1        # new session for bill created
+ * sarah@1484823526597->1484823526597 = 1       # new session for sarah created
+ * jo@1484825207597->1484825207597 = 1          # new session for jo created as event time is after inactivity gap
+ * bill@1484823466597->1484825206597 = 2        # extend previous session for bill as event time is within inactivity gap
+ * sarah@1484827006597->1484827006597 = 1       # new session for sarah created as event time is after inactivity gap
+ * jo@1484823406597->1484825207597 = 3          # new event merges 2 previous sessions for jo
+ * bill@1484828806597->1484828806597 = 1        # new session for bill created
+ * sarah@1484827006597->1484827186597 = 2       # extend session for sarah as event time is within inactivity gap
  * }
  * </pre>
  * <p>
@@ -107,7 +107,7 @@ public class SessionWindowsExample {
   public static void main(String[] args) {
     final KafkaStreams streams = createStreams("localhost:9092",
                                                "http://localhost:8081",
-                                               "/tmp/kafka-streams-session-windows");
+                                               "/tmp/kafka-streams");
 
     streams.start();
 
@@ -133,9 +133,7 @@ public class SessionWindowsExample {
 
     final CachedSchemaRegistryClient schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryUrl, 100);
 
-    final Map<String, String>
-        serdeProps =
-        Collections.singletonMap("schema.registry.url", schemaRegistryUrl);
+    final Map<String, String> serdeProps = Collections.singletonMap("schema.registry.url", schemaRegistryUrl);
 
     // create and configure the SpecificAvroSerdes required in this example
     final SpecificAvroSerde<PlayEvent> playEventSerde = new SpecificAvroSerde<>(schemaRegistry, serdeProps);
@@ -145,7 +143,7 @@ public class SessionWindowsExample {
     builder.stream(Serdes.String(), playEventSerde, PLAY_EVENTS)
         // group by key so we can count by session windows
         .groupByKey(Serdes.String(), playEventSerde)
-        // count play events into session windows
+        // count play events per session
         .count(SessionWindows.with(INACTIVITY_GAP), PLAY_EVENTS_PER_SESSION)
         // convert to a stream so we can map the key to a string
         .toStream()
@@ -155,8 +153,6 @@ public class SessionWindowsExample {
         .to(Serdes.String(), Serdes.Long(), PLAY_EVENTS_PER_SESSION);
 
     return new KafkaStreams(builder, new StreamsConfig(config));
-
-
   }
 
 }

@@ -128,7 +128,7 @@ public class SessionWindowsExampleTest {
         playEventsPerSession =
         streams.store(SessionWindowsExample.PLAY_EVENTS_PER_SESSION, QueryableStoreTypes.<String, Long>sessionStore());
 
-    final KeyValue<Windowed<String>, Long> next = fetchSessions(userId, playEventsPerSession).get(0);
+    final KeyValue<Windowed<String>, Long> next = fetchSessionsFromLocalStore(userId, playEventsPerSession).get(0);
     assertThat(next.key, equalTo(new Windowed<>(userId, new SessionWindow(start, start))));
     assertThat(next.value, equalTo(1L));
 
@@ -150,7 +150,7 @@ public class SessionWindowsExampleTest {
                                                            1L)));
 
     // should now have 2 active sessions in the store
-    final List<KeyValue<Windowed<String>, Long>> results = fetchSessions(userId, playEventsPerSession);
+    final List<KeyValue<Windowed<String>, Long>> results = fetchSessionsFromLocalStore(userId, playEventsPerSession);
     assertThat(results, equalTo(Arrays.asList(KeyValue.pair(new Windowed<>(userId, new SessionWindow(start, start)),1L),
                                               KeyValue.pair(new Windowed<>(userId, new SessionWindow(secondSessionStart, secondSessionStart)),1L))));
 
@@ -173,17 +173,16 @@ public class SessionWindowsExampleTest {
     assertThat(merged.get(0), equalTo(KeyValue.pair(userId + "@" +start+"->"+secondSessionStart, 3L)));
 
     // should only have the merged session in the store
-    final List<KeyValue<Windowed<String>, Long>> mergedResults = fetchSessions(userId, playEventsPerSession);
-    assertThat(mergedResults, equalTo(Collections.singletonList(KeyValue.pair(new Windowed<>(userId, new SessionWindow
-        (start, secondSessionStart)), 3L))));
+    final List<KeyValue<Windowed<String>, Long>> mergedResults = fetchSessionsFromLocalStore(userId, playEventsPerSession);
+    assertThat(mergedResults, equalTo(Collections.singletonList(KeyValue.pair(new Windowed<>(userId, new SessionWindow(start, secondSessionStart)), 3L))));
 
 
 
 
   }
 
-  private List<KeyValue<Windowed<String>, Long>> fetchSessions(final String userId,
-                                                               final ReadOnlySessionStore<String, Long> playEventsPerSession) {
+  private List<KeyValue<Windowed<String>, Long>> fetchSessionsFromLocalStore(final String userId,
+                                                                             final ReadOnlySessionStore<String, Long> playEventsPerSession) {
     final List<KeyValue<Windowed<String>, Long>> results = new ArrayList<>();
     try (final KeyValueIterator<Windowed<String>, Long> iterator = playEventsPerSession.fetch(userId)) {
       iterator.forEachRemaining(results::add);

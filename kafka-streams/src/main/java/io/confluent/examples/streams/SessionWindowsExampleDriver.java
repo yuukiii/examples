@@ -58,48 +58,45 @@ public class SessionWindowsExampleDriver {
   }
 
   private static void producePlayEvents(final String bootstrapServers, final String schemaRegistryUrl) {
-    final CachedSchemaRegistryClient
-        schemaRegistry =
-        new CachedSchemaRegistryClient(schemaRegistryUrl, 100);
+    final CachedSchemaRegistryClient schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryUrl, 100);
 
-    final Map<String, String>
-        serdeProps =
-        Collections.singletonMap("schema.registry.url", schemaRegistryUrl);
+    final Map<String, String> serdeProps = Collections.singletonMap("schema.registry.url", schemaRegistryUrl);
 
     final SpecificAvroSerializer<PlayEvent>
-        playEventSerialzier = new SpecificAvroSerializer<>(schemaRegistry, serdeProps);
-    playEventSerialzier.configure(serdeProps, false);
+        playEventSerializer = new SpecificAvroSerializer<>(schemaRegistry, serdeProps);
+    playEventSerializer.configure(serdeProps, false);
 
     final Properties producerProperties = new Properties();
     producerProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 
     final KafkaProducer<String, PlayEvent> playEventProducer = new KafkaProducer<>(producerProperties,
                                                                                    Serdes.String() .serializer(),
-                                                                                   playEventSerialzier);
+                                                                                   playEventSerializer);
 
     final long start = System.currentTimeMillis();
-
+    final long billEvenTime = start + SessionWindowsExample.INACTIVITY_GAP / 10;
     // create three sessions with different times
     playEventProducer.send(new ProducerRecord<>(SessionWindowsExample.PLAY_EVENTS,
                                                 null,
                                                 start,
                                                 "jo",
                                                 new PlayEvent(1L, 10L)));
+
     playEventProducer.send(new ProducerRecord<>(SessionWindowsExample.PLAY_EVENTS,
                                                 null,
-                                                start + 60000,
+                                                billEvenTime,
                                                 "bill",
                                                 new PlayEvent(2L, 10L)));
     playEventProducer.send(new ProducerRecord<>(SessionWindowsExample.PLAY_EVENTS,
                                                 null,
-                                                start + 120000,
+                                                start + SessionWindowsExample.INACTIVITY_GAP / 5,
                                                 "sarah",
                                                 new PlayEvent(2L, 10L)));
 
     // out-of-order event for jo that is outside inactivity gap so will create a new session
     playEventProducer.send(new ProducerRecord<>(SessionWindowsExample.PLAY_EVENTS,
                                                 null,
-                                                start + SessionWindowsExample.INACTIVITY_GAP + 1000,
+                                                start + SessionWindowsExample.INACTIVITY_GAP + 1,
                                                 "jo",
                                                 new PlayEvent(1L, 10L)));
     // extend current session for bill
@@ -134,7 +131,8 @@ public class SessionWindowsExampleDriver {
     // new session for sarah
     playEventProducer.send(new ProducerRecord<>(SessionWindowsExample.PLAY_EVENTS,
                                                 null,
-                                                start + 2 * SessionWindowsExample.INACTIVITY_GAP + 180000,
+                                                start + 2 * SessionWindowsExample.INACTIVITY_GAP +
+                                                SessionWindowsExample.INACTIVITY_GAP / 5,
                                                 "sarah",
                                                 new PlayEvent(2L, 10L)));
 
