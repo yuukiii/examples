@@ -117,7 +117,7 @@ public class StreamToStreamJoinIntegrationTest {
     KStream<String, String> incidents = builder.stream(stringSerde, stringSerde, adClicksTopic);
 
     // In this example, we opt to perform an OUTER JOIN between the two streams.  We picked this
-    // join type to show how the Streams API will sent further join updates downstream whenever,
+    // join type to show how the Streams API will send further join updates downstream whenever,
     // for the same join key (e.g. "newspaper-advertisement"), we receive an update from either of
     // the two joined streams during the defined join window.
     KStream<String, String> impressionsAndClicks = alerts.outerJoin(incidents,
