@@ -32,6 +32,7 @@ import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.processor.StateStoreSupplier;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.Stores;
+import org.apache.kafka.test.TestUtils;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -150,15 +151,8 @@ public class StateStoresInTheDSLIntegrationTest {
     streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass().getName());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-    // Explicitly place the state directory under /tmp so that we can remove it via
-    // `purgeLocalStreamsState` below.  Once Streams is updated to expose the effective
-    // StreamsConfig configuration (so we can retrieve whatever state directory Streams came up
-    // with automatically) we don't need to set this anymore and can update `purgeLocalStreamsState`
-    // accordingly.
-    streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, "/tmp/kafka-streams");
-
-    // Remove any state from previous test runs
-    IntegrationTestUtils.purgeLocalStreamsState(streamsConfiguration);
+    // Use a temporary directory for storing state, which will be automatically removed after the test.
+    streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, TestUtils.tempDirectory().getAbsolutePath());
 
     // Create a state store manually.
     StateStoreSupplier wordCountsStore = Stores.create("WordCountsStore")

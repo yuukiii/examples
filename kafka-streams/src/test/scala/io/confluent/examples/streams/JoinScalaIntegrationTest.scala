@@ -23,6 +23,7 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization._
 import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder, KTable}
 import org.apache.kafka.streams.{KafkaStreams, KeyValue, StreamsConfig}
+import org.apache.kafka.test.TestUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit._
 import org.scalatest.junit.AssertionsForJUnit
@@ -107,18 +108,10 @@ class JoinScalaIntegrationTest extends AssertionsForJUnit {
       // this integration test's timeout (30 secs) to ensure we observe the expected processing results.
       p.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "10000")
       p.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
-
-      // Explicitly place the state directory under /tmp so that we can remove it via
-      // `purgeLocalStreamsState` below.  Once Streams is updated to expose the effective
-      // StreamsConfig configuration (so we can retrieve whatever state directory Streams came up
-      // with automatically) we don't need to set this anymore and can update `purgeLocalStreamsState`
-      // accordingly.
-      p.put(StreamsConfig.STATE_DIR_CONFIG, "/tmp/kafka-streams")
+      // Use a temporary directory for storing state, which will be automatically removed after the test.
+      p.put(StreamsConfig.STATE_DIR_CONFIG, TestUtils.tempDirectory.getAbsolutePath)
       p
     }
-
-    // Remove any state from previous test runs
-    IntegrationTestUtils.purgeLocalStreamsState(streamsConfiguration)
 
     val builder: KStreamBuilder = new KStreamBuilder()
 
