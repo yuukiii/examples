@@ -172,7 +172,7 @@ public class GlobalKTablesExampleDriver {
     return allOrders;
   }
 
-  static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(final String schemaRegistryUrl) {
+  private static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(final String schemaRegistryUrl) {
     final CachedSchemaRegistryClient
         schemaRegistry =
         new CachedSchemaRegistryClient(schemaRegistryUrl, 10);
