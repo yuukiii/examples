@@ -103,24 +103,6 @@ public class IntegrationTestUtils {
   }
 
   /**
-   * Removes local state stores.  Useful to reset state in-between integration test runs.
-   *
-   * @param streamsConfiguration Streams configuration settings
-   */
-  public static void purgeLocalStreamsState(Properties streamsConfiguration) throws IOException {
-    String path = streamsConfiguration.getProperty(StreamsConfig.STATE_DIR_CONFIG);
-    if (path != null) {
-      File node = Paths.get(path).normalize().toFile();
-      // Only purge state when it's under /tmp.  This is a safety net to prevent accidentally
-      // deleting important local directory trees.
-      if (node.getAbsolutePath().startsWith("/tmp")) {
-        List<String> nodes = Collections.singletonList(node.getAbsolutePath());
-        CoreUtils.delete(scala.collection.JavaConversions.asScalaBuffer(nodes).seq());
-      }
-    }
-  }
-
-  /**
    * @param topic          Kafka topic to write the data records to
    * @param records        Data records to write to Kafka
    * @param producerConfig Kafka producer configuration

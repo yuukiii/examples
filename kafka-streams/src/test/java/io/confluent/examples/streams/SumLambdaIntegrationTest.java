@@ -24,6 +24,7 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.test.TestUtils;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -76,15 +77,8 @@ public class SumLambdaIntegrationTest {
     // this integration test's timeout (30 secs) to ensure we observe the expected processing results.
     streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
     streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-    // Explicitly place the state directory under /tmp so that we can remove it via
-    // `purgeLocalStreamsState` below.  Once Streams is updated to expose the effective
-    // StreamsConfig configuration (so we can retrieve whatever state directory Streams came up
-    // with automatically) we don't need to set this anymore and can update `purgeLocalStreamsState`
-    // accordingly.
-    streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, "/tmp/kafka-streams");
-
-    // Remove any state from previous test runs
-    IntegrationTestUtils.purgeLocalStreamsState(streamsConfiguration);
+    // Use a temporary directory for storing state, which will be automatically removed after the test.
+    streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, TestUtils.tempDirectory().getAbsolutePath());
 
     KStream<Integer, Integer> input = builder.stream(inputTopic);
     KTable<Integer, Integer> sumOfOddNumbers = input
