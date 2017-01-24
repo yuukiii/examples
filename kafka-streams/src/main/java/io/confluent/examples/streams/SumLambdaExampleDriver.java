@@ -38,7 +38,7 @@ import java.util.stream.IntStream;
  * Once packaged you can then run:
  * <pre>
  * {@code
- * $ java -cp target/streams-examples-3.1.1-standalone.jar io.confluent.examples.streams.SumLambdaExampleDriver
+ * $ java -cp target/streams-examples-3.1.2-standalone.jar io.confluent.examples.streams.SumLambdaExampleDriver
  * }</pre>
  * You should terminate with {@code Ctrl-C}.
  * Please refer to {@link SumLambdaExample} for instructions on running the example.
