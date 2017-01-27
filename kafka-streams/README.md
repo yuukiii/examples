@@ -102,7 +102,7 @@ results (using the standard Kafka consumer client).
 > Tip: Run `mvn test` to launch the integration tests.
 
 * [WordCountLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/WordCountLambdaIntegrationTest.java)
-* [JoinLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/JoinLambdaIntegrationTest.java)
+* [WordCountInteractiveQueriesExampleTest](src/test/java/io/confluent/examples/streams/interactivequeries/WordCountInteractiveQueriesExampleTest.java)
 * [MapFunctionLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/MapFunctionLambdaIntegrationTest.java)
 * [MixAndMatchLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/MixAndMatchLambdaIntegrationTest.java)
 * [PassThroughIntegrationTest](src/test/java/io/confluent/examples/streams/PassThroughIntegrationTest.java)
@@ -112,9 +112,9 @@ results (using the standard Kafka consumer client).
 * [TableToTableJoinIntegrationTest](src/test/java/io/confluent/examples/streams/TableToTableJoinIntegrationTest.java)
 * [UserCountsPerRegionLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/UserCountsPerRegionLambdaIntegrationTest.java)
 * [GenericAvroIntegrationTest](src/test/java/io/confluent/examples/streams/GenericAvroIntegrationTest.java)
-* [SpecificAvroIntegrationTest](src/test/java/io/confluent/examples/streams/interactiveSpecificAvroIntegrationTest.java)
-* [KafkaMusicExampleTest](src/test/java/io/confluent/examples/streams/io.confluent.examples.streams.interactivequeries.kafkamusic/KafkaMusicExampleTest)
-* [GlobalKTableExampleTest](src/test/java/io/confluent/examples/streams/io.confluent.examples.streams.GlobalKTableExampleTest)
+* [SpecificAvroIntegrationTest](src/test/java/io/confluent/examples/streams/SpecificAvroIntegrationTest.java)
+* [KafkaMusicExampleTest](src/test/java/io/confluent/examples/streams/interactivequeries/kafkamusic/KafkaMusicExampleTest.java)
+* [GlobalKTableExampleTest](src/test/java/io/confluent/examples/streams/GlobalKTablesExampleTest.java)
 
 
 <a name="examples-scala"/>
