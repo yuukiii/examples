@@ -178,7 +178,8 @@ public class TableToTableJoinIntegrationTest {
     List<KeyValue<String, String>> actualResults = IntegrationTestUtils.waitUntilMinKeyValueRecordsReceived(consumerConfig,
         outputTopic, expectedResults.size());
 
-    // Verify the state store of the joined table
+    // Verify the (local) state store of the joined table.
+    // For a comprehensive demonstration of interactive queries please refer to KafkaMusicExample.
     ReadOnlyKeyValueStore<String, String> readOnlyKeyValueStore =
         streams.store("joined-store", QueryableStoreTypes.keyValueStore());
     KeyValueIterator<String, String> keyValueIterator = readOnlyKeyValueStore.all();
