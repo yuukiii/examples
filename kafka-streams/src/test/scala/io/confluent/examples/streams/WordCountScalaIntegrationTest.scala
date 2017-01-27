@@ -37,7 +37,7 @@ import org.scalatest.junit.AssertionsForJUnit
   *
   * Note: We intentionally use JUnit4 (wrapped by ScalaTest) for implementing this Scala integration
   * test so it is easier to compare this Scala code with the equivalent Java code at
-  * JoinLambdaIntegrationTest.  One difference is that, to simplify the Scala/Junit integration, we
+  * StreamToTableJoinIntegrationTest.  One difference is that, to simplify the Scala/Junit integration, we
   * switched from BeforeClass (which must be `static`) to Before as well as from @ClassRule (which
   * must be `static` and `public`) to a workaround combination of `@Rule def` and a `private val`.
   */

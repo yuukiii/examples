@@ -108,6 +108,7 @@ results (using the standard Kafka consumer client).
 * [PassThroughIntegrationTest](src/test/java/io/confluent/examples/streams/PassThroughIntegrationTest.java)
 * [SumLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/SumLambdaIntegrationTest.java)
 * [StreamToStreamJoinIntegrationTest](src/test/java/io/confluent/examples/streams/StreamToStreamJoinIntegrationTest.java)
+* [StreamToTableJoinIntegrationTest](src/test/java/io/confluent/examples/streams/StreamToTableJoinIntegrationTest.java)
 * [TableToTableJoinIntegrationTest](src/test/java/io/confluent/examples/streams/TableToTableJoinIntegrationTest.java)
 * [UserCountsPerRegionLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/UserCountsPerRegionLambdaIntegrationTest.java)
 * [GenericAvroIntegrationTest](src/test/java/io/confluent/examples/streams/GenericAvroIntegrationTest.java)
@@ -132,7 +133,7 @@ results (using the standard Kafka consumer client).
 
 > Tip: Run `mvn test` to launch the integration tests.
 
-* [JoinScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/JoinScalaIntegrationTest.scala)
+* [StreamToTableJoinScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/StreamToTableJoinScalaIntegrationTest.scala)
 * [WordCountScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/WordCountScalaIntegrationTest.scala)
 * [GenericAvroScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/GenericAvroScalaIntegrationTest.scala)
 * [SpecificAvroScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/SpecificAvroScalaIntegrationTest.scala)
