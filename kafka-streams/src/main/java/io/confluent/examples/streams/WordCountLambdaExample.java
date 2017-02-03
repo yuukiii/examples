@@ -16,7 +16,6 @@ package io.confluent.examples.streams;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
@@ -165,6 +164,10 @@ public class WordCountLambdaExample {
     // it via `start()`.  The Streams application as a whole can be launched just like any
     // normal Java application that has a `main()` method.
     final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
+    // clean local state: should not be added in production (compare ApplicationResetExample.java)
+    // required to reset application for a re-run using bin/kafka-streams-application-reset
+    // save to call even without actual reset -- only performance penalty due to necessary state recreation
+    streams.cleanUp();
     streams.start();
 
     // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams

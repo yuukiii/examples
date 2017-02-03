@@ -157,6 +157,10 @@ public class WordCountInteractiveQueriesExample {
     streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, example.getPath());
 
     final KafkaStreams streams = createStreams(streamsConfiguration);
+    // clean local state: should not be added in production (compare ApplicationResetExample.java)
+    // required to reset application for a re-run using bin/kafka-streams-application-reset
+    // save to call even without actual reset -- only performance penalty due to necessary state recreation
+    streams.cleanUp();
     // Now that we have finished the definition of the processing topology we can actually run
     // it via `start()`.  The Streams application as a whole can be launched just like any
     // normal Java application that has a `main()` method.

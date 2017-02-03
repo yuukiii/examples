@@ -16,6 +16,11 @@
  */
 package io.confluent.examples.streams.interactivequeries.kafkamusic;
 
+import io.confluent.examples.streams.avro.PlayEvent;
+import io.confluent.examples.streams.avro.Song;
+import io.confluent.examples.streams.avro.SongPlayCount;
+import io.confluent.examples.streams.utils.SpecificAvroSerde;
+import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
@@ -40,12 +45,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
-
-import io.confluent.examples.streams.avro.PlayEvent;
-import io.confluent.examples.streams.avro.Song;
-import io.confluent.examples.streams.avro.SongPlayCount;
-import io.confluent.examples.streams.utils.SpecificAvroSerde;
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 
 /**
  * Demonstrates how to locate and query state stores (Interactive Queries).
@@ -185,6 +184,12 @@ public class KafkaMusicExample {
                                                      "http://localhost:8081",
                                                      port,
                                                      "/tmp/kafka-streams");
+
+    // clean local state: should not be added in production (compare ApplicationResetExample.java)
+    // required to reset application for a re-run using bin/kafka-streams-application-reset
+    // save to call even without actual reset -- only performance penalty due to necessary state recreation
+    streams.cleanUp();
+
     // Now that we have finished the definition of the processing topology we can actually run
     // it via `start()`.  The Streams application as a whole can be launched just like any
     // normal Java application that has a `main()` method.

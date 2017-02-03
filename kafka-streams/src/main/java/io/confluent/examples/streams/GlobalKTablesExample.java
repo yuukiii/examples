@@ -13,6 +13,12 @@
  */
 package io.confluent.examples.streams;
 
+import io.confluent.examples.streams.avro.Customer;
+import io.confluent.examples.streams.avro.EnrichedOrder;
+import io.confluent.examples.streams.avro.Order;
+import io.confluent.examples.streams.avro.Product;
+import io.confluent.examples.streams.utils.SpecificAvroSerde;
+import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -24,13 +30,6 @@ import org.apache.kafka.streams.kstream.KStreamBuilder;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
-
-import io.confluent.examples.streams.avro.Customer;
-import io.confluent.examples.streams.avro.EnrichedOrder;
-import io.confluent.examples.streams.avro.Order;
-import io.confluent.examples.streams.avro.Product;
-import io.confluent.examples.streams.utils.SpecificAvroSerde;
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 
 /**
  * Demonstrates how to perform joins between  KStreams and GlobalKTables, i.e. joins that
@@ -95,6 +94,10 @@ public class GlobalKTablesExample {
     final KafkaStreams
         streams =
         createStreams("localhost:9092", "http://localhost:8081", "/tmp/kafka-streams-global-tables");
+    // clean local state: should not be added in production (compare ApplicationResetExample.java)
+    // required to reset application for a re-run using bin/kafka-streams-application-reset
+    // save to call even without actual reset -- only performance penalty due to necessary state recreation
+    streams.cleanUp();
     // start processing
     streams.start();
     // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams

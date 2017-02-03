@@ -88,6 +88,10 @@ public class WikipediaFeedAvroExample {
       "localhost:2181",
       "http://localhost:8081",
       "/tmp/kafka-streams");
+    // clean local state: should not be added in production (compare ApplicationResetExample.java)
+    // required to reset application for a re-run using bin/kafka-streams-application-reset
+    // save to call even without actual reset -- only performance penalty due to necessary state recreation
+    streams.cleanUp();
     streams.start();
 
     // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams

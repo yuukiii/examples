@@ -16,24 +16,21 @@
  */
 package io.confluent.examples.streams;
 
+import io.confluent.examples.streams.avro.PlayEvent;
+import io.confluent.examples.streams.utils.SpecificAvroSerde;
+import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
-import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.SessionWindows;
-import org.apache.kafka.streams.kstream.Windowed;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-
-import io.confluent.examples.streams.avro.PlayEvent;
-import io.confluent.examples.streams.utils.SpecificAvroSerde;
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 
 /**
  * Demonstrates counting user activity (play-events) into Session Windows
@@ -108,6 +105,11 @@ public class SessionWindowsExample {
     final KafkaStreams streams = createStreams("localhost:9092",
                                                "http://localhost:8081",
                                                "/tmp/kafka-streams");
+
+    // clean local state: should not be added in production (compare ApplicationResetExample.java)
+    // required to reset application for a re-run using bin/kafka-streams-application-reset
+    // save to call even without actual reset -- only performance penalty due to necessary state recreation
+    streams.cleanUp();
 
     streams.start();
 

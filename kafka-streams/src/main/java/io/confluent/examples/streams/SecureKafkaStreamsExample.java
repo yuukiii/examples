@@ -168,6 +168,10 @@ public class SecureKafkaStreamsExample {
     // Write the input data as-is to the output topic.
     builder.stream("secure-input").to("secure-output");
     final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
+    // clean local state: should not be added in production (compare ApplicationResetExample.java)
+    // required to reset application for a re-run using bin/kafka-streams-application-reset
+    // save to call even without actual reset -- only performance penalty due to necessary state recreation
+    streams.cleanUp();
     streams.start();
 
     // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
