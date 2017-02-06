@@ -13,8 +13,6 @@
  */
 package io.confluent.examples.streams;
 
-import io.confluent.examples.streams.utils.GenericAvroSerde;
-import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -35,6 +33,9 @@ import org.apache.kafka.streams.kstream.Windowed;
 
 import java.io.InputStream;
 import java.util.Properties;
+
+import io.confluent.examples.streams.utils.GenericAvroSerde;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 
 /**
  * Demonstrates how to perform a join between a KStream and a KTable, i.e. an example of a stateful
@@ -211,9 +212,16 @@ public class PageViewRegionExample {
     viewsByRegionForConsole.to(stringSerde, longSerde, "PageViewsByRegion");
 
     final KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
-    // clean local state: should not be added in production (compare ApplicationResetExample.java)
-    // required to reset application for a re-run using bin/kafka-streams-application-reset
-    // save to call even without actual reset -- only performance penalty due to necessary state recreation
+    // Always (and unconditionally) clean local state prior to starting the processing topology.
+    // We opt for this unconditional call here because this will make it easier for you to play around with the example
+    // when resetting the application for doing a re-run (via the Application Reset Tool,
+    // http://docs.confluent.io/current/streams/developer-guide.html#application-reset-tool).
+    //
+    // The drawback of cleaning up local state prior is that your app must rebuilt its local state from scratch, which
+    // will take time and will require reading all the state-relevant data from the Kafka cluster over the network.
+    // Thus in a production scenario you typically do not want to clean up always as we do here but rather only when it
+    // is truly needed, i.e., only under certain conditions (e.g., the presence of a command line flag for your app).
+    // See `ApplicationResetExample.java` for a production-like example.
     streams.cleanUp();
     streams.start();
 
