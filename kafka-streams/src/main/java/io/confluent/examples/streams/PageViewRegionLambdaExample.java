@@ -170,7 +170,7 @@ public class PageViewRegionLambdaExample {
         return viewRegion;
       })
       .map((user, viewRegion) -> new KeyValue<>(viewRegion.get("region").toString(), viewRegion))
-      // count views by user, using hopping windows of size 5 minutes that advance every 1 minute
+      // count views by region, using hopping windows of size 5 minutes that advance every 1 minute
       .groupByKey()
       .count(TimeWindows.of(5 * 60 * 1000L).advanceBy(60 * 1000L), "GeoPageViewsStore");
 
