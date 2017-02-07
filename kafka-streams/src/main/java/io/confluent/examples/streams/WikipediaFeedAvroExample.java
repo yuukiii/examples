@@ -15,9 +15,6 @@
  */
 package io.confluent.examples.streams;
 
-import io.confluent.examples.streams.avro.WikiFeed;
-import io.confluent.examples.streams.utils.SpecificAvroSerde;
-import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -31,6 +28,10 @@ import org.apache.kafka.streams.kstream.KeyValueMapper;
 import org.apache.kafka.streams.kstream.Predicate;
 
 import java.util.Properties;
+
+import io.confluent.examples.streams.avro.WikiFeed;
+import io.confluent.examples.streams.utils.SpecificAvroSerde;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 
 
 /**
@@ -87,6 +88,17 @@ public class WikipediaFeedAvroExample {
       "localhost:9092",
       "http://localhost:8081",
       "/tmp/kafka-streams");
+    // Always (and unconditionally) clean local state prior to starting the processing topology.
+    // We opt for this unconditional call here because this will make it easier for you to play around with the example
+    // when resetting the application for doing a re-run (via the Application Reset Tool,
+    // http://docs.confluent.io/current/streams/developer-guide.html#application-reset-tool).
+    //
+    // The drawback of cleaning up local state prior is that your app must rebuilt its local state from scratch, which
+    // will take time and will require reading all the state-relevant data from the Kafka cluster over the network.
+    // Thus in a production scenario you typically do not want to clean up always as we do here but rather only when it
+    // is truly needed, i.e., only under certain conditions (e.g., the presence of a command line flag for your app).
+    // See `ApplicationResetExample.java` for a production-like example.
+    streams.cleanUp();
     streams.start();
 
     // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
