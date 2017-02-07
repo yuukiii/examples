@@ -106,7 +106,6 @@ public class TopArticlesLambdaExample {
 
   public static void main(final String[] args) throws Exception {
     final KafkaStreams streams = buildTopArticlesStream("localhost:9092",
-      "localhost:2181",
       SCHEMA_REGISTRY_URL,
       "/tmp/kafka-streams");
     streams.start();
@@ -116,7 +115,6 @@ public class TopArticlesLambdaExample {
   }
 
   static KafkaStreams buildTopArticlesStream(final String bootstrapServers,
-                                             final String zkConnect,
                                              final String schemaRegistryUrl,
                                              final String stateDir) throws IOException {
     final Properties streamsConfiguration = new Properties();
@@ -125,8 +123,6 @@ public class TopArticlesLambdaExample {
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "top-articles-lambda-example");
     // Where to find Kafka broker(s).
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    // Where to find the corresponding ZooKeeper ensemble.
-    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, zkConnect);
     // Where to find the Confluent schema registry instance(s)
     streamsConfiguration.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
     // Specify default (de)serializers for record keys and for record values.

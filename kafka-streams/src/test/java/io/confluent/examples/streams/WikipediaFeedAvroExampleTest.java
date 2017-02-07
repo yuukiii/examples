@@ -61,7 +61,6 @@ public class WikipediaFeedAvroExampleTest {
   public void createStreams() throws IOException {
     streams =
         WikipediaFeedAvroExample.buildWikipediaFeed(CLUSTER.bootstrapServers(),
-                                                    CLUSTER.zookeeperConnect(),
                                                     CLUSTER.schemaRegistryUrl(),
                                                     TestUtils.tempDirectory().getPath());
   }

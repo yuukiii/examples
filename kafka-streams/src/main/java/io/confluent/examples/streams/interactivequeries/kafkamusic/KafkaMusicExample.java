@@ -181,7 +181,6 @@ public class KafkaMusicExample {
 
 
     final KafkaStreams streams = createChartsStreams("localhost:9092",
-                                                     "localhost:2181",
                                                      "http://localhost:8081",
                                                      port,
                                                      "/tmp/kafka-streams");
@@ -213,7 +212,6 @@ public class KafkaMusicExample {
   }
 
   static KafkaStreams createChartsStreams(final String bootstrapServers,
-                                          final String zkConnect,
                                           final String schemaRegistryUrl,
                                           final int applicationServerPort,
                                           final String stateDir) {
@@ -223,8 +221,6 @@ public class KafkaMusicExample {
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "kafka-music-charts");
     // Where to find Kafka broker(s).
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    // Where to find the corresponding ZooKeeper ensemble.
-    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, zkConnect);
     // Provide the details of our embedded http service that we'll use to connect to this streams
     // instance and discover locations of stores.
     streamsConfiguration.put(StreamsConfig.APPLICATION_SERVER_CONFIG, "localhost:" + applicationServerPort);

@@ -71,7 +71,6 @@ public class TopArticlesLambdaExampleTest {
   public void createStreams() throws IOException {
     streams =
         TopArticlesLambdaExample.buildTopArticlesStream(CLUSTER.bootstrapServers(),
-                                                        CLUSTER.zookeeperConnect(),
                                                         CLUSTER.schemaRegistryUrl(),
                                                         TestUtils.tempDirectory().getPath());
   }
