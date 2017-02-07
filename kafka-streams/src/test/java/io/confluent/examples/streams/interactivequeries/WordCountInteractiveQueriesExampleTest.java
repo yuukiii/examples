@@ -259,8 +259,6 @@ public class WordCountInteractiveQueriesExampleTest {
         "interactive-queries-wordcount-example");
     // Where to find Kafka broker(s).
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootStrap);
-    // Where to find the corresponding ZooKeeper ensemble.
-    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zookeeperConnect());
     // The host:port the embedded REST proxy will run on
     streamsConfiguration.put(StreamsConfig.APPLICATION_SERVER_CONFIG, "localhost:" + port);
     // The directory where the RocksDB State Stores will reside

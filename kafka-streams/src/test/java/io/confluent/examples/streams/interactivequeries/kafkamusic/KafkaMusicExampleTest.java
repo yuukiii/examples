@@ -92,7 +92,6 @@ public class KafkaMusicExampleTest {
     appServerPort = randomFreeLocalPort();
     streams =
         KafkaMusicExample.createChartsStreams(CLUSTER.bootstrapServers(),
-                                              CLUSTER.zookeeperConnect(),
                                               CLUSTER.schemaRegistryUrl(),
                                               appServerPort,
                                               TestUtils.tempDirectory().getPath());

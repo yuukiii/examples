@@ -85,7 +85,6 @@ public class WikipediaFeedAvroExample {
   public static void main(final String[] args) throws Exception {
     final KafkaStreams streams = buildWikipediaFeed(
       "localhost:9092",
-      "localhost:2181",
       "http://localhost:8081",
       "/tmp/kafka-streams");
     streams.start();
@@ -100,7 +99,6 @@ public class WikipediaFeedAvroExample {
   }
 
   static KafkaStreams buildWikipediaFeed(final String bootstrapServers,
-                                         final String zkConnect,
                                          final String schemaRegistryUrl,
                                          final String stateDir) {
     final Properties streamsConfiguration = new Properties();
@@ -109,8 +107,6 @@ public class WikipediaFeedAvroExample {
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "wordcount-avro-example");
     // Where to find Kafka broker(s).
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    // Where to find the corresponding ZooKeeper ensemble.
-    streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, zkConnect);
     // Where to find the Confluent schema registry instance(s)
     streamsConfiguration.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
     // Specify default (de)serializers for record keys and for record values.
