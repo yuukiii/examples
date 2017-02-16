@@ -116,6 +116,7 @@ public class UserCountsPerRegionLambdaIntegrationTest {
     KTable<String, String> userRegionsTable = builder.table(stringSerde, stringSerde, inputTopic, "UserRegionsStore");
 
     KTable<String, Long> usersPerRegionTable = userRegionsTable
+        // no need to specify explicit serdes because the resulting key and value types match our default serde settings
         .groupBy((userId, region) -> KeyValue.pair(region, region))
         .count("UserCountsByRegion");
 

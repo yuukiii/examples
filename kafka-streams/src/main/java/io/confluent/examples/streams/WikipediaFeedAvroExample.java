@@ -154,6 +154,7 @@ public class WikipediaFeedAvroExample {
                 return new KeyValue<>(value.getUser(), value);
               }
             })
+            // no need to specify explicit serdes because the resulting key and value types match our default serde settings
             .groupByKey()
             .count("Counts");
 

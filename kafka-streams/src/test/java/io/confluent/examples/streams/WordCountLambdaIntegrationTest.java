@@ -114,6 +114,7 @@ public class WordCountLambdaIntegrationTest {
 
     KStream<String, Long> wordCounts = textLines
         .flatMapValues(value -> Arrays.asList(pattern.split(value.toLowerCase())))
+        // no need to specify explicit serdes because the resulting key and value types match our default serde settings
         .groupBy((key, word) -> word)
         .count("Counts")
         .toStream();

@@ -120,8 +120,8 @@ public class UserRegionLambdaExample {
 
     // Aggregate the user counts of by region
     final KTable<String, Long> regionCounts = userRegions
-      // Count by region
-      // We do not need to specify any explict serdes because the key and value types do not change
+      // Count by region;
+      // no need to specify explicit serdes because the resulting key and value types match our default serde settings
       .groupBy((userId, region) -> KeyValue.pair(region, region))
       .count("CountsByRegion")
       // discard any regions with only 1 user

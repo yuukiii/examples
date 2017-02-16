@@ -112,6 +112,7 @@ public class SumLambdaExample {
       // The actual new key (here: `1`) we pick here doesn't matter as long it is the same across
       // all records.
       .selectKey((k, v) -> 1)
+      // no need to specify explicit serdes because the resulting key and value types match our default serde settings
       .groupByKey()
       // Add the numbers to compute the sum.
       .reduce((v1, v2) -> v1 + v2, "sum");

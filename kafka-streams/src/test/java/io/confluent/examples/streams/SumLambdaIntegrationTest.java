@@ -83,6 +83,7 @@ public class SumLambdaIntegrationTest {
     KTable<Integer, Integer> sumOfOddNumbers = input
         .filter((k, v) -> v % 2 == 0)
         .selectKey((k, v) -> 1)
+        // no need to specify explicit serdes because the resulting key and value types match our default serde settings
         .groupByKey()
         .reduce((v1, v2) -> v1 + v2, "sum");
     sumOfOddNumbers.to(outputTopic);

@@ -125,7 +125,8 @@ public class AnomalyDetectionLambdaExample {
     final KTable<Windowed<String>, Long> anomalousUsers = views
       // map the user name as key, because the subsequent counting is performed based on the key
       .map((ignoredKey, username) -> new KeyValue<>(username, username))
-      // count users, using one-minute tumbling windows
+      // count users, using one-minute tumbling windows;
+      // no need to specify explicit serdes because the resulting key and value types match our default serde settings
       .groupByKey()
       .count(TimeWindows.of(60 * 1000L), "UserCountStore")
       // get users whose one-minute count is >= 3

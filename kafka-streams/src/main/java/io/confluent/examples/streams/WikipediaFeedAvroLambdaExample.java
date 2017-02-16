@@ -131,6 +131,7 @@ public class WikipediaFeedAvroLambdaExample {
       .filter((dummy, value) -> value.getIsNew())
       // map the user id as key
       .map((key, value) -> new KeyValue<>(value.getUser(), value))
+      // no need to specify explicit serdes because the resulting key and value types match our default serde settings
       .groupByKey()
       .count("Counts");
 

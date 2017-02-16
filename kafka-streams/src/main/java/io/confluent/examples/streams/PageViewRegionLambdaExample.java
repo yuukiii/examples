@@ -170,7 +170,7 @@ public class PageViewRegionLambdaExample {
       })
       .map((user, viewRegion) -> new KeyValue<>(viewRegion.get("region").toString(), viewRegion))
       // count views by region, using hopping windows of size 5 minutes that advance every 1 minute
-      .groupByKey()
+      .groupByKey() // no need to specify explicit serdes because the resulting key and value types match our default serde settings
       .count(TimeWindows.of(5 * 60 * 1000L).advanceBy(60 * 1000L), "GeoPageViewsStore");
 
     // Note: The following operations would NOT be needed for the actual pageview-by-region
