@@ -55,7 +55,7 @@ import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder}
   * Once packaged you can then run:
   *
   * {{{
-  * $ java -cp target/streams-examples-3.2.0-standalone.jar io.confluent.examples.streams.MapFunctionScalaExample
+  * $ java -cp target/streams-examples-3.3.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.MapFunctionScalaExample
   * }
   * }}}
   *

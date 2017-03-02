@@ -60,7 +60,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
  * Once packaged you can then run:
  * <pre>
  * {@code
- * $ java -cp target/streams-examples-3.2.0-standalone.jar io.confluent.examples.streams.WikipediaFeedAvroLambdaExample
+ * $ java -cp target/streams-examples-3.3.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.WikipediaFeedAvroLambdaExample
  * }</pre>
  * 4) Write some input data to the source topics (e.g. via {@link WikipediaFeedAvroExampleDriver}).
  * The already running example application (step 3) will automatically process this input data and
@@ -70,7 +70,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
  * {@code
  * # Here: Write input data using the example driver.  Once the driver has stopped generating data,
  * # you can terminate it via Ctrl-C.
- * $ java -cp target/streams-examples-3.2.0-standalone.jar io.confluent.examples.streams.WikipediaFeedAvroExampleDriver
+ * $ java -cp target/streams-examples-3.3.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.WikipediaFeedAvroExampleDriver
  * }</pre>
  */
 public class WikipediaFeedAvroLambdaExample {

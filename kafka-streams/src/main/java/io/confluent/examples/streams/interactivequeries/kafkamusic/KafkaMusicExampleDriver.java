@@ -43,7 +43,7 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
  * Once packaged you can then run:
  * <pre>
  * {@code
- * $ java -cp target/streams-examples-3.2.0-standalone.jar \
+ * $ java -cp target/streams-examples-3.3.0-SNAPSHOT-standalone.jar \
  *      io.confluent.examples.streams.interactivequeries.kafkamusic.KafkaMusicExampleDriver
  * }
  * </pre>
