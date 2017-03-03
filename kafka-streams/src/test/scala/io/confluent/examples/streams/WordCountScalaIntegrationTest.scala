@@ -45,15 +45,15 @@ class WordCountScalaIntegrationTest extends AssertionsForJUnit {
 
   private val privateCluster: EmbeddedSingleNodeKafkaCluster = new EmbeddedSingleNodeKafkaCluster
 
-  @Rule def CLUSTER = privateCluster
+  @Rule def cluster: EmbeddedSingleNodeKafkaCluster = privateCluster
 
   private val inputTopic = "inputTopic"
   private val outputTopic = "output-topic"
 
   @Before
-  def startKafkaCluster() = {
-    CLUSTER.createTopic(inputTopic)
-    CLUSTER.createTopic(outputTopic)
+  def startKafkaCluster() {
+    cluster.createTopic(inputTopic)
+    cluster.createTopic(outputTopic)
   }
 
   @Test
@@ -84,7 +84,7 @@ class WordCountScalaIntegrationTest extends AssertionsForJUnit {
     val streamsConfiguration: Properties = {
       val p = new Properties()
       p.put(StreamsConfig.APPLICATION_ID_CONFIG, "wordcount-scala-integration-test")
-      p.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers())
+      p.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers())
       p.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       p.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       // The commit interval for flushing records to state stores and downstream must be lower than
@@ -112,7 +112,7 @@ class WordCountScalaIntegrationTest extends AssertionsForJUnit {
     val wordCounts: KStream[String, JLong] = textLines
         .flatMapValues(value => value.toLowerCase.split("\\W+").toIterable.asJava)
         // no need to specify explicit serdes because the resulting key and value types match our default serde settings
-        .groupBy((key, word) => word)
+        .groupBy((_, word) => word)
         .count("Counts")
         .toStream()
 
@@ -126,7 +126,7 @@ class WordCountScalaIntegrationTest extends AssertionsForJUnit {
     //
     val producerConfig: Properties = {
       val p = new Properties()
-      p.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers())
+      p.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers())
       p.put(ProducerConfig.ACKS_CONFIG, "all")
       p.put(ProducerConfig.RETRIES_CONFIG, "0")
       p.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
@@ -141,7 +141,7 @@ class WordCountScalaIntegrationTest extends AssertionsForJUnit {
     //
     val consumerConfig = {
       val p = new Properties()
-      p.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers())
+      p.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers())
       p.put(ConsumerConfig.GROUP_ID_CONFIG, "wordcount-scala-integration-test-standard-consumer")
       p.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
       p.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
