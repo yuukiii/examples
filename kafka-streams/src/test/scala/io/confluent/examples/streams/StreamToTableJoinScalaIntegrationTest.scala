@@ -43,17 +43,17 @@ class StreamToTableJoinScalaIntegrationTest extends AssertionsForJUnit {
 
   private val privateCluster: EmbeddedSingleNodeKafkaCluster = new EmbeddedSingleNodeKafkaCluster
 
-  @Rule def CLUSTER = privateCluster
+  @Rule def cluster: EmbeddedSingleNodeKafkaCluster = privateCluster
 
   private val userClicksTopic = "user-clicks"
   private val userRegionsTopic = "user-regions"
   private val outputTopic = "output-topic"
 
   @Before
-  def startKafkaCluster() = {
-    CLUSTER.createTopic(userClicksTopic)
-    CLUSTER.createTopic(userRegionsTopic)
-    CLUSTER.createTopic(outputTopic)
+  def startKafkaCluster() {
+    cluster.createTopic(userClicksTopic)
+    cluster.createTopic(userRegionsTopic)
+    cluster.createTopic(outputTopic)
   }
 
   @Test
@@ -107,7 +107,7 @@ class StreamToTableJoinScalaIntegrationTest extends AssertionsForJUnit {
     val streamsConfiguration: Properties = {
       val p = new Properties()
       p.put(StreamsConfig.APPLICATION_ID_CONFIG, "stream-table-join-scala-integration-test")
-      p.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers())
+      p.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers())
       p.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       p.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       // The commit interval for flushing records to state stores and downstream must be lower than
@@ -156,7 +156,7 @@ class StreamToTableJoinScalaIntegrationTest extends AssertionsForJUnit {
       .leftJoin(userRegionsTable, (clicks: Long, region: String) => (if (region == null) "UNKNOWN" else region, clicks))
     val clicksByRegion : KStream[String, Long] = userClicksJoinRegion
       // Change the stream from <user> -> <region, clicks> to <region> -> <clicks>
-      .map((user: String, regionWithClicks: (String, Long)) => new KeyValue[String, Long](
+      .map((_: String, regionWithClicks: (String, Long)) => new KeyValue[String, Long](
       regionWithClicks._1, regionWithClicks._2))
 
     val clicksPerRegion: KTable[String, Long] = clicksByRegion
@@ -178,7 +178,7 @@ class StreamToTableJoinScalaIntegrationTest extends AssertionsForJUnit {
     // data records would typically be arriving concurrently in both input streams/topics.
     val userRegionsProducerConfig: Properties = {
       val p = new Properties()
-      p.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers())
+      p.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers())
       p.put(ProducerConfig.ACKS_CONFIG, "all")
       p.put(ProducerConfig.RETRIES_CONFIG, "0")
       p.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
@@ -193,7 +193,7 @@ class StreamToTableJoinScalaIntegrationTest extends AssertionsForJUnit {
     //
     val userClicksProducerConfig: Properties = {
       val p = new Properties()
-      p.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers())
+      p.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers())
       p.put(ProducerConfig.ACKS_CONFIG, "all")
       p.put(ProducerConfig.RETRIES_CONFIG, "0")
       p.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
@@ -207,7 +207,7 @@ class StreamToTableJoinScalaIntegrationTest extends AssertionsForJUnit {
     //
     val consumerConfig = {
       val p = new Properties()
-      p.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers())
+      p.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers())
       p.put(ConsumerConfig.GROUP_ID_CONFIG, "join-scala-integration-test-standard-consumer")
       p.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
       p.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
