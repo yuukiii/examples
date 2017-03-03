@@ -1,4 +1,4 @@
-# Kafka Streams examples [![Build Status](https://travis-ci.org/confluentinc/examples.svg?branch=kafka-0.10.0.1-cp-3.0.1)](https://travis-ci.org/confluentinc/examples)
+# Kafka Streams examples [![Build Status](https://travis-ci.org/confluentinc/examples.svg?branch=3.2.x)](https://travis-ci.org/confluentinc/examples)
 
 This sub-folder contains code examples that demonstrate how to implement real-time processing applications using Kafka
 Streams, which is a new stream processing library included with the [Apache Kafka](http://kafka.apache.org/) open source
