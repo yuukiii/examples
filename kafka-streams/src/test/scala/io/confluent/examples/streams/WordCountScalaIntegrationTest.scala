@@ -122,7 +122,7 @@ class WordCountScalaIntegrationTest extends AssertionsForJUnit {
     streams.start()
 
     //
-    // Step 2: Publish some user click events.
+    // Step 2: Publish some input text lines.
     //
     val producerConfig: Properties = {
       val p = new Properties()
