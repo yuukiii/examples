@@ -111,7 +111,7 @@ public class ApplicationResetIntegrationTest {
 
     // wait for application to be completely shut down
     final AdminClient adminClient = AdminClient.createSimplePlaintext(CLUSTER.bootstrapServers());
-    while (!adminClient.describeConsumerGroup(applicationId,0 ).consumers().get().isEmpty()) {
+    while (!adminClient.describeConsumerGroup(applicationId, 0).consumers().get().isEmpty()) {
       Utils.sleep(50);
     }
 
@@ -126,7 +126,7 @@ public class ApplicationResetIntegrationTest {
     Assert.assertEquals(0, exitCode);
 
     // wait for reset client to be completely closed
-    while (!adminClient.describeConsumerGroup(applicationId, 10).consumers().get().isEmpty()) {
+    while (!adminClient.describeConsumerGroup(applicationId, 0).consumers().get().isEmpty()) {
       Utils.sleep(50);
     }
 
