@@ -84,6 +84,8 @@ There are two kinds of examples:
 * [KafkaMusicExample](src/main/java/io/confluent/examples/streams/interactivequeries/kafkamusic/KafkaMusicExample.java) (Java 8+)
   -- demonstrates the building of a simple music charts application. Uses the Interactive Queries feature to query the state stores to get
   the latest top five songs. Demonstrates locating the KafkaStreams instance for a store and key and retrieving the values via a REST API
+* [HandlingCorruptedInputRecordsIntegrationTest](src/test/java/io/confluent/examples/streams/HandlingCorruptedInputRecordsIntegrationTest.java)
+  (Java 8+) -- demonstrates how to handle corrupt input records (think: poison pill messages)
 * [MixAndMatchLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/MixAndMatchLambdaIntegrationTest.java)
   (Java 8+) -- demonstrates how to mix and match the DSL and the Processor API via `KStream#transform()` and
   `KStream#process()`, which allow you to include custom `Transformer` and `Processor` implementations, respectively,
@@ -103,6 +105,7 @@ results (using the standard Kafka consumer client).
 
 * [WordCountLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/WordCountLambdaIntegrationTest.java)
 * [WordCountInteractiveQueriesExampleTest](src/test/java/io/confluent/examples/streams/interactivequeries/WordCountInteractiveQueriesExampleTest.java)
+* [HandlingCorruptedInputRecordsIntegrationTest](src/test/java/io/confluent/examples/streams/HandlingCorruptedInputRecordsIntegrationTest.java)
 * [MapFunctionLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/MapFunctionLambdaIntegrationTest.java)
 * [MixAndMatchLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/MixAndMatchLambdaIntegrationTest.java)
 * [PassThroughIntegrationTest](src/test/java/io/confluent/examples/streams/PassThroughIntegrationTest.java)
