@@ -94,7 +94,7 @@ There are two kinds of examples:
   -- demonstrates the usage of the application reset tool (`bin/kafka-streams-application-reset`)
 * [GlobalKTablesExample](src/main/java/io/confluent/examples/streams/GlobalKTablesExample.java) (Java 8+)
   -- demonstrates joining between `KStream` and `GlobalKTable`.
-* [ProbabilisticCountingScalaIntegrationTest](src/test/java/io/confluent/examples/streams/algebird/ProbabilisticCountingScalaIntegrationTest.scala)
+* [ProbabilisticCountingScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/ProbabilisticCountingScalaIntegrationTest.scala)
   -- demonstrates how to probabilistically count items in an input stream by implementing a custom state store that is
   backed by a [Count-Min Sketch](https://en.wikipedia.org/wiki/Count%E2%80%93min_sketch) data structure (with the CMS
   implementation of [Twitter Algebird](https://github.com/twitter/algebird))
@@ -143,7 +143,7 @@ results (using the standard Kafka consumer client).
 * [StreamToTableJoinScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/StreamToTableJoinScalaIntegrationTest.scala)
 * [WordCountScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/WordCountScalaIntegrationTest.scala)
 * [GenericAvroScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/GenericAvroScalaIntegrationTest.scala)
-* [ProbabilisticCountingScalaIntegrationTest](src/test/java/io/confluent/examples/streams/algebird/ProbabilisticCountingScalaIntegrationTest.scala)
+* [ProbabilisticCountingScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/ProbabilisticCountingScalaIntegrationTest.scala)
 * [SpecificAvroScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/SpecificAvroScalaIntegrationTest.scala)
 
 
