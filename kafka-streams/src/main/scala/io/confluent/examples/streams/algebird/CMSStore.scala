@@ -95,6 +95,7 @@ import org.apache.kafka.streams.state.StateSerdes
   * }}}
   *
   * @param name            The name of this store instance
+  * @param loggingEnabled  Whether or not changelogging (fault-tolerance) is enabled for this store.
   * @param delta           CMS parameter: A bound on the probability that a query estimate does not
   *                        lie within some small interval (an interval that depends on `eps`) around
   *                        the truth.
@@ -130,6 +131,7 @@ import org.apache.kafka.streams.state.StateSerdes
   *           See [[com.twitter.algebird.CMSMonoid]] for further information.
   */
 class CMSStore[T: CMSHasher](override val name: String,
+                             val loggingEnabled: Boolean = true,
                              val delta: Double = 1E-10,
                              val eps: Double = 0.001,
                              val seed: Int = 1,
@@ -190,8 +192,9 @@ class CMSStore[T: CMSHasher](override val name: String,
       TopCMSSerde[T])
     changeLogger = new CMSStoreChangeLogger[Integer, TopCMS[T]](name, context, serdes)
 
-    if (root != null) {
-      val loggingEnabled = true
+    // Note: We must manually guard with `loggingEnabled` here because `context.register()` ignores
+    // that parameter.
+    if (root != null && loggingEnabled) {
       context.register(root, loggingEnabled, (_, value) => {
         if (value == null) {
           cms = cmsMonoid.zero
@@ -253,7 +256,9 @@ class CMSStore[T: CMSHasher](override val name: String,
     * underlying CMS data structure in its entirety to Kafka.
     */
   override def flush() {
-    changeLogger.logChange(changelogKey, cms)
+    if (loggingEnabled) {
+      changeLogger.logChange(changelogKey, cms)
+    }
   }
 
   override def close() {

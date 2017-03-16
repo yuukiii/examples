@@ -16,9 +16,8 @@
 package io.confluent.examples.streams.algebird
 
 import com.twitter.algebird.CMSHasher
-import org.apache.kafka.common.serialization.{Serde, Serdes}
-import org.apache.kafka.common.utils.Time
-import org.apache.kafka.streams.state.internals.AbstractStoreSupplier
+import org.apache.kafka.common.serialization.Serde
+import org.apache.kafka.streams.processor.StateStoreSupplier
 
 /**
   * A factory for Kafka Streams to instantiate a [[CMSStore]].
@@ -40,23 +39,18 @@ import org.apache.kafka.streams.state.internals.AbstractStoreSupplier
   * new CMSStoreSupplier[String](cmsStoreName, Serdes.String(), changeloggingEnabled, changelogConfig)
   * }}}
   */
-class CMSStoreSupplier[T: CMSHasher](name: String,
+class CMSStoreSupplier[T: CMSHasher](val name: String,
                                      val serde: Serde[T],
-                                     time: Time,
-                                     logged: Boolean,
-                                     logConfig: java.util.Map[String, String])
-    extends AbstractStoreSupplier[T, Long, CMSStore[T]](name, serde, Serdes.Long().asInstanceOf[Serde[Long]], time, logged, logConfig) {
+                                     val loggingEnabled: Boolean,
+                                     val logConfig: java.util.Map[String, String])
+    extends StateStoreSupplier[CMSStore[T]] {
 
   def this(name: String, serde: Serde[T]) {
-    this(name, serde, null, true, new java.util.HashMap[String, String])
+    this(name, serde, true, new java.util.HashMap[String, String])
   }
 
-  def this(name: String, serde: Serde[T], logged: Boolean) {
-    this(name, serde, null, logged, new java.util.HashMap[String, String])
-  }
-
-  def this(name: String, serde: Serde[T], logged: Boolean, logConfig: java.util.Map[String, String]) {
-    this(name, serde, null, logged, logConfig)
+  def this(name: String, serde: Serde[T], loggingEnabled: Boolean) {
+    this(name, serde, loggingEnabled, new java.util.HashMap[String, String])
   }
 
   override def get(): CMSStore[T] = new CMSStore[T](name)
