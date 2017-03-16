@@ -60,6 +60,12 @@ class CMSStoreTest extends AssertionsForJUnit with MockitoSugar {
   }
 
   @Test
+  def shouldBeChangeloggingByDefault(): Unit = {
+    val store = new CMSStore[String](anyStoreName)
+    assertThat(store.loggingEnabled).isTrue
+  }
+
+  @Test
   def shouldBeNonPersistentStore(): Unit = {
     val store = new CMSStore[String](anyStoreName)
     assertThat(store.persistent).isFalse
@@ -118,11 +124,11 @@ class CMSStoreTest extends AssertionsForJUnit with MockitoSugar {
   }
 
   @Test
-  def shouldBackupToChangelog(): Unit = {
+  def shouldBackupToChangelogIfLoggingIsEnabled(): Unit = {
     // Given
     val driver: KeyValueStoreTestDriver[Integer, TopCMS[String]] = createTestDriver[String]()
     val processorContext = createTestContext(driver)
-    val store: CMSStore[String] = new CMSStore[String](anyStoreName)
+    val store: CMSStore[String] = new CMSStore[String](anyStoreName, loggingEnabled = true)
     store.init(processorContext, store)
 
     // When
@@ -136,11 +142,10 @@ class CMSStoreTest extends AssertionsForJUnit with MockitoSugar {
     assertThat(driver.flushedEntryRemoved(store.changelogKey)).isFalse
   }
 
-
   @Test
   def shouldBackupToChangelogOnlyOnFlush(): Unit = {
     // Given
-    val store: CMSStore[String] = new CMSStore[String](anyStoreName)
+    val store: CMSStore[String] = new CMSStore[String](anyStoreName, loggingEnabled = true)
     val observedChangelogRecords = new java.util.ArrayList[ProducerRecord[_, _]]
     val processorContext = {
       // We must use a "spying" RecordCollector because, unfortunately, Kafka's
@@ -176,9 +181,27 @@ class CMSStoreTest extends AssertionsForJUnit with MockitoSugar {
   }
 
   @Test
+  def shouldNotBackupToChangelogIfLoggingIsDisabled(): Unit = {
+    // Given
+    val driver: KeyValueStoreTestDriver[Integer, TopCMS[String]] = createTestDriver[String]()
+    val processorContext = createTestContext(driver)
+    val store: CMSStore[String] = new CMSStore[String](anyStoreName, loggingEnabled = false)
+    store.init(processorContext, store)
+
+    // When
+    val items = Seq("one", "two", "three")
+    items.foreach(store.put)
+    store.flush()
+
+    // Then
+    assertThat(driver.flushedEntryStored(store.changelogKey)).isNull()
+    assertThat(driver.flushedEntryRemoved(store.changelogKey)).isFalse
+  }
+
+  @Test
   def shouldRestoreFromEmptyChangelog(): Unit = {
     // Given
-    val store: CMSStore[String] = new CMSStore[String](anyStoreName)
+    val store: CMSStore[String] = new CMSStore[String](anyStoreName, loggingEnabled = true)
     val processorContext = createTestContext[String]()
 
     // When
@@ -192,7 +215,7 @@ class CMSStoreTest extends AssertionsForJUnit with MockitoSugar {
   @Test
   def shouldRestoreFromNonEmptyChangelog(): Unit = {
     // Given
-    val store: CMSStore[String] = new CMSStore[String](anyStoreName)
+    val store: CMSStore[String] = new CMSStore[String](anyStoreName, loggingEnabled = true)
     val items: Seq[String] = Seq("foo", "bar", "foo", "foo", "quux", "bar", "foo")
     val processorContext: MockProcessorContext = {
       val changelogKeyDoesNotMatter = 123
@@ -212,7 +235,7 @@ class CMSStoreTest extends AssertionsForJUnit with MockitoSugar {
   @Test
   def shouldRestoreFromChangelogTombstone(): Unit = {
     // Given
-    val store: CMSStore[String] = new CMSStore[String](anyStoreName)
+    val store: CMSStore[String] = new CMSStore[String](anyStoreName, loggingEnabled = true)
     val processorContext: MockProcessorContext = {
       val changelogKeyDoesNotMatter = 123
       val tombstone: TopCMS[String] = null
@@ -231,7 +254,7 @@ class CMSStoreTest extends AssertionsForJUnit with MockitoSugar {
   @Test
   def shouldRestoreFromLatestChangelogRecordOnly(): Unit = {
     // Given
-    val store: CMSStore[String] = new CMSStore[String](anyStoreName)
+    val store: CMSStore[String] = new CMSStore[String](anyStoreName, loggingEnabled = true)
     val expectedItems = Seq("foo", "bar", "foo", "foo", "quux", "bar", "foo")
     val unexpectedItems1 = Seq("something", "entirely", "different")
     val unexpectedItems2 = Seq("even", "more", "different")
@@ -259,6 +282,26 @@ class CMSStoreTest extends AssertionsForJUnit with MockitoSugar {
     // CMS hash collisions that would lead to non-zero counts even for un-counted items.
     unexpectedItems1.toSet[String].foreach(item => assertThat(store.get(item)).isEqualTo(0))
     unexpectedItems2.toSet[String].foreach(item => assertThat(store.get(item)).isEqualTo(0))
+  }
+
+  @Test
+  def shouldNotRestoreFromChangelogIfLoggingIsDisabled(): Unit = {
+    // Given
+    val store: CMSStore[String] = new CMSStore[String](anyStoreName, loggingEnabled = false)
+    val items: Seq[String] = Seq("foo", "bar", "foo", "foo", "quux", "bar", "foo")
+    val processorContext: MockProcessorContext = {
+      val changelogKeyDoesNotMatter = 123
+      val cms: TopCMS[String] = store.cmsFrom(items)
+      val changelogRecords = Seq((changelogKeyDoesNotMatter, cms))
+      createTestContext(changelogRecords = Some(changelogRecords))
+    }
+
+    // When
+    store.init(processorContext, store)
+
+    // Then
+    assertThat(store.totalCount).isZero
+    assertThat(store.heavyHitters.size).isZero
   }
 
 }
