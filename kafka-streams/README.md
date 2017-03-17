@@ -140,9 +140,10 @@ results (using the standard Kafka consumer client).
 * [WordCountScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/WordCountScalaIntegrationTest.scala)
 * [GenericAvroScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/GenericAvroScalaIntegrationTest.scala)
 * [ProbabilisticCountingScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/ProbabilisticCountingScalaIntegrationTest.scala)
-  -- demonstrates how to probabilistically count items in an input stream by implementing a custom state store that is
-  backed by a [Count-Min Sketch](https://en.wikipedia.org/wiki/Count%E2%80%93min_sketch) data structure (with the CMS
-  implementation of [Twitter Algebird](https://github.com/twitter/algebird))
+  -- demonstrates how to probabilistically count items in an input stream by implementing a custom state store
+  ([CMSStore](src/main/scala/io/confluent/examples/streams/algebird/CMSStore.scala)) that is backed by a
+  [Count-Min Sketch](https://en.wikipedia.org/wiki/Count%E2%80%93min_sketch) data structure (with the CMS implementation
+  of [Twitter Algebird](https://github.com/twitter/algebird))
 * [SpecificAvroScalaIntegrationTest](src/test/scala/io/confluent/examples/streams/SpecificAvroScalaIntegrationTest.scala)
 
 
