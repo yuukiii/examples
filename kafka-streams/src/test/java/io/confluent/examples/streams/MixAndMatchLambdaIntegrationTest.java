@@ -49,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * More concretely, we show how to use the {@link KStream#transform(TransformerSupplier, String...)}
  * method to include a custom {@link org.apache.kafka.streams.kstream.Transformer} (from the
- * Processor API) in a data pipeline defined via the DSL.  The fictitious use case is to anonymize
+ * Processor API) in a topology defined via the DSL.  The fictitious use case is to anonymize
  * IPv4 addresses contained in the input data.
  *
  * Tip: Users that want to use {@link KStream#process(ProcessorSupplier, String...)} would need to
@@ -78,7 +78,7 @@ public class MixAndMatchLambdaIntegrationTest {
    * Performs rudimentary anonymization of IPv4 address in the input data.
    * You should use this for demonstration purposes only.
    */
-  private static class AnonymizeIpAddressProcessor implements Transformer<byte[], String, KeyValue<byte[], String>> {
+  private static class AnonymizeIpAddressTransformer implements Transformer<byte[], String, KeyValue<byte[], String>> {
 
     private static Pattern ipv4AddressPattern =
         Pattern.compile("(?<keep>[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)(?<anonymize>[0-9]{1,3})");
@@ -113,7 +113,7 @@ public class MixAndMatchLambdaIntegrationTest {
 
     @Override
     public KeyValue<byte[], String> punctuate(long timestamp) {
-      // We don't need any periodic actions in this processor.  Returning null achieves that.
+      // We don't need any periodic actions in this transformer.  Returning null achieves that.
       return null;
     }
 
@@ -145,7 +145,7 @@ public class MixAndMatchLambdaIntegrationTest {
     KStream<byte[], String> input = builder.stream(inputTopic);
     KStream<byte[], String> uppercasedAndAnonymized = input
         .mapValues(String::toUpperCase)
-        .transform(AnonymizeIpAddressProcessor::new);
+        .transform(AnonymizeIpAddressTransformer::new);
     uppercasedAndAnonymized.to(outputTopic);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
