@@ -161,7 +161,8 @@ public class EventDeduplicationLambdaIntegrationTest {
 
     @Override
     public void close() {
-      eventIdStore.close();
+      // Note: The store should NOT be closed manually here via `eventIdStore.close()`!
+      // The Kafka Streams API will automatically close stores when necessary.
     }
 
   }

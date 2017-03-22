@@ -113,7 +113,8 @@ public class StateStoresInTheDSLIntegrationTest {
 
         @Override
         public void close() {
-          stateStore.close();
+          // Note: The store should NOT be closed manually here via `stateStore.close()`!
+          // The Kafka Streams API will automatically close stores when necessary.
         }
       };
     }
