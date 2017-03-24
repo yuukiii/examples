@@ -63,11 +63,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * IMPORTANT:  The Apache Kafka project is currently working on supporting exactly-once semantics.
  * Once available, most use cases will no longer need to worry about duplicates or duplicate
- * processing because, typically, such duplicates only happen in the face of failures.
- * That said, there will still be some scenarios where the upstream data producers may generate
- * duplicate events under normal, non-failure conditions; in such cases, an event de-duplication
- * approach as shown in this example is helpful.
- * https://cwiki.apache.org/confluence/display/KAFKA/KIP-98+-+Exactly+Once+Delivery+and+Transactional+Messaging
+ * processing because, typically, such duplicates only happen in the face of failures. That said,
+ * there will still be some scenarios where the upstream data producers may generate duplicate
+ * events under normal, non-failure conditions; in such cases, an event de-duplication approach as
+ * shown in this example is helpful. https://cwiki.apache.org/confluence/display/KAFKA/KIP-98+-+Exactly+Once+Delivery+and+Transactional+Messaging
  * https://cwiki.apache.org/confluence/display/KAFKA/KIP-129%3A+Streams+Exactly-Once+Semantics
  *
  * Note: This example uses lambda expressions and thus works with Java 8+ only.
@@ -91,8 +90,8 @@ public class EventDeduplicationLambdaIntegrationTest {
    *
    * Duplicate records are detected based on an event ID;  in this simplified example, the record
    * value is the event ID.  The store remembers known event IDs in an associated state store.
-   * To prevent the this store from growing indefinitely, the transformer purges/expires event IDs
-   * from the store after a certain amount of time.
+   * To prevent the store from growing indefinitely, the transformer purges/expires event IDs from
+   * the store after a certain amount of time.
    *
    * Note: This code is for demonstration purposes and was not tested for production usage.
    */
@@ -102,7 +101,8 @@ public class EventDeduplicationLambdaIntegrationTest {
 
     /**
      * Key: event ID
-     * Value: timestamp (processing-time) of when the event ID "remembered", i.e. written to the store
+     * Value: timestamp (event-time) of the corresponding event when the event ID was seen for the
+     * first time
      */
     private KeyValueStore<String, Long> eventIdStore;
 
@@ -127,7 +127,7 @@ public class EventDeduplicationLambdaIntegrationTest {
         // Discard the record.
         return null;
       } else {
-        remember(eventId);
+        remember(eventId, context.timestamp());
         // Forward the record downstream as-is.
         return KeyValue.pair(recordKey, recordValue);
       }
@@ -141,31 +141,30 @@ public class EventDeduplicationLambdaIntegrationTest {
       return eventIdStore.get(eventId) != null;
     }
 
-    private void remember(final String eventId) {
-      eventIdStore.put(eventId, System.currentTimeMillis());
+    private void remember(final String eventId, final long eventTimestamp) {
+      eventIdStore.put(eventId, eventTimestamp);
     }
 
     @Override
-    public KeyValue<byte[], String> punctuate(final long timestamp) {
-      purgeExpiredEventIds();
+    public KeyValue<byte[], String> punctuate(final long currentStreamTimeMs) {
+      purgeExpiredEventIds(currentStreamTimeMs);
       return null;
     }
 
-    private void purgeExpiredEventIds() {
+    private void purgeExpiredEventIds(final long currentStreamTimeMs) {
       try (final KeyValueIterator<String, Long> iterator = eventIdStore.all()) {
         while (iterator.hasNext()) {
           final KeyValue<String, Long> entry = iterator.next();
           final long eventTimestamp = entry.value;
-          if (hasExpired(eventTimestamp)) {
+          if (hasExpired(eventTimestamp, currentStreamTimeMs)) {
             eventIdStore.delete(entry.key);
           }
         }
       }
     }
 
-    private boolean hasExpired(final long eventTimestamp) {
-      final long nowMs = System.currentTimeMillis();
-      return (nowMs - eventTimestamp) > maintainDurationMs;
+    private boolean hasExpired(final long eventTimestamp, final long currentStreamTimeMs) {
+      return (currentStreamTimeMs - eventTimestamp) > maintainDurationMs;
     }
 
     @Override
