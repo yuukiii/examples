@@ -116,8 +116,9 @@ public class EventDeduplicationLambdaIntegrationTest {
     private final KeyValueMapper<K, V, E> idExtractor;
 
     /**
-     * @param idExtractor extracts a unique identifier from a record by which we de-duplicate
-     *                    input records
+     * @param idExtractor extracts a unique identifier from a record by which we de-duplicate input
+     *                    records; if it returns null, the record will not be considered for
+     *                    de-duping but forwarded as-is.
      */
     DeduplicationTransformer(KeyValueMapper<K, V, E> idExtractor) {
       this.idExtractor = idExtractor;
@@ -134,14 +135,18 @@ public class EventDeduplicationLambdaIntegrationTest {
     @Override
     public KeyValue<K, V> transform(final K recordKey, final V recordValue) {
       final E eventId = idExtractor.apply(recordKey, recordValue);
-      if (isDuplicate(eventId)) {
-        // Discard the record.
-        return null;
-      } else {
-        remember(eventId, context.timestamp());
-        // Forward the record downstream as-is.
-        return KeyValue.pair(recordKey, recordValue);
+      if (eventId != null) {
+        if (isDuplicate(eventId)) {
+          // Discard the record.
+          return null;
+        } else {
+          remember(eventId, context.timestamp());
+          // Forward the record downstream as-is.
+          return KeyValue.pair(recordKey, recordValue);
+        }
       }
+      // Forward the record downstream as-is.
+      return KeyValue.pair(recordKey, recordValue);
     }
 
     private boolean isDuplicate(final E eventId) {
@@ -208,7 +213,7 @@ public class EventDeduplicationLambdaIntegrationTest {
     streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, TestUtils.tempDirectory().getAbsolutePath());
 
     StateStoreSupplier deduplicationStoreSupplier = Stores.create("eventId-store")
-        .withKeys(Serdes.String())
+        .withKeys(Serdes.String()) // must match the return type of the Transformer's id extractor
         .withValues(Serdes.Long())
         .persistent()
         .build();
