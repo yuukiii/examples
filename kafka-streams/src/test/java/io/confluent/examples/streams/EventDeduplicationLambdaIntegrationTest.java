@@ -128,7 +128,7 @@ public class EventDeduplicationLambdaIntegrationTest {
     @SuppressWarnings("unchecked")
     public void init(final ProcessorContext context) {
       this.context = context;
-      eventIdStore = (KeyValueStore) context.getStateStore("eventId-store");
+      eventIdStore = (KeyValueStore<E, Long>) context.getStateStore("eventId-store");
       this.context.schedule(TimeUnit.MINUTES.toMillis(1));
     }
 
