@@ -26,6 +26,7 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
+import org.apache.kafka.streams.kstream.KeyValueMapper;
 import org.apache.kafka.streams.kstream.Transformer;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.processor.StateStoreSupplier;
@@ -95,7 +96,7 @@ public class EventDeduplicationLambdaIntegrationTest {
    *
    * Note: This code is for demonstration purposes and was not tested for production usage.
    */
-  private static class DeduplicationTransformer implements Transformer<byte[], String, KeyValue<byte[], String>> {
+  private static class DeduplicationTransformer<K, V, E> implements Transformer<K, V, KeyValue<K, V>> {
 
     private ProcessorContext context;
 
@@ -104,13 +105,23 @@ public class EventDeduplicationLambdaIntegrationTest {
      * Value: timestamp (event-time) of the corresponding event when the event ID was seen for the
      * first time
      */
-    private KeyValueStore<String, Long> eventIdStore;
+    private KeyValueStore<E, Long> eventIdStore;
 
     /**
      * How long to remember an event ID.  Event IDs that have been stored for longer than this
      * duration will eventually be purged from the store.
      */
     private final long maintainDurationMs = TimeUnit.MINUTES.toMillis(5);
+
+    private final KeyValueMapper<K, V, E> idExtractor;
+
+    /**
+     * @param idExtractor extracts a unique identifier from a record by which we de-duplicate
+     *                    input records
+     */
+    DeduplicationTransformer(KeyValueMapper<K, V, E> idExtractor) {
+      this.idExtractor = idExtractor;
+    }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -121,8 +132,8 @@ public class EventDeduplicationLambdaIntegrationTest {
     }
 
     @Override
-    public KeyValue<byte[], String> transform(final byte[] recordKey, final String recordValue) {
-      final String eventId = extractEventId(recordValue);
+    public KeyValue<K, V> transform(final K recordKey, final V recordValue) {
+      final E eventId = idExtractor.apply(recordKey, recordValue);
       if (isDuplicate(eventId)) {
         // Discard the record.
         return null;
@@ -133,28 +144,24 @@ public class EventDeduplicationLambdaIntegrationTest {
       }
     }
 
-    private String extractEventId(final String recordValue) {
-      return recordValue;
-    }
-
-    private boolean isDuplicate(final String eventId) {
+    private boolean isDuplicate(final E eventId) {
       return eventIdStore.get(eventId) != null;
     }
 
-    private void remember(final String eventId, final long eventTimestamp) {
+    private void remember(final E eventId, final long eventTimestamp) {
       eventIdStore.put(eventId, eventTimestamp);
     }
 
     @Override
-    public KeyValue<byte[], String> punctuate(final long currentStreamTimeMs) {
+    public KeyValue<K, V> punctuate(final long currentStreamTimeMs) {
       purgeExpiredEventIds(currentStreamTimeMs);
       return null;
     }
 
     private void purgeExpiredEventIds(final long currentStreamTimeMs) {
-      try (final KeyValueIterator<String, Long> iterator = eventIdStore.all()) {
+      try (final KeyValueIterator<E, Long> iterator = eventIdStore.all()) {
         while (iterator.hasNext()) {
-          final KeyValue<String, Long> entry = iterator.next();
+          final KeyValue<E, Long> entry = iterator.next();
           final long eventTimestamp = entry.value;
           if (hasExpired(eventTimestamp, currentStreamTimeMs)) {
             eventIdStore.delete(entry.key);
@@ -209,7 +216,12 @@ public class EventDeduplicationLambdaIntegrationTest {
     builder.addStateStore(deduplicationStoreSupplier);
 
     KStream<byte[], String> input = builder.stream(inputTopic);
-    KStream<byte[], String> deduplicated = input.transform(DeduplicationTransformer::new, "eventId-store");
+    KStream<byte[], String> deduplicated = input.transform(
+        // In this example, we assume that the record value as-is represents a unique event ID by
+        // which we can perform de-duplication.  If your records are different, adapt the extractor
+        // function as needed.
+        () -> new DeduplicationTransformer<>((key, value) -> value),
+        "eventId-store");
     deduplicated.to(outputTopic);
 
     KafkaStreams streams = new KafkaStreams(builder, streamsConfiguration);
