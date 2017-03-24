@@ -61,6 +61,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  * is but one example of how to perform de-duplication in general.  The code example below can be
  * adapted to other de-duplication approaches.
  *
+ * IMPORTANT:  The Apache Kafka project is currently working on supporting exactly-once semantics.
+ * Once available, most use cases will no longer need to worry about duplicates or duplicate
+ * processing because, typically, such duplicates only happen in the face of failures.
+ * That said, there will still be some scenarios where the upstream data producers may generate
+ * duplicate events under normal, non-failure conditions; in such cases, an event de-duplication
+ * approach as shown in this example is helpful.
+ * https://cwiki.apache.org/confluence/display/KAFKA/KIP-98+-+Exactly+Once+Delivery+and+Transactional+Messaging
+ * https://cwiki.apache.org/confluence/display/KAFKA/KIP-129%3A+Streams+Exactly-Once+Semantics
+ *
  * Note: This example uses lambda expressions and thus works with Java 8+ only.
  */
 public class EventDeduplicationLambdaIntegrationTest {
