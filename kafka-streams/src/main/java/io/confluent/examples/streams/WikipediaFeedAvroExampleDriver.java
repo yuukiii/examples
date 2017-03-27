@@ -38,7 +38,7 @@ import io.confluent.examples.streams.avro.WikiFeed;
  * You can then run this class directly in your IDE or via the command line.
  *
  * To run via the command line you might want to package as a fatjar first. Please refer to:
- * <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>
+ * <a href='https://github.com/confluentinc/examples/tree/3.2.x/kafka-streams#packaging-and-running'>Packaging</a>
  *
  * Once packaged you can then run:
  * java -cp target/streams-examples-3.3.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.WikipediaFeedAvroExampleDriver
