@@ -18,6 +18,15 @@ a new branch for a specific Confluent release line (e.g. a `3.2.x` branch for th
         # Such links in the Javadocs would need updating (note the `3.2.x` token)
         <a href='https://github.com/confluentinc/examples/tree/3.2.x/kafka-streams#packaging-and-running'>Packaging</a>
 
+  Here's an example command pipeline to update some such references from `3.1.x` to `3.2.x`:
+
+        # Note: the `\1` prefix before `3.2.x` in the command below reference to
+        # a so-called "capture group" in `sed` -- it is not a typo!
+        $ find src -type f \
+            | xargs grep "examples/tree/3.1.x/" \
+            | cut -d ":" -f 1 \
+            | xargs sed -i '' 's/\(\/examples\/tree\/\)3.1.x\//\13.2.x\//g'
+
 - `README.md`: Update the version compatibility matrix by (1) adding a new entry for the new release and (2) updating
   the entry for the `master` branch.  Pay special attention to the version identifier of the Apache Kafka version.
 - Run sth like `git grep 3.2` (here: when releasing Confluent 3.2) to spot any references to the specific release
