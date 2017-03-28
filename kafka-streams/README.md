@@ -57,6 +57,8 @@ There are two kinds of examples:
   -- demonstrates how to perform stateless transformations via map functions, using the Kafka Streams DSL
   (see also the Scala variant
   [MapFunctionScalaExample](src/main/scala/io/confluent/examples/streams/MapFunctionScalaExample.scala))
+* [SessionWindowsExample](src/main/java/io/confluent/examples/streams/SessionWindowsExample.java)
+  -- demonstrates how to perform user behavior analysis through sessionization of user events
 * [SumLambdaExample](src/main/java/io/confluent/examples/streams/SumLambdaExample.java)
   -- demonstrates how to perform stateful transformations via `reduce`, using the Kafka Streams DSL
 * [PageViewRegionLambdaExample](src/main/java/io/confluent/examples/streams/PageViewRegionLambdaExample.java)
@@ -112,6 +114,7 @@ results (using the standard Kafka consumer client).
 * [MapFunctionLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/MapFunctionLambdaIntegrationTest.java)
 * [MixAndMatchLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/MixAndMatchLambdaIntegrationTest.java)
 * [PassThroughIntegrationTest](src/test/java/io/confluent/examples/streams/PassThroughIntegrationTest.java)
+* [SessionWindowsExampleTest](src/test/java/io/confluent/examples/streams/SessionWindowsExampleTest.java)
 * [SumLambdaIntegrationTest](src/test/java/io/confluent/examples/streams/SumLambdaIntegrationTest.java)
 * [StreamToStreamJoinIntegrationTest](src/test/java/io/confluent/examples/streams/StreamToStreamJoinIntegrationTest.java)
 * [StreamToTableJoinIntegrationTest](src/test/java/io/confluent/examples/streams/StreamToTableJoinIntegrationTest.java)
