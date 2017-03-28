@@ -22,11 +22,7 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.StreamsConfig;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,8 +31,6 @@ import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-
-import kafka.utils.CoreUtils;
 
 /**
  * Utility functions to make integration testing more convenient.
@@ -139,12 +133,12 @@ public class IntegrationTestUtils {
 
   /**
    * Wait until enough data (key-value records) has been consumed.
-   * @param consumerConfig Kafka Consumer configuration
-   * @param topic          Topic to consume from
+   *
+   * @param consumerConfig     Kafka Consumer configuration
+   * @param topic              Topic to consume from
    * @param expectedNumRecords Minimum number of expected records
-   * @param waitTime       Upper bound in waiting time in milliseconds
+   * @param waitTime           Upper bound in waiting time in milliseconds
    * @return All the records consumed, or null if no records are consumed
-   * @throws InterruptedException
    * @throws AssertionError if the given wait time elapses
    */
   public static <K, V> List<KeyValue<K, V>> waitUntilMinKeyValueRecordsReceived(Properties consumerConfig,
@@ -159,7 +153,7 @@ public class IntegrationTestUtils {
       if (accumData.size() >= expectedNumRecords)
         return accumData;
       if (System.currentTimeMillis() > startTime + waitTime)
-        throw new AssertionError("Expected " +  expectedNumRecords +
+        throw new AssertionError("Expected " + expectedNumRecords +
             " but received only " + accumData.size() +
             " records before timeout " + waitTime + " ms");
       Thread.sleep(Math.min(waitTime, 100L));
@@ -175,12 +169,12 @@ public class IntegrationTestUtils {
 
   /**
    * Wait until enough data (value records) has been consumed.
-   * @param consumerConfig Kafka Consumer configuration
-   * @param topic          Topic to consume from
+   *
+   * @param consumerConfig     Kafka Consumer configuration
+   * @param topic              Topic to consume from
    * @param expectedNumRecords Minimum number of expected records
-   * @param waitTime       Upper bound in waiting time in milliseconds
+   * @param waitTime           Upper bound in waiting time in milliseconds
    * @return All the records consumed, or null if no records are consumed
-   * @throws InterruptedException
    * @throws AssertionError if the given wait time elapses
    */
   public static <V> List<V> waitUntilMinValuesRecordsReceived(Properties consumerConfig,
@@ -195,7 +189,7 @@ public class IntegrationTestUtils {
       if (accumData.size() >= expectedNumRecords)
         return accumData;
       if (System.currentTimeMillis() > startTime + waitTime)
-        throw new AssertionError("Expected " +  expectedNumRecords +
+        throw new AssertionError("Expected " + expectedNumRecords +
             " but received only " + accumData.size() +
             " records before timeout " + waitTime + " ms");
       Thread.sleep(Math.min(waitTime, 100L));
