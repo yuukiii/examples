@@ -8,10 +8,10 @@ a new branch for a specific Confluent release line (e.g. a `3.2.x` branch for th
 - For all instructions in e.g. `README.md` and Javadocs, remove `-SNAPSHOT` from the name of the packaged jar:
 
         # Snapshot = before release
-        $ java -cp target/streams-examples-3.2.0-SNAPSHOT-standalone.jar
+        streams-examples-3.2.0-SNAPSHOT-standalone.jar
 
         # After release
-        $ java -cp target/streams-examples-3.2.0-standalone.jar
+        streams-examples-3.2.0-standalone.jar
 
 - Update, if needed, any references in the instructions to "blobs" or links that are branch-based or tag-based.
 
@@ -20,12 +20,14 @@ a new branch for a specific Confluent release line (e.g. a `3.2.x` branch for th
 
   Here's an example command pipeline to update some such references from `3.1.x` to `3.2.x`:
 
-        # Note: the `\1` prefix before `3.2.x` in the command below reference to
-        # a so-called "capture group" in `sed` -- it is not a typo!
-        $ find src -type f \
-            | xargs grep "examples/tree/3.1.x/" \
-            | cut -d ":" -f 1 \
-            | xargs sed -i '' 's/\(\/examples\/tree\/\)3.1.x\//\13.2.x\//g'
+    ```shell
+    # Note: the `\1` prefix before `3.2.x` in the command below reference to
+    # a so-called "capture group" in `sed` -- it is not a typo!
+    $ find src -type f \
+        | xargs grep "examples/tree/3.1.x/" \
+        | cut -d ":" -f 1 \
+        | xargs sed -i '' 's/\(\/examples\/tree\/\)3.1.x\//\13.2.x\//g'
+    ```
 
 - `README.md`: Update the version compatibility matrix by (1) adding a new entry for the new release and (2) updating
   the entry for the `master` branch.  Pay special attention to the version identifier of the Apache Kafka version.
