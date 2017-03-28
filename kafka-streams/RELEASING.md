@@ -31,6 +31,11 @@ a new branch for a specific Confluent release line (e.g. a `3.2.x` branch for th
 
 - `README.md`: Update the version compatibility matrix by (1) adding a new entry for the new release and (2) updating
   the entry for the `master` branch.  Pay special attention to the version identifier of the Apache Kafka version.
+- `README.md`: Update the Travis CI badge to point to the new release branch.
+
+        # Example for 3.2.x
+        [![Build Status](https://travis-ci.org/confluentinc/examples.svg?branch=3.2.x)](...etc...)
+
 - Run sth like `git grep 3.2` (here: when releasing Confluent 3.2) to spot any references to the specific release
   version, and update the locations where applicable.
 
