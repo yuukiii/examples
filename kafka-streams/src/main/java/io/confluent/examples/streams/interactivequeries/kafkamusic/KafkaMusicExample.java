@@ -98,7 +98,7 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
  * 3) Start two instances of this example application either in your IDE or on the command
  * line.
  *
- * If via the command line please refer to <a href='https://github.com/confluentinc/examples/tree/3.2.x/kafka-streams#packaging-and-running'>Packaging</a>.
+ * If via the command line please refer to <a href='https://github.com/confluentinc/examples/tree/master/kafka-streams#packaging-and-running'>Packaging</a>.
  *
  * Once packaged you can then start the first instance of the application (on port 7070):
  *
