@@ -132,19 +132,20 @@ public class ValidateStateWithInteractiveQueriesLambdaIntegrationTest {
     producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
     IntegrationTestUtils.produceKeyValuesSynchronously(inputTopic, inputUserClicks, producerConfig);
 
-    // Wait a bit so that the input data can be fully processed to ensure that the stores can
-    // actually be populated with data.  Running the build on (slow) Travis CI in particular
-    // requires a few seconds to run this test reliably.
-    Thread.sleep(5000);
-
     //
     // Step 3: Validate the application's state by interactively querying its state stores.
     //
     ReadOnlyKeyValueStore<String, Long> keyValueStore =
         IntegrationTestUtils.waitUntilStoreIsQueryable("max-store", QueryableStoreTypes.keyValueStore(), streams);
-    IntegrationTestUtils.assertThatKeyValueStoreContains(keyValueStore, expectedMaxClicksPerUser);
     ReadOnlyWindowStore<String, Long> windowStore =
         IntegrationTestUtils.waitUntilStoreIsQueryable("max-window-store", QueryableStoreTypes.windowStore(), streams);
+
+    // Wait a bit so that the input data can be fully processed to ensure that the stores can
+    // actually be populated with data.  Running the build on (slow) Travis CI in particular
+    // requires a few seconds to run this test reliably.
+    Thread.sleep(3000);
+
+    IntegrationTestUtils.assertThatKeyValueStoreContains(keyValueStore, expectedMaxClicksPerUser);
     IntegrationTestUtils.assertThatOldestWindowContains(windowStore, expectedMaxClicksPerUser);
     streams.close();
   }
