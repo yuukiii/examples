@@ -65,7 +65,7 @@ import java.util.Properties;
  * <pre>
  * {@code
  * $ bin/kafka-console-consumer --topic sum-of-odd-numbers-topic --from-beginning \
- *                              --zookeeper localhost:2181 \
+ *                              --new-consumer --bootstrap-server localhost:9092 \
  *                              --property value.deserializer=org.apache.kafka.common.serialization.IntegerDeserializer
  * }</pre>
  * You should see output data similar to:

@@ -78,7 +78,7 @@ import java.util.regex.Pattern;
  * <pre>
  * {@code
  * $ bin/kafka-console-consumer --topic WordsWithCountsTopic --from-beginning \
- *                              --zookeeper localhost:2181 \
+ *                              --new-consumer --bootstrap-server localhost:9092 \
  *                              --property print.key=true \
  *                              --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
  * }</pre>

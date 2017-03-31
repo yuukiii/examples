@@ -75,9 +75,9 @@ import java.util.Properties;
  * <pre>
  * {@code
  * $ bin/kafka-console-consumer --topic UppercasedTextLinesTopic --from-beginning \
- *                              --zookeeper localhost:2181
+ *                              --new-consumer --bootstrap-server localhost:9092
  * $ bin/kafka-console-consumer --topic OriginalAndUppercasedTopic --from-beginning \
- *                              --zookeeper localhost:2181
+ *                              --new-consumer --bootstrap-server localhost:9092
  * }</pre>
  * You should see output data similar to:
  * <pre>

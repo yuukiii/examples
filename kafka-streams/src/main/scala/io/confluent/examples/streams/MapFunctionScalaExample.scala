@@ -77,8 +77,8 @@ import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder}
   * 5) Inspect the resulting data in the output topics, e.g. via `kafka-console-consumer`.
   *
   * {{{
-  * $ bin/kafka-console-consumer --zookeeper localhost:2181 --topic UppercasedTextLinesTopic --from-beginning
-  * $ bin/kafka-console-consumer --zookeeper localhost:2181 --topic OriginalAndUppercasedTopic --from-beginning
+  * $ bin/kafka-console-consumer --new-consumer --bootstrap-server localhost:9092 --topic UppercasedTextLinesTopic --from-beginning
+  * $ bin/kafka-console-consumer --new-consumer --bootstrap-server localhost:9092 --topic OriginalAndUppercasedTopic --from-beginning
   * }}}
   *
   * You should see output data similar to:
