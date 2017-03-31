@@ -60,9 +60,9 @@ import java.util.regex.Pattern;
  * {@code
  * $ java -cp target/streams-examples-3.3.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.WordCountLambdaExample
  * }</pre>
- * 4) Write some input data to the source topics (e.g. via {@code kafka-console-producer}). The already
- * running example application (step 3) will automatically process this input data and write the
- * results to the output topic.
+ * 4) Write some input data to the source topic "TextLinesTopic" (e.g. via {@code kafka-console-producer}).
+ * The already running example application (step 3) will automatically process this input data and write the
+ * results to the output topic "WordsWithCountsTopic".
  * <pre>
  * {@code
  * # Start the console producer. You can then enter input data by writing some line of text, followed by ENTER:
@@ -74,11 +74,11 @@ import java.util.regex.Pattern;
  * # Every line you enter will become the value of a single Kafka message.
  * $ bin/kafka-console-producer --broker-list localhost:9092 --topic TextLinesTopic
  * }</pre>
- * 5) Inspect the resulting data in the output topics, e.g. via {@code kafka-console-consumer}.
+ * 5) Inspect the resulting data in the output topic, e.g. via {@code kafka-console-consumer}.
  * <pre>
  * {@code
  * $ bin/kafka-console-consumer --topic WordsWithCountsTopic --from-beginning \
- *                              --zookeeper localhost:2181 \
+ *                              --new-consumer --bootstrap-server localhost:9092 \
  *                              --property print.key=true \
  *                              --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
  * }</pre>
@@ -107,12 +107,13 @@ import java.util.regex.Pattern;
 public class WordCountLambdaExample {
 
   public static void main(final String[] args) throws Exception {
+    final String bootstrapServers = args.length > 0 ? args[0] : "localhost:9092";
     final Properties streamsConfiguration = new Properties();
     // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
     // against which the application is run.
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "wordcount-lambda-example");
     // Where to find Kafka broker(s).
-    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     // Specify default (de)serializers for record keys and for record values.
     streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());

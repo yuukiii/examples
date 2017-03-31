@@ -340,7 +340,8 @@ $ java -cp target/streams-examples-3.3.0-SNAPSHOT-standalone.jar \
 
 Keep in mind that the machine on which you run the command above must have access to the Kafka/ZK clusters you
 configured in the code examples.  By default, the code examples assume the Kafka cluster is accessible via
-`localhost:9092` (Kafka broker) and the ZooKeeper ensemble via `localhost:2181`.
+`localhost:9092` (aka Kafka's ``bootstrap.servers`` parameter) and the ZooKeeper ensemble via `localhost:2181`.
+You can override the default ``bootstrap.servers`` parameter through a command line argument.
 
 
 <a name="development"/>

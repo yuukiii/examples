@@ -35,20 +35,14 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 
 
 /**
- * Computes, for every minute the number of new user feeds from the Wikipedia feed irc stream.
- * Same as {@link WikipediaFeedAvroLambdaExample} but does not use lambda expressions and thus works on
- * Java 7+.
- * <p>
- * Note: The specific Avro binding is used for serialization/deserialization, where the {@code WikiFeed}
- * class is auto-generated from its Avro schema by the maven avro plugin. See {@code wikifeed.avsc}
- * under {@code src/main/resources/avro/io/confluent/examples/streams/}.
- * <p>
- * <br>
- * HOW TO RUN THIS EXAMPLE
- * <p>
- * 1) Start Zookeeper, Kafka, and Confluent Schema Registry. Please refer to <a href='http://docs.confluent.io/current/quickstart.html#quickstart'>QuickStart</a>.
- * <p>
- * 2) Create the input/intermediate/output topics used by this example.
+ * Computes, for every minute the number of new user feeds from the Wikipedia feed irc stream. Same
+ * as {@link WikipediaFeedAvroLambdaExample} but does not use lambda expressions and thus works on
+ * Java 7+. <p> Note: The specific Avro binding is used for serialization/deserialization, where the
+ * {@code WikiFeed} class is auto-generated from its Avro schema by the maven avro plugin. See
+ * {@code wikifeed.avsc} under {@code src/main/resources/avro/io/confluent/examples/streams/}. <p>
+ * <br> HOW TO RUN THIS EXAMPLE <p> 1) Start Zookeeper, Kafka, and Confluent Schema Registry. Please
+ * refer to <a href='http://docs.confluent.io/current/quickstart.html#quickstart'>QuickStart</a>.
+ * <p> 2) Create the input/intermediate/output topics used by this example.
  * <pre>
  * {@code
  * $ bin/kafka-topics --create --topic WikipediaFeed \
@@ -80,14 +74,16 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 
 public class WikipediaFeedAvroExample {
 
-  public static final String WIKIPEDIA_FEED = "WikipediaFeed";
-  public static final String WIKIPEDIA_STATS = "WikipediaStats";
+  static final String WIKIPEDIA_FEED = "WikipediaFeed";
+  static final String WIKIPEDIA_STATS = "WikipediaStats";
 
   public static void main(final String[] args) throws Exception {
+    final String bootstrapServers = args.length > 0 ? args[0] : "localhost:9092";
+    final String schemaRegistryUrl = args.length > 1 ? args[1] : "http://localhost:8081";
     final KafkaStreams streams = buildWikipediaFeed(
-      "localhost:9092",
-      "http://localhost:8081",
-      "/tmp/kafka-streams");
+        bootstrapServers,
+        schemaRegistryUrl,
+        "/tmp/kafka-streams");
     // Always (and unconditionally) clean local state prior to starting the processing topology.
     // We opt for this unconditional call here because this will make it easier for you to play around with the example
     // when resetting the application for doing a re-run (via the Application Reset Tool,
@@ -140,23 +136,23 @@ public class WikipediaFeedAvroExample {
 
     // aggregate the new feed counts of by user
     final KTable<String, Long> aggregated = feeds
-            // filter out old feeds
-            .filter(new Predicate<String, WikiFeed>() {
-              @Override
-              public boolean test(final String dummy, final WikiFeed value) {
-                return value.getIsNew();
-              }
-            })
-            // map the user id as key
-            .map(new KeyValueMapper<String, WikiFeed, KeyValue<String, WikiFeed>>() {
-              @Override
-              public KeyValue<String, WikiFeed> apply(final String key, final WikiFeed value) {
-                return new KeyValue<>(value.getUser(), value);
-              }
-            })
-            // no need to specify explicit serdes because the resulting key and value types match our default serde settings
-            .groupByKey()
-            .count("Counts");
+        // filter out old feeds
+        .filter(new Predicate<String, WikiFeed>() {
+          @Override
+          public boolean test(final String dummy, final WikiFeed value) {
+            return value.getIsNew();
+          }
+        })
+        // map the user id as key
+        .map(new KeyValueMapper<String, WikiFeed, KeyValue<String, WikiFeed>>() {
+          @Override
+          public KeyValue<String, WikiFeed> apply(final String key, final WikiFeed value) {
+            return new KeyValue<>(value.getUser(), value);
+          }
+        })
+        // no need to specify explicit serdes because the resulting key and value types match our default serde settings
+        .groupByKey()
+        .count("Counts");
 
     // write to the result topic, need to override serdes
     aggregated.to(stringSerde, longSerde, WIKIPEDIA_STATS);

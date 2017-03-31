@@ -173,15 +173,16 @@ public class KafkaMusicExample {
   static final String TOP_FIVE_KEY = "all";
 
   public static void main(String[] args) throws Exception {
-    if (args.length != 1) {
-      throw new IllegalArgumentException("usage ... portForRestEndPoint");
+    if (args.length == 0 || args.length > 3) {
+      throw new IllegalArgumentException("usage: ... <portForRestEndPoint> " +
+          "[<bootstrap.servers> (optional)] [<schema.registry.url> (optional)]");
     }
     final int port = Integer.valueOf(args[0]);
+    final String bootstrapServers = args.length > 1 ? args[1] : "localhost:9092";
+    final String schemaRegistryUrl = args.length > 2 ? args[2] : "http://localhost:8081";
 
-
-
-    final KafkaStreams streams = createChartsStreams("localhost:9092",
-                                                     "http://localhost:8081",
+    final KafkaStreams streams = createChartsStreams(bootstrapServers,
+                                                     schemaRegistryUrl,
                                                      port,
                                                      "/tmp/kafka-streams");
 

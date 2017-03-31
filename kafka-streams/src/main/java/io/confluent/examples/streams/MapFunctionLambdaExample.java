@@ -75,9 +75,9 @@ import java.util.Properties;
  * <pre>
  * {@code
  * $ bin/kafka-console-consumer --topic UppercasedTextLinesTopic --from-beginning \
- *                              --zookeeper localhost:2181
+ *                              --new-consumer --bootstrap-server localhost:9092
  * $ bin/kafka-console-consumer --topic OriginalAndUppercasedTopic --from-beginning \
- *                              --zookeeper localhost:2181
+ *                              --new-consumer --bootstrap-server localhost:9092
  * }</pre>
  * You should see output data similar to:
  * <pre>
@@ -91,12 +91,13 @@ import java.util.Properties;
 public class MapFunctionLambdaExample {
 
   public static void main(final String[] args) throws Exception {
+    final String bootstrapServers = args.length > 0 ? args[0] : "localhost:9092";
     final Properties streamsConfiguration = new Properties();
     // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
     // against which the application is run.
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "map-function-lambda-example");
     // Where to find Kafka broker(s).
-    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     // Specify default (de)serializers for record keys and for record values.
     streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass().getName());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());

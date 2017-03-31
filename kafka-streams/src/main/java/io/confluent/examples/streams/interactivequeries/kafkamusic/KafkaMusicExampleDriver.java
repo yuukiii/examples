@@ -52,6 +52,8 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 public class KafkaMusicExampleDriver {
 
   public static void main(String [] args) throws Exception {
+    final String bootstrapServers = args.length > 0 ? args[0] : "localhost:9092";
+    final String schemaRegistryUrl = args.length > 1 ? args[1] : "http://localhost:8081";
     final List<Song> songs = Arrays.asList(new Song(1L,
                                                     "Fresh Fruit For Rotting Vegetables",
                                                     "Dead Kennedys",
@@ -117,9 +119,8 @@ public class KafkaMusicExampleDriver {
     );
 
     final Properties props = new Properties();
-    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 
-    final String schemaRegistryUrl = "http://localhost:8081";
     final CachedSchemaRegistryClient
         schemaRegistry =
         new CachedSchemaRegistryClient(schemaRegistryUrl, 100);

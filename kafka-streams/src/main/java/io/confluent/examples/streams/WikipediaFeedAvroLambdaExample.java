@@ -32,19 +32,14 @@ import io.confluent.examples.streams.utils.SpecificAvroSerde;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 
 /**
- * Computes, for every minute the number of new user feeds from the Wikipedia feed irc stream.
- * Same as {@link WikipediaFeedAvroExample} but uses lambda expressions and thus only works on Java 8+.
- * <p>
- * Note: The specific Avro binding is used for serialization/deserialization, where the {@code WikiFeed}
- * class is auto-generated from its Avro schema by the maven avro plugin. See {@code wikifeed.avsc}
- * under {@code src/main/resources/avro/io/confluent/examples/streams/}.
- * <p>
- * <br>
- * HOW TO RUN THIS EXAMPLE
- * <p>
- * 1) Start Zookeeper, Kafka, and Confluent Schema Registry. Please refer to <a href='http://docs.confluent.io/current/quickstart.html#quickstart'>QuickStart</a>.
- * <p>
- * 2) Create the input/intermediate/output topics used by this example.
+ * Computes, for every minute the number of new user feeds from the Wikipedia feed irc stream. Same
+ * as {@link WikipediaFeedAvroExample} but uses lambda expressions and thus only works on Java 8+.
+ * <p> Note: The specific Avro binding is used for serialization/deserialization, where the {@code
+ * WikiFeed} class is auto-generated from its Avro schema by the maven avro plugin. See {@code
+ * wikifeed.avsc} under {@code src/main/resources/avro/io/confluent/examples/streams/}. <p> <br> HOW
+ * TO RUN THIS EXAMPLE <p> 1) Start Zookeeper, Kafka, and Confluent Schema Registry. Please refer to
+ * <a href='http://docs.confluent.io/current/quickstart.html#quickstart'>QuickStart</a>. <p> 2)
+ * Create the input/intermediate/output topics used by this example.
  * <pre>
  * {@code
  * $ bin/kafka-topics --create --topic WikipediaFeed \
@@ -76,10 +71,12 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 public class WikipediaFeedAvroLambdaExample {
 
   public static void main(final String[] args) throws Exception {
+    final String bootstrapServers = args.length > 0 ? args[0] : "localhost:9092";
+    final String schemaRegistryUrl = args.length > 1 ? args[1] : "http://localhost:8081";
     final KafkaStreams streams = buildWikipediaFeed(
-      "localhost:9092",
-      "http://localhost:8081",
-      "/tmp/kafka-streams");
+        bootstrapServers,
+        schemaRegistryUrl,
+        "/tmp/kafka-streams");
     // Always (and unconditionally) clean local state prior to starting the processing topology.
     // We opt for this unconditional call here because this will make it easier for you to play around with the example
     // when resetting the application for doing a re-run (via the Application Reset Tool,
@@ -116,7 +113,7 @@ public class WikipediaFeedAvroLambdaExample {
     // Records should be flushed every 10 seconds. This is less than the default
     // in order to keep this example interactive.
     streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
- 
+
     final Serde<String> stringSerde = Serdes.String();
     final Serde<Long> longSerde = Serdes.Long();
 
@@ -127,13 +124,13 @@ public class WikipediaFeedAvroLambdaExample {
 
     // aggregate the new feed counts of by user
     final KTable<String, Long> aggregated = feeds
-      // filter out old feeds
-      .filter((dummy, value) -> value.getIsNew())
-      // map the user id as key
-      .map((key, value) -> new KeyValue<>(value.getUser(), value))
-      // no need to specify explicit serdes because the resulting key and value types match our default serde settings
-      .groupByKey()
-      .count("Counts");
+        // filter out old feeds
+        .filter((dummy, value) -> value.getIsNew())
+        // map the user id as key
+        .map((key, value) -> new KeyValue<>(value.getUser(), value))
+        // no need to specify explicit serdes because the resulting key and value types match our default serde settings
+        .groupByKey()
+        .count("Counts");
 
     // write to the result topic, need to override serdes
     aggregated.to(stringSerde, longSerde, WikipediaFeedAvroExample.WIKIPEDIA_STATS);

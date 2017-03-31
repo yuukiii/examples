@@ -43,6 +43,7 @@ import java.util.Random;
 public class WordCountInteractiveQueriesDriver {
 
   public static void main(String [] args) throws Exception {
+    final String bootstrapServers = args.length > 0 ? args[0] : "localhost:9092";
     final List<String> inputValues = Arrays.asList("hello world",
                                                    "all streams lead to kafka",
                                                    "streams",
@@ -58,7 +59,7 @@ public class WordCountInteractiveQueriesDriver {
                                                    "king of the world");
 
     Properties producerConfig = new Properties();
-    producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     producerConfig.put(ProducerConfig.ACKS_CONFIG, "all");
     producerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);
     producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
