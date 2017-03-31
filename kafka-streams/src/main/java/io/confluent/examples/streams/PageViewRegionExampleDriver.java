@@ -52,19 +52,21 @@ import java.util.stream.IntStream;
 public class PageViewRegionExampleDriver {
 
   public static void main(final String[] args) throws IOException {
-    produceInputs();
-    consumeOutput();
+    final String bootstrapServers = args.length > 0 ? args[0] : "localhost:9092";
+    final String schemaRegistryUrl = args.length > 1 ? args[1] : "http://localhost:8081";
+    produceInputs(bootstrapServers, schemaRegistryUrl);
+    consumeOutput(bootstrapServers);
   }
 
-  private static void produceInputs() throws IOException {
+  private static void produceInputs(String bootstrapServers, String schemaRegistryUrl) throws IOException {
     final String[] users = {"erica", "bob", "joe", "damian", "tania", "phil", "sam", "lauren", "joseph"};
     final String[] regions = {"europe", "usa", "asia", "africa"};
 
     final Properties props = new Properties();
-    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
-    props.put("schema.registry.url", "http://localhost:8081");
+    props.put("schema.registry.url", schemaRegistryUrl);
     final KafkaProducer<String, GenericRecord> producer = new KafkaProducer<>(props);
 
     final GenericRecordBuilder pageViewBuilder =
@@ -94,10 +96,10 @@ public class PageViewRegionExampleDriver {
     producer.flush();
   }
 
-  private static void consumeOutput() {
+  private static void consumeOutput(String bootstrapServers) {
     final String resultTopic = "PageViewsByRegion";
     final Properties consumerProperties = new Properties();
-    consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
     consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG,

@@ -93,12 +93,13 @@ import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder}
 object MapFunctionScalaExample {
 
   def main(args: Array[String]) {
-    val builder: KStreamBuilder = new KStreamBuilder
+    val bootstrapServers = if (args.length > 0) args(0) else "localhost:9092"
+    val builder = new KStreamBuilder
 
     val streamingConfig = {
       val settings = new Properties
       settings.put(StreamsConfig.APPLICATION_ID_CONFIG, "map-function-scala-example")
-      settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
+      settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers)
       // Specify default (de)serializers for record keys and for record values.
       settings.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.ByteArray.getClass.getName)
       settings.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)

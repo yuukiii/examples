@@ -103,8 +103,10 @@ public class SessionWindowsExample {
   static final String PLAY_EVENTS_PER_SESSION = "play-events-per-session";
 
   public static void main(String[] args) {
-    final KafkaStreams streams = createStreams("localhost:9092",
-                                               "http://localhost:8081",
+    final String bootstrapServers = args.length > 0 ? args[0] : "localhost:9092";
+    final String schemaRegistryUrl = args.length > 1 ? args[1] : "http://localhost:8081";
+    final KafkaStreams streams = createStreams(bootstrapServers,
+                                               schemaRegistryUrl,
                                                "/tmp/kafka-streams");
 
     // Always (and unconditionally) clean local state prior to starting the processing topology.

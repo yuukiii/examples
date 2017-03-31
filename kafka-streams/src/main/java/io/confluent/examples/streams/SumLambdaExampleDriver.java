@@ -48,13 +48,14 @@ import java.util.stream.IntStream;
 public class SumLambdaExampleDriver {
 
   public static void main(final String[] args) throws Exception {
-    produceInput();
-    consumeOutput();
+    final String bootstrapServers = args.length > 0 ? args[0] : "localhost:9092";
+    produceInput(bootstrapServers);
+    consumeOutput(bootstrapServers);
   }
 
-  private static void consumeOutput() {
+  private static void consumeOutput(String bootstrapServers) {
     final Properties properties = new Properties();
-    properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, IntegerDeserializer.class);
     properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, IntegerDeserializer.class);
     properties.put(ConsumerConfig.GROUP_ID_CONFIG, "sum-lambda-example-consumer");
@@ -71,9 +72,9 @@ public class SumLambdaExampleDriver {
     }
   }
 
-  private static void produceInput() {
+  private static void produceInput(String bootstrapServers) {
     final Properties props = new Properties();
-    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class);
     props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class);
 

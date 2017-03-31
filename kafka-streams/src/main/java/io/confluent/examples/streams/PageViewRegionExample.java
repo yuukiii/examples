@@ -111,14 +111,16 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 public class PageViewRegionExample {
 
   public static void main(final String[] args) throws Exception {
+    final String bootstrapServers = args.length > 0 ? args[0] : "localhost:9092";
+    final String schemaRegistryUrl = args.length > 1 ? args[1] : "http://localhost:8081";
     final Properties streamsConfiguration = new Properties();
     // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
     // against which the application is run.
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "pageview-region-example");
     // Where to find Kafka broker(s).
-    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     // Where to find the Confluent schema registry instance(s)
-    streamsConfiguration.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
+    streamsConfiguration.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
     // Specify default (de)serializers for record keys and for record values.
     streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class);
