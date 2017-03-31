@@ -93,7 +93,6 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
  */
 public class TopArticlesLambdaExample {
 
-  private static final String SCHEMA_REGISTRY_URL = "http://localhost:8081";
   static final String TOP_NEWS_PER_INDUSTRY_TOPIC = "TopNewsPerIndustry";
   static final String PAGE_VIEWS = "PageViews";
 
@@ -106,8 +105,11 @@ public class TopArticlesLambdaExample {
   }
 
   public static void main(final String[] args) throws Exception {
-    final KafkaStreams streams = buildTopArticlesStream("localhost:9092",
-      SCHEMA_REGISTRY_URL,
+    final String bootstrapServers = args.length > 0 ? args[0] : "localhost:9092";
+    final String schemaRegistryUrl = args.length > 1 ? args[1] : "http://localhost:8081";
+    final KafkaStreams streams = buildTopArticlesStream(
+        bootstrapServers,
+        schemaRegistryUrl,
       "/tmp/kafka-streams");
     // Always (and unconditionally) clean local state prior to starting the processing topology.
     // We opt for this unconditional call here because this will make it easier for you to play around with the example

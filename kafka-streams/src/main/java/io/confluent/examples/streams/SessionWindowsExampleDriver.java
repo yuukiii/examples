@@ -51,8 +51,8 @@ public class SessionWindowsExampleDriver {
   public static final int NUM_RECORDS_SENT = 8;
 
   public static void main(String[] args) {
-    final String bootstrapServers = "localhost:9092";
-    final String schemaRegistryUrl = "http://localhost:8081";
+    final String bootstrapServers = args.length > 0 ? args[0] : "localhost:9092";
+    final String schemaRegistryUrl = args.length > 1 ? args[1] : "http://localhost:8081";
     producePlayEvents(bootstrapServers, schemaRegistryUrl);
     consumeOutput(bootstrapServers);
   }

@@ -92,9 +92,11 @@ public class GlobalKTablesExample {
   static final String ENRICHED_ORDER_TOPIC = "enriched-order";
 
   public static void main(String[] args) {
+    final String bootstrapServers = args.length > 0 ? args[0] : "localhost:9092";
+    final String schemaRegistryUrl = args.length > 1 ? args[1] : "http://localhost:8081";
     final KafkaStreams
         streams =
-        createStreams("localhost:9092", "http://localhost:8081", "/tmp/kafka-streams-global-tables");
+        createStreams(bootstrapServers, schemaRegistryUrl, "/tmp/kafka-streams-global-tables");
     // Always (and unconditionally) clean local state prior to starting the processing topology.
     // We opt for this unconditional call here because this will make it easier for you to play around with the example
     // when resetting the application for doing a re-run (via the Application Reset Tool,

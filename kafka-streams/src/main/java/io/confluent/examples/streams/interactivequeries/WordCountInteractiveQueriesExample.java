@@ -137,17 +137,18 @@ public class WordCountInteractiveQueriesExample {
   static final String TEXT_LINES_TOPIC = "TextLinesTopic";
 
   public static void main(String[] args) throws Exception {
-    if (args.length != 1) {
-      throw new IllegalArgumentException("usage ... portForRestEndPoint");
+    if (args.length == 0 || args.length > 2) {
+      throw new IllegalArgumentException("usage: ... <portForRestEndPoint> [<bootstrap.servers> (optional)]");
     }
     final int port = Integer.valueOf(args[0]);
+    final String bootstrapServers = args.length > 1 ? args[1] : "localhost:9092";
 
     Properties streamsConfiguration = new Properties();
     // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
     // against which the application is run.
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "interactive-queries-example");
     // Where to find Kafka broker(s).
-    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     // Provide the details of our embedded http service that we'll use to connect to this streams
     // instance and discover locations of stores.
     streamsConfiguration.put(StreamsConfig.APPLICATION_SERVER_CONFIG, "localhost:" + port);
