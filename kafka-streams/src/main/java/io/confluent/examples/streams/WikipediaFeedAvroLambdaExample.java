@@ -47,9 +47,11 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
  * $ bin/kafka-topics --create --topic WikipediaStats \
  *                    --zookeeper localhost:2181 --partitions 1 --replication-factor 1
  * }</pre>
- * Note: The above commands are for the Confluent Platform. For Apache Kafka it should be {@code
- * bin/kafka-topics.sh ...}. <p> 3) Start this example application either in your IDE or on the
- * command line. <p> If via the command line please refer to <a href='https://github.com/confluentinc/examples/tree/3.2.x/kafka-streams#packaging-and-running'>Packaging</a>.
+ * Note: The above commands are for the Confluent Platform. For Apache Kafka it should be {@code bin/kafka-topics.sh ...}.
+ * <p>
+ * 3) Start this example application either in your IDE or on the command line.
+ * <p>
+ * If via the command line please refer to <a href='https://github.com/confluentinc/examples/tree/3.2.x/kafka-streams#packaging-and-running'>Packaging</a>.
  * Once packaged you can then run:
  * <pre>
  * {@code
