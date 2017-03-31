@@ -60,9 +60,9 @@ import java.util.regex.Pattern;
  * {@code
  * $ java -cp target/streams-examples-3.2.0-standalone.jar io.confluent.examples.streams.WordCountLambdaExample
  * }</pre>
- * 4) Write some input data to the source topics (e.g. via {@code kafka-console-producer}). The already
- * running example application (step 3) will automatically process this input data and write the
- * results to the output topic.
+ * 4) Write some input data to the source topic "TextLinesTopic" (e.g. via {@code kafka-console-producer}).
+ * The already running example application (step 3) will automatically process this input data and write the
+ * results to the output topic "WordsWithCountsTopic".
  * <pre>
  * {@code
  * # Start the console producer. You can then enter input data by writing some line of text, followed by ENTER:
@@ -74,7 +74,7 @@ import java.util.regex.Pattern;
  * # Every line you enter will become the value of a single Kafka message.
  * $ bin/kafka-console-producer --broker-list localhost:9092 --topic TextLinesTopic
  * }</pre>
- * 5) Inspect the resulting data in the output topics, e.g. via {@code kafka-console-consumer}.
+ * 5) Inspect the resulting data in the output topic, e.g. via {@code kafka-console-consumer}.
  * <pre>
  * {@code
  * $ bin/kafka-console-consumer --topic WordsWithCountsTopic --from-beginning \
