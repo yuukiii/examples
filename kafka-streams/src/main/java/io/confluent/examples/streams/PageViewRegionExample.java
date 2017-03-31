@@ -93,6 +93,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
  * {@code
  * $ bin/kafka-console-consumer --topic PageViewsByRegion --from-beginning \
  *                              --new-consumer --bootstrap-server localhost:9092 \
+ *                              --property print.key=true \
  *                              --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
  * }</pre>
  * You should see output data similar to:
