@@ -257,6 +257,21 @@ public class KafkaMusicExample {
     // Set the commit interval to 500ms so that any changes are flushed frequently and the top five
     // charts are updated with low latency.
     streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 500);
+    // Allow the user to fine-tune the `metadata.max.age.ms` via Java system properties from the CLI.
+    // Lowering this parameter from its default of 5 minutes to a few seconds is helpful in
+    // situations where the input topic was not pre-created before running the application because
+    // the application will discover a newly created topic faster.  In production, you would
+    // typically not change this parameter from its default.
+    String metadataMaxAgeMs = System.getProperty(ConsumerConfig.METADATA_MAX_AGE_CONFIG);
+    if (metadataMaxAgeMs != null) {
+      try {
+        int value = Integer.parseInt(metadataMaxAgeMs);
+        streamsConfiguration.put(ConsumerConfig.METADATA_MAX_AGE_CONFIG, value);
+        System.out.println("Set consumer configuration " + ConsumerConfig.METADATA_MAX_AGE_CONFIG +
+            " to " + value);
+      } catch (NumberFormatException ignored) {
+      }
+    }
 
     final CachedSchemaRegistryClient
         schemaRegistry =
