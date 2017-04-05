@@ -172,22 +172,30 @@ public class KafkaMusicExample {
   static final String TOP_FIVE_SONGS_STORE = "top-five-songs";
   static final String TOP_FIVE_KEY = "all";
 
+  private static final String DEFAULT_REST_ENDPOINT_HOSTNAME = "localhost";
+  private static final String DEFAULT_BOOTSTRAP_SERVERS = "localhost:9092";
+  private static final String DEFAULT_SCHEMA_REGISTRY_URL = "http://localhost:8081";
+
   public static void main(String[] args) throws Exception {
-    if (args.length == 0 || args.length > 3) {
-      throw new IllegalArgumentException("usage: ... <portForRestEndPoint> " +
-          "[<bootstrap.servers> (optional)] [<schema.registry.url> (optional)]");
+    if (args.length == 0 || args.length > 4) {
+      throw new IllegalArgumentException("usage: ... <portForRestEndpoint> " +
+          "[<bootstrap.servers> (optional, default: " + DEFAULT_BOOTSTRAP_SERVERS + ")] " +
+          "[<schema.registry.url> (optional, default: " + DEFAULT_SCHEMA_REGISTRY_URL + ")] " +
+          "[<hostnameForRestEndPoint> (optional, default: " + DEFAULT_REST_ENDPOINT_HOSTNAME + ")]");
     }
-    final int port = Integer.valueOf(args[0]);
+    final int restEndpointPort = Integer.valueOf(args[0]);
     final String bootstrapServers = args.length > 1 ? args[1] : "localhost:9092";
     final String schemaRegistryUrl = args.length > 2 ? args[2] : "http://localhost:8081";
+    final String restEndpointHostname = args.length > 3 ? args[3] : DEFAULT_REST_ENDPOINT_HOSTNAME;
+    final HostInfo restEndpoint = new HostInfo(restEndpointHostname, restEndpointPort);
 
     System.out.println("Connecting to Kafka cluster via bootstrap servers " + bootstrapServers);
     System.out.println("Connecting to Confluent schema registry at " + schemaRegistryUrl);
-    System.out.println("REST endpoint listens at http://localhost:" + port);
+    System.out.println("REST endpoint at http://" + restEndpointHostname + ":" + restEndpointPort);
 
     final KafkaStreams streams = createChartsStreams(bootstrapServers,
                                                      schemaRegistryUrl,
-                                                     port,
+                                                     restEndpointPort,
                                                      "/tmp/kafka-streams");
 
     // Always (and unconditionally) clean local state prior to starting the processing topology.
@@ -208,7 +216,7 @@ public class KafkaMusicExample {
     streams.start();
 
     // Start the Restful proxy for servicing remote access to state stores
-    final MusicPlaysRestService restService = startRestProxy(streams, new HostInfo("localhost", port));
+    final MusicPlaysRestService restService = startRestProxy(streams, restEndpoint);
 
     // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
