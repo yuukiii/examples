@@ -181,6 +181,10 @@ public class KafkaMusicExample {
     final String bootstrapServers = args.length > 1 ? args[1] : "localhost:9092";
     final String schemaRegistryUrl = args.length > 2 ? args[2] : "http://localhost:8081";
 
+    System.out.println("Connecting to Kafka cluster via bootstrap servers " + bootstrapServers);
+    System.out.println("Connecting to Confluent schema registry at " + schemaRegistryUrl);
+    System.out.println("REST endpoint listens at http://localhost:" + port);
+
     final KafkaStreams streams = createChartsStreams(bootstrapServers,
                                                      schemaRegistryUrl,
                                                      port,
