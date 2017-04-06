@@ -241,7 +241,6 @@ public class IntegrationTestUtils {
    * @param <V>      the store's value type
    */
   public static <K, V> void assertThatKeyValueStoreContains(ReadOnlyKeyValueStore<K, V> store, Map<K, V> expected) {
-    assertThat(store.approximateNumEntries()).isEqualTo(expected.size());
     for (K key : expected.keySet()) {
       V actualValue = store.get(key);
       assertThat(actualValue).isEqualTo(expected.get(key));
