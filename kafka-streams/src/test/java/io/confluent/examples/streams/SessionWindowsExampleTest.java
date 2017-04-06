@@ -87,15 +87,15 @@ public class SessionWindowsExampleTest {
         Collections.singletonMap("schema.registry.url", CLUSTER.schemaRegistryUrl());
 
     final SpecificAvroSerializer<PlayEvent>
-        playEventSerialzier = new SpecificAvroSerializer<>(schemaRegistry, serdeProps);
-    playEventSerialzier.configure(serdeProps, false);
+        playEventSerializer = new SpecificAvroSerializer<>(schemaRegistry, serdeProps);
+    playEventSerializer.configure(serdeProps, false);
 
     final Properties producerProperties = new Properties();
     producerProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
 
     final KafkaProducer<String, PlayEvent> playEventProducer = new KafkaProducer<>(producerProperties,
                                                                                    Serdes.String() .serializer(),
-                                                                                   playEventSerialzier);
+                                                                                   playEventSerializer);
 
     final Properties consumerProps = new Properties();
     consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
