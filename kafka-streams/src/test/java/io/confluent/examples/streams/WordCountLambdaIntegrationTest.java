@@ -26,6 +26,7 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
+import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.test.TestUtils;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -112,12 +113,11 @@ public class WordCountLambdaIntegrationTest {
 
     Pattern pattern = Pattern.compile("\\W+", Pattern.UNICODE_CHARACTER_CLASS);
 
-    KStream<String, Long> wordCounts = textLines
+    KTable<String, Long> wordCounts = textLines
         .flatMapValues(value -> Arrays.asList(pattern.split(value.toLowerCase())))
         // no need to specify explicit serdes because the resulting key and value types match our default serde settings
         .groupBy((key, word) -> word)
-        .count("Counts")
-        .toStream();
+        .count("Counts");
 
     wordCounts.to(stringSerde, longSerde, outputTopic);
 
