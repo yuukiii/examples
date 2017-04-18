@@ -19,6 +19,7 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
+import org.apache.kafka.streams.kstream.KTable;
 
 import java.util.Arrays;
 import java.util.Properties;
@@ -120,6 +121,8 @@ public class WordCountLambdaExample {
     // Records should be flushed every 10 seconds. This is less than the default
     // in order to keep this example interactive.
     streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
+    // For illustrative purposes we disable record caches
+    streamsConfiguration.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
 
     // Set up serializers and deserializers, which we will use for overriding the default serdes
     // specified above.
@@ -141,7 +144,7 @@ public class WordCountLambdaExample {
 
     final Pattern pattern = Pattern.compile("\\W+", Pattern.UNICODE_CHARACTER_CLASS);
 
-    final KStream<String, Long> wordCounts = textLines
+    final KTable<String, Long> wordCounts = textLines
       // Split each text line, by whitespace, into words.  The text lines are the record
       // values, i.e. we can ignore whatever data is in the record keys and thus invoke
       // `flatMapValues()` instead of the more generic `flatMap()`.
@@ -154,9 +157,7 @@ public class WordCountLambdaExample {
       //
       // Note: no need to specify explicit serdes because the resulting key and value types match our default serde settings
       .groupBy((key, word) -> word)
-      .count("Counts")
-      // Convert the `KTable<String, Long>` into a `KStream<String, Long>`.
-      .toStream();
+      .count("Counts");
 
     // Write the `KStream<String, Long>` to the output topic.
     wordCounts.to(stringSerde, longSerde, "WordsWithCountsTopic");
