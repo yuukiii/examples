@@ -30,8 +30,8 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import io.confluent.examples.streams.avro.PlayEvent;
-import io.confluent.examples.streams.utils.SpecificAvroSerde;
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.streams.serdes.SpecificAvroSerde;
 
 /**
  * Demonstrates counting user activity (play-events) into Session Windows
@@ -143,13 +143,11 @@ public class SessionWindowsExample {
     // disable caching to see session merging
     config.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
 
-    final CachedSchemaRegistryClient schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryUrl, 100);
-
-    final Map<String, String> serdeProps = Collections.singletonMap("schema.registry.url", schemaRegistryUrl);
-
     // create and configure the SpecificAvroSerdes required in this example
-    final SpecificAvroSerde<PlayEvent> playEventSerde = new SpecificAvroSerde<>(schemaRegistry, serdeProps);
-    playEventSerde.configure(serdeProps, false);
+    final SpecificAvroSerde<PlayEvent> playEventSerde = new SpecificAvroSerde<>();
+    final Map<String, String> serdeConfig = Collections.singletonMap(
+        AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+    playEventSerde.configure(serdeConfig, false);
 
     final KStreamBuilder builder = new KStreamBuilder();
     builder.stream(Serdes.String(), playEventSerde, PLAY_EVENTS)

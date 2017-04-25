@@ -28,8 +28,8 @@ import java.util.Random;
 
 import io.confluent.examples.streams.avro.PlayEvent;
 import io.confluent.examples.streams.avro.Song;
-import io.confluent.examples.streams.utils.SpecificAvroSerializer;
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.streams.serdes.SpecificAvroSerializer;
 
 
 /**
@@ -123,25 +123,16 @@ public class KafkaMusicExampleDriver {
     final Properties props = new Properties();
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 
-    final CachedSchemaRegistryClient
-        schemaRegistry =
-        new CachedSchemaRegistryClient(schemaRegistryUrl, 100);
-
-    final Map<String, String>
-        serdeProps =
-        Collections.singletonMap("schema.registry.url", schemaRegistryUrl);
-
-    final SpecificAvroSerializer<PlayEvent>
-        playEventSerialzier = new SpecificAvroSerializer<>(schemaRegistry, serdeProps);
-    playEventSerialzier.configure(serdeProps, false);
-
-    final SpecificAvroSerializer<Song>
-        songSerializer = new SpecificAvroSerializer<>(schemaRegistry, serdeProps);
-    songSerializer.configure(serdeProps, false);
+    final Map<String, String> serdeConfig = Collections.singletonMap(
+        AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+    final SpecificAvroSerializer<PlayEvent> playEventSerializer = new SpecificAvroSerializer<>();
+    playEventSerializer.configure(serdeConfig, false);
+    final SpecificAvroSerializer<Song> songSerializer = new SpecificAvroSerializer<>();
+    songSerializer.configure(serdeConfig, false);
 
     final KafkaProducer<String, PlayEvent> playEventProducer = new KafkaProducer<>(props,
-                                                                                   Serdes.String() .serializer(),
-                                                                                   playEventSerialzier);
+                                                                                   Serdes.String().serializer(),
+                                                                                   playEventSerializer);
 
     final KafkaProducer<Long, Song> songProducer = new KafkaProducer<>(props,
                                                                        new LongSerializer(),
@@ -150,7 +141,7 @@ public class KafkaMusicExampleDriver {
     songs.forEach(song -> {
       System.out.println("Writing song information for '" + song.getName() + "' to input topic " +
           KafkaMusicExample.SONG_FEED);
-      songProducer.send(new ProducerRecord<Long, Song>(KafkaMusicExample.SONG_FEED, song.getId(), song));
+      songProducer.send(new ProducerRecord<>(KafkaMusicExample.SONG_FEED, song.getId(), song));
     });
 
     songProducer.close();

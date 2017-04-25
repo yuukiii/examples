@@ -34,6 +34,8 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.stream.IntStream;
 
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+
 /**
  * This is a sample driver for the {@link PageViewRegionExample} and {@link PageViewRegionLambdaExample}.
  * To run this driver please first refer to the instructions in {@link PageViewRegionExample} or {@link PageViewRegionLambdaExample}.
@@ -66,7 +68,7 @@ public class PageViewRegionExampleDriver {
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
-    props.put("schema.registry.url", schemaRegistryUrl);
+    props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
     final KafkaProducer<String, GenericRecord> producer = new KafkaProducer<>(props);
 
     final GenericRecordBuilder pageViewBuilder =

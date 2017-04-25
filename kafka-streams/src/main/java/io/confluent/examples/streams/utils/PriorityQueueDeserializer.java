@@ -14,10 +14,6 @@ public class PriorityQueueDeserializer<T> implements Deserializer<PriorityQueue<
     private final Comparator<T> comparator;
     private final Deserializer<T> valueDeserializer;
 
-    /**
-     * Constructor used by Kafka Streams.
-     * @param comparator
-     */
     public PriorityQueueDeserializer(final Comparator<T> comparator, final Deserializer<T> valueDeserializer) {
         this.comparator = comparator;
         this.valueDeserializer = valueDeserializer;

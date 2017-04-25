@@ -29,8 +29,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import io.confluent.examples.streams.avro.PlayEvent;
-import io.confluent.examples.streams.utils.SpecificAvroSerializer;
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.streams.serdes.SpecificAvroSerializer;
 
 /**
  * This is a sample driver for the {@link SessionWindowsExample}.
@@ -58,13 +58,11 @@ public class SessionWindowsExampleDriver {
   }
 
   private static void producePlayEvents(final String bootstrapServers, final String schemaRegistryUrl) {
-    final CachedSchemaRegistryClient schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryUrl, 100);
 
-    final Map<String, String> serdeProps = Collections.singletonMap("schema.registry.url", schemaRegistryUrl);
-
-    final SpecificAvroSerializer<PlayEvent>
-        playEventSerializer = new SpecificAvroSerializer<>(schemaRegistry, serdeProps);
-    playEventSerializer.configure(serdeProps, false);
+    final SpecificAvroSerializer<PlayEvent> playEventSerializer = new SpecificAvroSerializer<>();
+    final Map<String, String> serdeConfig = Collections.singletonMap(
+        AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+    playEventSerializer.configure(serdeConfig, false);
 
     final Properties producerProperties = new Properties();
     producerProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);

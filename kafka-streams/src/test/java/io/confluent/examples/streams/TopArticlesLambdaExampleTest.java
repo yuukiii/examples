@@ -48,6 +48,7 @@ import java.util.Properties;
 import java.util.Random;
 
 import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 
 import static io.confluent.examples.streams.TopArticlesExampleDriver.loadSchema;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -88,7 +89,7 @@ public class TopArticlesLambdaExampleTest {
               StringSerializer.class);
     props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
               io.confluent.kafka.serializers.KafkaAvroSerializer.class);
-    props.put("schema.registry.url", CLUSTER.schemaRegistryUrl());
+    props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, CLUSTER.schemaRegistryUrl());
     final KafkaProducer<String, GenericRecord> producer = new KafkaProducer<>(props);
 
     final GenericRecordBuilder pageViewBuilder =
@@ -105,8 +106,6 @@ public class TopArticlesLambdaExampleTest {
     createPageViews(producer, pageViewBuilder, 3, "index");
     createPageViews(producer, pageViewBuilder, 2, "about");
     createPageViews(producer, pageViewBuilder, 1, "help");
-
-
 
     final Map<String, List<String>> expected = new HashMap<>();
     expected.put("eng", Arrays.asList("news", "random", "stuff"));

@@ -34,8 +34,8 @@ import org.apache.kafka.streams.kstream.Windowed;
 import java.io.InputStream;
 import java.util.Properties;
 
-import io.confluent.examples.streams.utils.GenericAvroSerde;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.streams.serdes.GenericAvroSerde;
 
 /**
  * Demonstrates how to perform a join between a KStream and a KTable, i.e. an example of a stateful

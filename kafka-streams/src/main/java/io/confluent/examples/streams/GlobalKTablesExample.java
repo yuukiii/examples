@@ -29,8 +29,8 @@ import io.confluent.examples.streams.avro.Customer;
 import io.confluent.examples.streams.avro.EnrichedOrder;
 import io.confluent.examples.streams.avro.Order;
 import io.confluent.examples.streams.avro.Product;
-import io.confluent.examples.streams.utils.SpecificAvroSerde;
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.streams.serdes.SpecificAvroSerde;
 
 /**
  * Demonstrates how to perform joins between  KStreams and GlobalKTables, i.e. joins that
@@ -129,26 +129,21 @@ public class GlobalKTablesExample {
     // started
     streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-    final CachedSchemaRegistryClient
-        schemaRegistry =
-        new CachedSchemaRegistryClient(schemaRegistryUrl, 100);
-
-    final Map<String, String>
-        serdeProps =
-        Collections.singletonMap("schema.registry.url", schemaRegistryUrl);
-
     // create and configure the SpecificAvroSerdes required in this example
-    final SpecificAvroSerde<Order> orderSerde = new SpecificAvroSerde<>(schemaRegistry, serdeProps);
-    orderSerde.configure(serdeProps, false);
+    final SpecificAvroSerde<Order> orderSerde = new SpecificAvroSerde<>();
+    final Map<String, String> serdeConfig =
+        Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
+            schemaRegistryUrl);
+    orderSerde.configure(serdeConfig, false);
 
-    final SpecificAvroSerde<Customer> customerSerde = new SpecificAvroSerde<>(schemaRegistry, serdeProps);
-    customerSerde.configure(serdeProps, true);
+    final SpecificAvroSerde<Customer> customerSerde = new SpecificAvroSerde<>();
+    customerSerde.configure(serdeConfig, false);
 
-    final SpecificAvroSerde<Product> productSerde = new SpecificAvroSerde<>(schemaRegistry, serdeProps);
-    productSerde.configure(serdeProps, false);
+    final SpecificAvroSerde<Product> productSerde = new SpecificAvroSerde<>();
+    productSerde.configure(serdeConfig, false);
 
-    final SpecificAvroSerde<EnrichedOrder> enrichedOrdersSerde = new SpecificAvroSerde<>(schemaRegistry, serdeProps);
-    enrichedOrdersSerde.configure(serdeProps, false);
+    final SpecificAvroSerde<EnrichedOrder> enrichedOrdersSerde = new SpecificAvroSerde<>();
+    enrichedOrdersSerde.configure(serdeConfig, false);
 
     final KStreamBuilder builder = new KStreamBuilder();
 

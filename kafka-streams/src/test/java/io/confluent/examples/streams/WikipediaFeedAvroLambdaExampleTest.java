@@ -41,6 +41,7 @@ import java.util.Properties;
 
 import io.confluent.examples.streams.avro.WikiFeed;
 import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -78,7 +79,7 @@ public class WikipediaFeedAvroLambdaExampleTest {
               StringSerializer.class);
     props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
               io.confluent.kafka.serializers.KafkaAvroSerializer.class);
-    props.put("schema.registry.url", CLUSTER.schemaRegistryUrl());
+    props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, CLUSTER.schemaRegistryUrl());
     final KafkaProducer<String, WikiFeed> producer = new KafkaProducer<>(props);
 
     producer.send(new ProducerRecord<>(WikipediaFeedAvroExample.WIKIPEDIA_FEED,
