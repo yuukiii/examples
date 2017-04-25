@@ -30,7 +30,7 @@ import io.confluent.examples.streams.avro.EnrichedOrder;
 import io.confluent.examples.streams.avro.Order;
 import io.confluent.examples.streams.avro.Product;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.streams.serdes.SpecificAvroSerde;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 
 /**
  * Demonstrates how to perform joins between  KStreams and GlobalKTables, i.e. joins that

@@ -18,7 +18,7 @@ import java.util.{Collections, Properties}
 
 import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster
 import io.confluent.kafka.serializers.{AbstractKafkaAvroSerDeConfig, KafkaAvroDeserializer, KafkaAvroSerializer}
-import io.confluent.kafka.streams.serdes.GenericAvroSerde
+import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
 import org.apache.avro.Schema
 import org.apache.avro.generic.{GenericData, GenericRecord}
 import org.apache.kafka.clients.consumer.ConsumerConfig

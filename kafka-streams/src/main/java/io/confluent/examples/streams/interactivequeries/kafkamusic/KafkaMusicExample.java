@@ -45,7 +45,7 @@ import io.confluent.examples.streams.avro.PlayEvent;
 import io.confluent.examples.streams.avro.Song;
 import io.confluent.examples.streams.avro.SongPlayCount;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.streams.serdes.SpecificAvroSerde;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 
 /**
  * Demonstrates how to locate and query state stores (Interactive Queries).

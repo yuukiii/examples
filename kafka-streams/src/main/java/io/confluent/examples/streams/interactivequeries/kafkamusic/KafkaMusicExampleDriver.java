@@ -29,7 +29,7 @@ import java.util.Random;
 import io.confluent.examples.streams.avro.PlayEvent;
 import io.confluent.examples.streams.avro.Song;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.streams.serdes.SpecificAvroSerializer;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 
 
 /**

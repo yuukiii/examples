@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.confluent.examples.streams.avro.PlayEvent;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.streams.serdes.SpecificAvroSerde;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 
 /**
  * Demonstrates counting user activity (play-events) into Session Windows

@@ -45,7 +45,7 @@ import java.util.Properties;
 import io.confluent.examples.streams.avro.PlayEvent;
 import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.streams.serdes.SpecificAvroSerializer;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;

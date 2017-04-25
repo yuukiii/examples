@@ -36,7 +36,7 @@ import io.confluent.examples.streams.avro.Product;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
-import io.confluent.kafka.streams.serdes.SpecificAvroSerde;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 
 import static io.confluent.examples.streams.GlobalKTablesExample.CUSTOMER_TOPIC;
 import static io.confluent.examples.streams.GlobalKTablesExample.ENRICHED_ORDER_TOPIC;

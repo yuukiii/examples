@@ -31,7 +31,7 @@ import java.util.Properties;
 
 import io.confluent.examples.streams.avro.WikiFeed;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.streams.serdes.SpecificAvroSerde;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 
 
 /**

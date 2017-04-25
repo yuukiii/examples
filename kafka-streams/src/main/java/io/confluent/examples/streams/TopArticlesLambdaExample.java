@@ -41,7 +41,7 @@ import java.util.Properties;
 import io.confluent.examples.streams.utils.PriorityQueueSerde;
 import io.confluent.examples.streams.utils.WindowedSerde;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.streams.serdes.GenericAvroSerde;
+import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde;
 
 /**
  *
