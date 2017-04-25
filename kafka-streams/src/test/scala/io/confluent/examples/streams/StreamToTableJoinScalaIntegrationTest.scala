@@ -144,7 +144,6 @@ class StreamToTableJoinScalaIntegrationTest extends AssertionsForJUnit {
     //
     // The resulting KTable is continuously being updated as new data records are arriving in the
     // input KStream `userClicksStream` and input KTable `userRegionsTable`.
-    import FunctionImplicits.BinaryFunctionToReducer
     val userClicksJoinRegion : KStream[String, (String, Long)] = userClicksStream
       // Join the stream against the table.
       //
@@ -159,6 +158,7 @@ class StreamToTableJoinScalaIntegrationTest extends AssertionsForJUnit {
       .map((_: String, regionWithClicks: (String, Long)) => new KeyValue[String, Long](
       regionWithClicks._1, regionWithClicks._2))
 
+    import FunctionImplicits.BinaryFunctionToReducer
     val clicksPerRegion: KTable[String, Long] = clicksByRegion
         // Compute the total per region by summing the individual click counts per region.
         .groupByKey(stringSerde, longSerde)
