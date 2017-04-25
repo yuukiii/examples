@@ -37,6 +37,8 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.stream.IntStream;
 
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+
 /**
  * This is a sample driver for the {@link TopArticlesLambdaExample} and
  * To run this driver please first refer to the instructions in {@link TopArticlesLambdaExample}
@@ -71,7 +73,7 @@ public class TopArticlesExampleDriver {
         StringSerializer.class);
     props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
         io.confluent.kafka.serializers.KafkaAvroSerializer.class);
-    props.put("schema.registry.url", schemaRegistryUrl);
+    props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
     final KafkaProducer<String, GenericRecord> producer = new KafkaProducer<>(props);
 
     final GenericRecordBuilder pageViewBuilder =
@@ -100,7 +102,7 @@ public class TopArticlesExampleDriver {
     consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
               StringDeserializer.class);
-    consumerProperties.put("schema.registry.url", schemaRegistryUrl);
+    consumerProperties.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
     consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG,
         "top-articles-lambda-example-consumer");
     consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");

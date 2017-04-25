@@ -44,8 +44,8 @@ import java.util.TreeSet;
 import io.confluent.examples.streams.avro.PlayEvent;
 import io.confluent.examples.streams.avro.Song;
 import io.confluent.examples.streams.avro.SongPlayCount;
-import io.confluent.examples.streams.utils.SpecificAvroSerde;
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.streams.serdes.SpecificAvroSerde;
 
 /**
  * Demonstrates how to locate and query state stores (Interactive Queries).
@@ -273,23 +273,21 @@ public class KafkaMusicExample {
       }
     }
 
-    final CachedSchemaRegistryClient
-        schemaRegistry =
-        new CachedSchemaRegistryClient(schemaRegistryUrl, 100);
-
-    final Map<String, String>
-        serdeProps =
-        Collections.singletonMap("schema.registry.url", schemaRegistryUrl);
-
     // create and configure the SpecificAvroSerdes required in this example
-    final SpecificAvroSerde<PlayEvent> playEventSerde = new SpecificAvroSerde<>(schemaRegistry, serdeProps);
-    playEventSerde.configure(serdeProps, false);
+    final Map<String, String> serdeConfig = Collections.singletonMap(
+        AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
 
-    final SpecificAvroSerde<Song> songSerde = new SpecificAvroSerde<>(schemaRegistry, serdeProps);
-    songSerde.configure(serdeProps, true);
+    final SpecificAvroSerde<PlayEvent> playEventSerde = new SpecificAvroSerde<>();
+    playEventSerde.configure(serdeConfig, false);
 
-    final SpecificAvroSerde<SongPlayCount> songPlayCountSerde = new SpecificAvroSerde<>( schemaRegistry, serdeProps);
-    songPlayCountSerde.configure(serdeProps, false);
+    final SpecificAvroSerde<Song> keySongSerde = new SpecificAvroSerde<>();
+    keySongSerde.configure(serdeConfig, true);
+
+    final SpecificAvroSerde<Song> valueSongSerde = new SpecificAvroSerde<>();
+    valueSongSerde.configure(serdeConfig, false);
+
+    final SpecificAvroSerde<SongPlayCount> songPlayCountSerde = new SpecificAvroSerde<>();
+    songPlayCountSerde.configure(serdeConfig, false);
 
     final KStreamBuilder builder = new KStreamBuilder();
 
@@ -301,7 +299,7 @@ public class KafkaMusicExample {
     // get table and create a state store to hold all the songs in the store
     final KTable<Long, Song>
         songTable =
-        builder.table(Serdes.Long(), songSerde, SONG_FEED, ALL_SONGS);
+        builder.table(Serdes.Long(), valueSongSerde, SONG_FEED, ALL_SONGS);
 
     // Accept play events that have a duration >= the minimum
     final KStream<Long, PlayEvent> playsBySongId =
@@ -317,7 +315,7 @@ public class KafkaMusicExample {
                                                                  playEventSerde);
 
     // create a state store to track song play counts
-    final KTable<Song, Long> songPlayCounts = songPlays.groupBy((songId, song) -> song, songSerde, songSerde)
+    final KTable<Song, Long> songPlayCounts = songPlays.groupBy((songId, song) -> song, keySongSerde, valueSongSerde)
         .count(SONG_PLAY_COUNT_STORE);
 
     final TopFiveSerde topFiveSerde = new TopFiveSerde();

@@ -36,10 +36,10 @@ import java.util.List;
 import java.util.Properties;
 
 import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
-import io.confluent.examples.streams.utils.GenericAvroSerde;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
+import io.confluent.kafka.streams.serdes.GenericAvroSerde;
 
 import static org.junit.Assert.assertEquals;
 

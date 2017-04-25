@@ -31,6 +31,7 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 import io.confluent.examples.streams.avro.WikiFeed;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 
 /**
  * This is a sample driver for the {@link WikipediaFeedAvroExample} and
@@ -64,7 +65,7 @@ public class WikipediaFeedAvroExampleDriver {
             StringSerializer.class);
     props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
             io.confluent.kafka.serializers.KafkaAvroSerializer.class);
-    props.put("schema.registry.url", schemaRegistryUrl);
+    props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
     final KafkaProducer<String, WikiFeed> producer = new KafkaProducer<>(props);
 
     final Random random = new Random();
@@ -82,7 +83,7 @@ public class WikipediaFeedAvroExampleDriver {
     consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    consumerProperties.put("schema.registry.url", schemaRegistryUrl);
+    consumerProperties.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
     consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "wikipedia-feed-example-consumer");
     consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     final KafkaConsumer<String, Long> consumer = new KafkaConsumer<>(consumerProperties,

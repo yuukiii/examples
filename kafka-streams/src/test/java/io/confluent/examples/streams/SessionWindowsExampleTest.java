@@ -44,8 +44,8 @@ import java.util.Properties;
 
 import io.confluent.examples.streams.avro.PlayEvent;
 import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
-import io.confluent.examples.streams.utils.SpecificAvroSerializer;
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.streams.serdes.SpecificAvroSerializer;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -78,17 +78,10 @@ public class SessionWindowsExampleTest {
 
   @Test
   public void shouldCountPlayEventsBySession() throws Exception {
-    final CachedSchemaRegistryClient
-        schemaRegistry =
-        new CachedSchemaRegistryClient(CLUSTER.schemaRegistryUrl(), 100);
-
-    final Map<String, String>
-        serdeProps =
-        Collections.singletonMap("schema.registry.url", CLUSTER.schemaRegistryUrl());
-
-    final SpecificAvroSerializer<PlayEvent>
-        playEventSerializer = new SpecificAvroSerializer<>(schemaRegistry, serdeProps);
-    playEventSerializer.configure(serdeProps, false);
+    final Map<String, String> serdeConfig = Collections.singletonMap(
+        AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, CLUSTER.schemaRegistryUrl());
+    final SpecificAvroSerializer<PlayEvent> playEventSerializer = new SpecificAvroSerializer<>();
+    playEventSerializer.configure(serdeConfig, false);
 
     final Properties producerProperties = new Properties();
     producerProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
@@ -189,6 +182,5 @@ public class SessionWindowsExampleTest {
     }
     return results;
   }
-
 
 }

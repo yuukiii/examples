@@ -30,8 +30,8 @@ import org.apache.kafka.streams.kstream.Predicate;
 import java.util.Properties;
 
 import io.confluent.examples.streams.avro.WikiFeed;
-import io.confluent.examples.streams.utils.SpecificAvroSerde;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.streams.serdes.SpecificAvroSerde;
 
 
 /**

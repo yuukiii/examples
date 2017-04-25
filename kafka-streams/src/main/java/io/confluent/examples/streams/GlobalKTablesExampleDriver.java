@@ -33,11 +33,10 @@ import io.confluent.examples.streams.avro.Customer;
 import io.confluent.examples.streams.avro.EnrichedOrder;
 import io.confluent.examples.streams.avro.Order;
 import io.confluent.examples.streams.avro.Product;
-import io.confluent.examples.streams.utils.SpecificAvroSerde;
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
+import io.confluent.kafka.streams.serdes.SpecificAvroSerde;
 
 import static io.confluent.examples.streams.GlobalKTablesExample.CUSTOMER_TOPIC;
 import static io.confluent.examples.streams.GlobalKTablesExample.ENRICHED_ORDER_TOPIC;
@@ -173,16 +172,11 @@ public class GlobalKTablesExampleDriver {
   }
 
   private static <VT extends SpecificRecord> SpecificAvroSerde<VT> createSerde(final String schemaRegistryUrl) {
-    final CachedSchemaRegistryClient
-        schemaRegistry =
-        new CachedSchemaRegistryClient(schemaRegistryUrl, 10);
 
-    final Map<String, String>
-        serdeProps =
-        Collections.singletonMap("schema.registry.url", schemaRegistryUrl);
-
-    final SpecificAvroSerde<VT> serde = new SpecificAvroSerde<>(schemaRegistry, serdeProps);
-    serde.configure(serdeProps, true);
+    final SpecificAvroSerde<VT> serde = new SpecificAvroSerde<>();
+    final Map<String, String> serdeConfig = Collections.singletonMap(
+        AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+    serde.configure(serdeConfig, false);
     return serde;
   }
 

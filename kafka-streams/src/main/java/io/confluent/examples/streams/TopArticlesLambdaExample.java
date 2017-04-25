@@ -34,14 +34,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Properties;
 
-import io.confluent.examples.streams.utils.GenericAvroSerde;
 import io.confluent.examples.streams.utils.PriorityQueueSerde;
 import io.confluent.examples.streams.utils.WindowedSerde;
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.streams.serdes.GenericAvroSerde;
 
 /**
  *
@@ -147,20 +147,26 @@ public class TopArticlesLambdaExample {
     // Records should be flushed every 10 seconds. This is less than the default
     // in order to keep this example interactive.
     streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
+
+    // Serdes used in this example
     final Serde<String> stringSerde = Serdes.String();
-    final Serde<GenericRecord> avroSerde = new GenericAvroSerde(
-      new CachedSchemaRegistryClient(schemaRegistryUrl, 100),
-      Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
-        schemaRegistryUrl));
+
+    final Map<String, String> serdeConfig = Collections.singletonMap(
+        AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+
+    final Serde<GenericRecord> keyAvroSerde = new GenericAvroSerde();
+    keyAvroSerde.configure(serdeConfig, true);
+
+    final Serde<GenericRecord> valueAvroSerde = new GenericAvroSerde();
+    valueAvroSerde.configure(serdeConfig, false);
+
     final Serde<Windowed<String>> windowedStringSerde = new WindowedSerde<>(stringSerde);
 
     final KStreamBuilder builder = new KStreamBuilder();
 
     final KStream<byte[], GenericRecord> views = builder.stream(PAGE_VIEWS);
 
-    final InputStream
-      statsSchema =
-      TopArticlesLambdaExample.class.getClassLoader()
+    final InputStream statsSchema = TopArticlesLambdaExample.class.getClassLoader()
         .getResourceAsStream("avro/io/confluent/examples/streams/pageviewstats.avsc");
     final Schema schema = new Schema.Parser().parse(statsSchema);
 
@@ -178,7 +184,7 @@ public class TopArticlesLambdaExample {
 
     final KTable<Windowed<GenericRecord>, Long> viewCounts = articleViews
       // count the clicks per hour, using tumbling windows with a size of one hour
-      .groupByKey(avroSerde, avroSerde)
+      .groupByKey(keyAvroSerde, valueAvroSerde)
       .count(TimeWindows.of(60 * 60 * 1000L), "PageViewCountStore");
 
     final Comparator<GenericRecord> comparator =
@@ -201,7 +207,7 @@ public class TopArticlesLambdaExample {
           return new KeyValue<>(windowedIndustry, viewStats);
         },
         windowedStringSerde,
-        avroSerde
+        valueAvroSerde
       ).aggregate(
         // the initializer
         () -> new PriorityQueue<>(comparator),
@@ -218,7 +224,7 @@ public class TopArticlesLambdaExample {
           return queue;
         },
 
-        new PriorityQueueSerde<>(comparator, avroSerde),
+        new PriorityQueueSerde<>(comparator, valueAvroSerde),
         "AllArticles"
       );
 

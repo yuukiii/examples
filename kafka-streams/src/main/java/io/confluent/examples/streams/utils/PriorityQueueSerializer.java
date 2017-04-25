@@ -15,10 +15,6 @@ public class PriorityQueueSerializer<T> implements Serializer<PriorityQueue<T>> 
     private final Comparator<T> comparator;
     private final Serializer<T> valueSerializer;
 
-    /**
-     * Constructor used by Kafka Streams.
-     * @param comparator
-     */
     public PriorityQueueSerializer(final Comparator<T> comparator, final Serializer<T> valueSerializer) {
         this.comparator = comparator;
         this.valueSerializer = valueSerializer;

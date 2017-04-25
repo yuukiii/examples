@@ -35,11 +35,11 @@ import java.util.Properties;
 
 import io.confluent.examples.streams.avro.WikiFeed;
 import io.confluent.examples.streams.kafka.EmbeddedSingleNodeKafkaCluster;
-import io.confluent.examples.streams.utils.SpecificAvroSerde;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
+import io.confluent.kafka.streams.serdes.SpecificAvroSerde;
 
 import static org.junit.Assert.assertEquals;
 
