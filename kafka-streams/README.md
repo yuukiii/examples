@@ -4,6 +4,10 @@ This sub-folder contains code examples that demonstrate how to implement real-ti
 Streams, which is a new stream processing library included with the [Apache Kafka](http://kafka.apache.org/) open source
 project.
 
+For more information take a look at the
+[**Confluent 3.2.0 documentation on the Kafka Streams API**](http://docs.confluent.io/3.2.0/streams/), notably the
+[**Developer Guide**](http://docs.confluent.io/3.2.0/streams/developer-guide.html).
+
 ---
 Table of Contents
 
