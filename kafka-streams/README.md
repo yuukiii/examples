@@ -4,8 +4,8 @@ This sub-folder contains code examples that demonstrate how to implement real-ti
 microservices using the Streams API of [Apache Kafka](http://kafka.apache.org/) aka Kafka Streams.
 
 For more information take a look at the
-[**Confluent 3.2.0 documentation on the Kafka Streams API**](http://docs.confluent.io/3.2.0/streams/), notably the
-[**Developer Guide**](http://docs.confluent.io/3.2.0/streams/developer-guide.html).
+[**latest Confluent documentation on the Kafka Streams API**](http://docs.confluent.io/current/streams/), notably the
+[**Developer Guide**](http://docs.confluent.io/current/streams/developer-guide.html).
 
 ---
 Table of Contents
