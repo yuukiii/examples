@@ -278,6 +278,7 @@
                            is set to `2.11`, not `2.10`.
                         -->
                         <arg>-Xexperimental</arg>
+                        <arg>-feature</arg>
                     </args>
                 </configuration>
                 <executions>
