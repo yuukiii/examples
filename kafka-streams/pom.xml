@@ -282,7 +282,17 @@
                            is set to `2.11`, not `2.10`.
                         -->
                         <arg>-Xexperimental</arg>
+                        <!-- Emit warning and location for usages of features that should be imported explicitly. -->
                         <arg>-feature</arg>
+                        <!-- Emit warning and location for usages of deprecated APIs. -->
+                        <arg>-deprecation</arg>
+                        <!-- Enable additional warnings where generated code depends on assumptions. -->
+                        <arg>-unchecked</arg>
+                        <!-- Enable recommended additional warnings. -->
+                        <arg>-Xlint</arg>
+                        <!-- Warn if an argument list is modified to match the receiver. -->
+                        <arg>-Ywarn-adapted-args</arg>
+                        <arg>-Ywarn-dead-code</arg>
                     </args>
                 </configuration>
                 <executions>
