@@ -2,6 +2,8 @@ package io.confluent.examples.streams
 
 import org.apache.kafka.streams.KeyValue
 
+import scala.language.implicitConversions
+
 /**
   * Implicit conversions that provide us with some syntactic sugar when writing stream transformations.
   */
