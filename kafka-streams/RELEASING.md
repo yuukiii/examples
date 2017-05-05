@@ -36,10 +36,11 @@ a new branch for a specific Confluent release line (e.g. a `3.2.x` branch for th
         # Example for 3.2.x
         [![Build Status](https://travis-ci.org/confluentinc/examples.svg?branch=3.2.x)](...etc...)
 
-- Run sth like `git grep 3.2` (here: when releasing Confluent 3.2) and `git grep /current/` to spot any references to
-  the specific release version, and update the locations where applicable.  When you created the new release branch
-  off of `master`, you need to e.g. replace hyperlinks to `/current/` with a version-specific identifier such as
-  `/3.2.0/`.
+
+- Run sth like `git grep 3.2` (here: when releasing Confluent 3.2) to spot any references to the specific release
+  version, and update the references where applicable.
+- Run sth like `git grep 0.10.2.0` to spot any references to the specific Apache Kafka release version, and update the
+  references where applicable.
 
 As a follow-up step, you should also:
 

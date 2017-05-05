@@ -54,7 +54,11 @@ import java.util.Properties;
  * Once packaged you can then run:
  * <pre>
  * {@code
+<<<<<<< HEAD
  * $ java -cp target/streams-examples-3.3.0-SNAPSHOT-standalone.jar io.confluent.examples.streams.AnomalyDetectionLambdaExample
+=======
+ * $ java -cp target/streams-examples-3.2.1-standalone.jar io.confluent.examples.streams.AnomalyDetectionLambdaExample
+>>>>>>> origin/3.2.x
  * }</pre>
  * <p>
  * 4) Write some input data to the source topic (e.g. via {@code kafka-console-producer}. The already

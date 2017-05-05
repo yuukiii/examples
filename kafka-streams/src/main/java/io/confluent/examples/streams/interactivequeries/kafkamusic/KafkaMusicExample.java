@@ -28,6 +28,8 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.state.HostInfo;
+import org.apache.kafka.streams.state.RocksDBConfigSetter;
+import org.rocksdb.Options;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -176,6 +178,19 @@ public class KafkaMusicExample {
   private static final String DEFAULT_BOOTSTRAP_SERVERS = "localhost:9092";
   private static final String DEFAULT_SCHEMA_REGISTRY_URL = "http://localhost:8081";
 
+  public static class CustomRocksDBConfig implements RocksDBConfigSetter {
+
+    @Override
+    public void setConfig(final String storeName, final Options options, final Map<String, Object> configs) {
+      // Workaround: We must ensure that the parallelism is set to >= 2.  There seems to be a known
+      // issue with RocksDB where explicitly setting the parallelism to 1 causes issues (even though
+      // 1 seems to be RocksDB's default for this configuration).
+      int compactionParallelism = Math.max(Runtime.getRuntime().availableProcessors(), 2);
+      // Set number of compaction threads (but not flush threads).
+      options.setIncreaseParallelism(compactionParallelism);
+    }
+  }
+
   public static void main(String[] args) throws Exception {
     if (args.length == 0 || args.length > 4) {
       throw new IllegalArgumentException("usage: ... <portForRestEndpoint> " +
@@ -293,8 +308,8 @@ public class KafkaMusicExample {
 
     // get a stream of play events
     final KStream<String, PlayEvent> playEvents = builder.stream(Serdes.String(),
-                                                                 playEventSerde,
-                                                                 PLAY_EVENTS);
+        playEventSerde,
+        PLAY_EVENTS);
 
     // get table and create a state store to hold all the songs in the store
     final KTable<Long, Song>
@@ -310,9 +325,9 @@ public class KafkaMusicExample {
 
     // join the plays with song as we will use it later for charting
     final KStream<Long, Song> songPlays = playsBySongId.leftJoin(songTable,
-                                                                 (value1, song) -> song,
-                                                                 Serdes.Long(),
-                                                                 playEventSerde);
+        (value1, song) -> song,
+        Serdes.Long(),
+        playEventSerde);
 
     // create a state store to track song play counts
     final KTable<Song, Long> songPlayCounts = songPlays.groupBy((songId, song) -> song, keySongSerde, valueSongSerde)
@@ -325,45 +340,45 @@ public class KafkaMusicExample {
     // store "top-five-songs-by-genre", and this state store can then be queried interactively via a REST API (cf.
     // MusicPlaysRestService) for the latest charts per genre.
     songPlayCounts.groupBy((song, plays) ->
-                               KeyValue.pair(song.getGenre().toLowerCase(),
-                                             new SongPlayCount(song.getId(), plays)),
-                           Serdes.String(),
-                           songPlayCountSerde)
+            KeyValue.pair(song.getGenre().toLowerCase(),
+                new SongPlayCount(song.getId(), plays)),
+        Serdes.String(),
+        songPlayCountSerde)
         // aggregate into a TopFiveSongs instance that will keep track
         // of the current top five for each genre. The data will be available in the
         // top-five-songs-genre store
         .aggregate(TopFiveSongs::new,
-                   (aggKey, value, aggregate) -> {
-                     aggregate.add(value);
-                     return aggregate;
-                   },
-                   (aggKey, value, aggregate) -> {
-                     aggregate.remove(value);
-                     return aggregate;
-                   },
-                   topFiveSerde,
-                   TOP_FIVE_SONGS_BY_GENRE_STORE
+            (aggKey, value, aggregate) -> {
+              aggregate.add(value);
+              return aggregate;
+            },
+            (aggKey, value, aggregate) -> {
+              aggregate.remove(value);
+              return aggregate;
+            },
+            topFiveSerde,
+            TOP_FIVE_SONGS_BY_GENRE_STORE
         );
 
     // Compute the top five chart. The results of this computation will continuously update the state
     // store "top-five-songs", and this state store can then be queried interactively via a REST API (cf.
     // MusicPlaysRestService) for the latest charts per genre.
     songPlayCounts.groupBy((song, plays) ->
-                               KeyValue.pair(TOP_FIVE_KEY,
-                                             new SongPlayCount(song.getId(), plays)),
-                           Serdes.String(),
-                           songPlayCountSerde)
+            KeyValue.pair(TOP_FIVE_KEY,
+                new SongPlayCount(song.getId(), plays)),
+        Serdes.String(),
+        songPlayCountSerde)
         .aggregate(TopFiveSongs::new,
-                   (aggKey, value, aggregate) -> {
-                     aggregate.add(value);
-                     return aggregate;
-                   },
-                   (aggKey, value, aggregate) -> {
-                     aggregate.remove(value);
-                     return aggregate;
-                   },
-                   topFiveSerde,
-                   TOP_FIVE_SONGS_STORE
+            (aggKey, value, aggregate) -> {
+              aggregate.add(value);
+              return aggregate;
+            },
+            (aggKey, value, aggregate) -> {
+              aggregate.remove(value);
+              return aggregate;
+            },
+            topFiveSerde,
+            TOP_FIVE_SONGS_STORE
         );
 
     return new KafkaStreams(builder, streamsConfiguration);
