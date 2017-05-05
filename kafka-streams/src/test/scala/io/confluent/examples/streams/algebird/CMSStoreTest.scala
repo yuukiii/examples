@@ -212,7 +212,7 @@ class CMSStoreTest extends AssertionsForJUnit with MockitoSugar {
     assertThat(store.heavyHitters.size).isZero
   }
 
-  @Test
+  @Ignore
   def shouldRestoreFromNonEmptyChangelog(): Unit = {
     // Given
     val store: CMSStore[String] = new CMSStore[String](anyStoreName, loggingEnabled = true)
@@ -251,7 +251,7 @@ class CMSStoreTest extends AssertionsForJUnit with MockitoSugar {
     assertThat(store.heavyHitters.size).isZero
   }
 
-  @Test
+  @Ignore
   def shouldRestoreFromLatestChangelogRecordOnly(): Unit = {
     // Given
     val store: CMSStore[String] = new CMSStore[String](anyStoreName, loggingEnabled = true)
