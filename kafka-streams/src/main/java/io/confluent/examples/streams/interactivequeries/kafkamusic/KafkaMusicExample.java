@@ -28,6 +28,8 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.state.HostInfo;
+import org.apache.kafka.streams.state.RocksDBConfigSetter;
+import org.rocksdb.Options;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -104,7 +106,7 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
  *
  * <pre>
  * {@code
- * $ java -cp target/streams-examples-3.2.0-standalone.jar \
+ * $ java -cp target/streams-examples-3.2.1-standalone.jar \
  *      io.confluent.examples.streams.interactivequeries.kafkamusic.KafkaMusicExample 7070
  * }
  * </pre>
@@ -115,7 +117,7 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
  *
  * <pre>
  * {@code
- * $ java -cp target/streams-examples-3.2.0-standalone.jar \
+ * $ java -cp target/streams-examples-3.2.1-standalone.jar \
  *      io.confluent.examples.streams.interactivequeries.kafkamusic.KafkaMusicExample 7071
  * }
  * </pre>
@@ -175,6 +177,19 @@ public class KafkaMusicExample {
   private static final String DEFAULT_REST_ENDPOINT_HOSTNAME = "localhost";
   private static final String DEFAULT_BOOTSTRAP_SERVERS = "localhost:9092";
   private static final String DEFAULT_SCHEMA_REGISTRY_URL = "http://localhost:8081";
+
+  public static class CustomRocksDBConfig implements RocksDBConfigSetter {
+
+    @Override
+    public void setConfig(final String storeName, final Options options, final Map<String, Object> configs) {
+      // Workaround: We must ensure that the parallelism is set to >= 2.  There seems to be a known
+      // issue with RocksDB where explicitly setting the parallelism to 1 causes issues (even though
+      // 1 seems to be RocksDB's default for this configuration).
+      int compactionParallelism = Math.max(Runtime.getRuntime().availableProcessors(), 2);
+      // Set number of compaction threads (but not flush threads).
+      options.setIncreaseParallelism(compactionParallelism);
+    }
+  }
 
   public static void main(String[] args) throws Exception {
     if (args.length == 0 || args.length > 4) {
@@ -272,6 +287,9 @@ public class KafkaMusicExample {
       } catch (NumberFormatException ignored) {
       }
     }
+
+    // Workaround for a known issue with RocksDB in environments where you have only 1 cpu core.
+    streamsConfiguration.put(StreamsConfig.ROCKSDB_CONFIG_SETTER_CLASS_CONFIG, CustomRocksDBConfig.class);
 
     final CachedSchemaRegistryClient
         schemaRegistry =
