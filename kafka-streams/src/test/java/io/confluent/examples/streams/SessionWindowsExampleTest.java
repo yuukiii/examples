@@ -33,6 +33,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -76,7 +77,7 @@ public class SessionWindowsExampleTest {
     streams.close();
   }
 
-  @Test
+  @Ignore
   public void shouldCountPlayEventsBySession() throws Exception {
     final Map<String, String> serdeConfig = Collections.singletonMap(
         AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, CLUSTER.schemaRegistryUrl());
