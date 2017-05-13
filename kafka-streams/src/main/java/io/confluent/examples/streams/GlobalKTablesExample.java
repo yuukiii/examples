@@ -154,13 +154,13 @@ public class GlobalKTablesExample {
     // will be fully replicated on each instance of this application.
     final GlobalKTable<Long, Customer>
         customers =
-        builder.globalTable(Serdes.Long(), customerSerde, CUSTOMER_TOPIC, CUSTOMER_STORE);
+        builder.globalTable(Serdes.Long(), customerSerde, null, CUSTOMER_TOPIC, CUSTOMER_STORE);
 
     // Create a global table for products. The data from this global table
     // will be fully replicated on each instance of this application.
     final GlobalKTable<Long, Product>
         products =
-        builder.globalTable(Serdes.Long(), productSerde, PRODUCT_TOPIC, PRODUCT_STORE);
+        builder.globalTable(Serdes.Long(), productSerde, null, PRODUCT_TOPIC, PRODUCT_STORE);
 
     // Join the orders stream to the customer global table. As this is global table
     // we can use a non-key based join with out needing to repartition the input stream
