@@ -82,8 +82,8 @@ class ProbabilisticCountingScalaIntegrationTest extends AssertionsForJUnit {
       val p = new Properties()
       p.put(StreamsConfig.APPLICATION_ID_CONFIG, "probabilistic-counting-scala-integration-test")
       p.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers())
-      p.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.ByteArray.getClass.getName)
-      p.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
+      p.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.ByteArray.getClass.getName)
+      p.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       // The commit interval for flushing records to state stores and downstream must be lower than
       // this integration test's timeout (30 secs) to ensure we observe the expected processing results.
       p.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "10000")

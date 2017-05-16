@@ -118,8 +118,8 @@ public class ApplicationResetExample {
     // Where to find Kafka broker(s).
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     // Specify default (de)serializers for record keys and for record values.
-    streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-    streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+    streamsConfiguration.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+    streamsConfiguration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
     // Read the topic from the very beginning if no previous consumer offsets are found for this app.
     // Resetting an app will set any existing consumer offsets to zero,
     // so setting this config combined with resetting will cause the application to re-process all the input data in the topic.
