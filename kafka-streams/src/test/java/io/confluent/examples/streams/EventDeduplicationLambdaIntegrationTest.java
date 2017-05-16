@@ -30,7 +30,9 @@ import org.apache.kafka.streams.kstream.KeyValueMapper;
 import org.apache.kafka.streams.kstream.Transformer;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.processor.StateStoreSupplier;
-import org.apache.kafka.streams.state.*;
+import org.apache.kafka.streams.state.Stores;
+import org.apache.kafka.streams.state.WindowStore;
+import org.apache.kafka.streams.state.WindowStoreIterator;
 import org.apache.kafka.test.TestUtils;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -51,7 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * stream.
  *
  * Here, a stateful {@link org.apache.kafka.streams.kstream.Transformer} (from the Processor API)
- * detects and discards duplicate input records based on an "event id" that is included in each
+ * detects and discards duplicate input records based on an "event id" that is embedded in each
  * input record.  This transformer is then included in a topology defined via the DSL.
  *
  * In this simplified example, the values of input records represent the event ID by which
@@ -65,7 +67,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * processing because, typically, such duplicates only happen in the face of failures. That said,
  * there will still be some scenarios where the upstream data producers may generate duplicate
  * events under normal, non-failure conditions; in such cases, an event de-duplication approach as
- * shown in this example is helpful. https://cwiki.apache.org/confluence/display/KAFKA/KIP-98+-+Exactly+Once+Delivery+and+Transactional+Messaging
+ * shown in this example is helpful.
+ *
+ * https://cwiki.apache.org/confluence/display/KAFKA/KIP-98+-+Exactly+Once+Delivery+and+Transactional+Messaging
  * https://cwiki.apache.org/confluence/display/KAFKA/KIP-129%3A+Streams+Exactly-Once+Semantics
  *
  * Note: This example uses lambda expressions and thus works with Java 8+ only.
@@ -88,9 +92,9 @@ public class EventDeduplicationLambdaIntegrationTest {
    * Discards duplicate records from the input stream.
    *
    * Duplicate records are detected based on an event ID;  in this simplified example, the record
-   * value is the event ID.  The store remembers known event IDs in an associated state store.
-   * To prevent the store from growing indefinitely, the transformer purges/expires event IDs from
-   * the store after a certain amount of time.
+   * value is the event ID.  The transformer remembers known event IDs in an associated window state
+   * store, which automatically purges/expires event IDs from the store after a certain amount of
+   * time has passed to prevent the store from growing indefinitely.
    *
    * Note: This code is for demonstration purposes and was not tested for production usage.
    */
@@ -105,20 +109,26 @@ public class EventDeduplicationLambdaIntegrationTest {
      */
     private WindowStore<E, Long> eventIdStore;
 
-    /**
-     * How long to remember an event ID.  Event IDs that have been stored for longer than this
-     * duration will eventually be purged from the store.
-     */
-    private final long maintainDurationMs = TimeUnit.MINUTES.toMillis(5);
+    private final long leftDurationMs;
+    private final long rightDurationMs;
 
     private final KeyValueMapper<K, V, E> idExtractor;
 
     /**
+     * @param maintainDurationPerEventInMs how long to "remember" a known event (or rather, an event
+     *                                     ID), during the time of which any incoming duplicates of
+     *                                     the event will be dropped, thereby de-duplicating the
+     *                                     input.
      * @param idExtractor extracts a unique identifier from a record by which we de-duplicate input
      *                    records; if it returns null, the record will not be considered for
      *                    de-duping but forwarded as-is.
      */
-    DeduplicationTransformer(KeyValueMapper<K, V, E> idExtractor) {
+    DeduplicationTransformer(long maintainDurationPerEventInMs, KeyValueMapper<K, V, E> idExtractor) {
+      if (maintainDurationPerEventInMs < 1) {
+        throw new IllegalArgumentException("maintain duration per event must be >= 1");
+      }
+      leftDurationMs = maintainDurationPerEventInMs / 2;
+      rightDurationMs = maintainDurationPerEventInMs - leftDurationMs;
       this.idExtractor = idExtractor;
     }
 
@@ -129,31 +139,41 @@ public class EventDeduplicationLambdaIntegrationTest {
       eventIdStore = (WindowStore<E, Long>) context.getStateStore("eventId-store");
     }
 
-    @Override
     public KeyValue<K, V> transform(final K key, final V value) {
-
-      E uid = idExtractor.apply(key, value);
-
-      // if the idExtractor returns null, always forward -- allows skipping of this check for certain records
-      if (uid == null)
+      E eventId = idExtractor.apply(key, value);
+      if (eventId == null) {
         return KeyValue.pair(key, value);
-
-      return isDuplicate(uid)? null: KeyValue.pair(key, value);
+      } else {
+        KeyValue<K, V> output;
+        if (isDuplicate(eventId)) {
+          output = null;
+          updateTimestampOfExistingEventToPreventExpiry(eventId, context.timestamp());
+        } else {
+          output = KeyValue.pair(key, value);
+          rememberNewEvent(eventId, context.timestamp());
+        }
+        return output;
+      }
     }
 
-
     private boolean isDuplicate(final E eventId) {
-      Long eventTime = context.timestamp();
-      WindowStoreIterator<Long> timeIterator = eventIdStore.fetch(eventId, eventTime - maintainDurationMs,eventTime + maintainDurationMs);
+      long eventTime = context.timestamp();
+      WindowStoreIterator<Long> timeIterator = eventIdStore.fetch(
+          eventId,
+          eventTime - leftDurationMs,
+          eventTime + rightDurationMs);
       boolean isDuplicate = timeIterator.hasNext();
       timeIterator.close();
-
-      // add new event or update existing event with new timestamp (to prevent expiry)
-      eventIdStore.put(eventId, eventTime, eventTime);
-
       return isDuplicate;
     }
 
+    private void updateTimestampOfExistingEventToPreventExpiry(final E eventId, long newTimestamp) {
+      eventIdStore.put(eventId, newTimestamp, newTimestamp);
+    }
+
+    private void rememberNewEvent(final E eventId, long timestamp) {
+      eventIdStore.put(eventId, timestamp, timestamp);
+    }
 
     @Override
     public KeyValue<K, V> punctuate(final long timestamp) {
@@ -174,7 +194,8 @@ public class EventDeduplicationLambdaIntegrationTest {
     String firstId = UUID.randomUUID().toString(); // e.g. "4ff3cb44-abcb-46e3-8f9a-afb7cc74fbb8"
     String secondId = UUID.randomUUID().toString();
     String thirdId = UUID.randomUUID().toString();
-    List<String> inputValues = Arrays.asList(firstId, secondId, firstId, firstId, secondId, thirdId, thirdId, firstId, secondId);
+    List<String> inputValues = Arrays.asList(firstId, secondId, firstId, firstId, secondId, thirdId,
+        thirdId, firstId, secondId);
     List<String> expectedValues = Arrays.asList(firstId, secondId, thirdId);
 
     //
@@ -189,16 +210,24 @@ public class EventDeduplicationLambdaIntegrationTest {
     streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
     // The commit interval for flushing records to state stores and downstream must be lower than
     // this integration test's timeout (30 secs) to ensure we observe the expected processing results.
-    streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
+    streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, TimeUnit.SECONDS.toMillis(10));
     streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     // Use a temporary directory for storing state, which will be automatically removed after the test.
     streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, TestUtils.tempDirectory().getAbsolutePath());
+
+    // How long we "remember" an event.  During this time, any incoming duplicates of the event
+    // will be, well, dropped, thereby de-duplicating the input data.
+    //
+    // The actual value depends on your use case.  To reduce memory and disk usage, you could
+    // decrease the size to purge old windows more frequently at the cost of potentially missing out
+    // on de-duplicating late-arriving records.
+    long maintainDurationPerEventInMs = TimeUnit.MINUTES.toMillis(10);
 
     StateStoreSupplier deduplicationStoreSupplier = Stores.create("eventId-store")
         .withKeys(Serdes.String()) // must match the return type of the Transformer's id extractor
         .withValues(Serdes.Long())
         .persistent()
-        .windowed(TimeUnit.MINUTES.toMillis(10), TimeUnit.MINUTES.toMillis(30), 3, false)
+        .windowed(maintainDurationPerEventInMs, TimeUnit.MINUTES.toMillis(30), 3, false)
         .build();
 
     builder.addStateStore(deduplicationStoreSupplier);
@@ -208,7 +237,7 @@ public class EventDeduplicationLambdaIntegrationTest {
         // In this example, we assume that the record value as-is represents a unique event ID by
         // which we can perform de-duplication.  If your records are different, adapt the extractor
         // function as needed.
-        () -> new DeduplicationTransformer<>((key, value) -> value),
+        () -> new DeduplicationTransformer<>(maintainDurationPerEventInMs, (key, value) -> value),
         "eventId-store");
     deduplicated.to(outputTopic);
 
