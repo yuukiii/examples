@@ -201,11 +201,13 @@ class CMSStoreTest extends AssertionsForJUnit with MockitoSugar {
   @Test
   def shouldRestoreFromEmptyChangelog(): Unit = {
     // Given
+    val driver: KeyValueStoreTestDriver[Integer, TopCMS[String]] = createTestDriver[String]()
     val store: CMSStore[String] = new CMSStore[String](anyStoreName, loggingEnabled = true)
-    val processorContext = createTestContext[String]()
+    val processorContext = createTestContext[String](driver)
 
     // When
     store.init(processorContext, store)
+    processorContext.restore(store.name, driver.restoredEntries())
 
     // Then
     assertThat(store.totalCount).isZero
@@ -215,17 +217,19 @@ class CMSStoreTest extends AssertionsForJUnit with MockitoSugar {
   @Test
   def shouldRestoreFromNonEmptyChangelog(): Unit = {
     // Given
+    val driver: KeyValueStoreTestDriver[Integer, TopCMS[String]] = createTestDriver[String]()
     val store: CMSStore[String] = new CMSStore[String](anyStoreName, loggingEnabled = true)
     val items: Seq[String] = Seq("foo", "bar", "foo", "foo", "quux", "bar", "foo")
     val processorContext: MockProcessorContext = {
       val changelogKeyDoesNotMatter = 123
       val cms: TopCMS[String] = store.cmsFrom(items)
       val changelogRecords = Seq((changelogKeyDoesNotMatter, cms))
-      createTestContext(changelogRecords = Some(changelogRecords))
+      createTestContext(driver, changelogRecords = Some(changelogRecords))
     }
 
     // When
     store.init(processorContext, store)
+    processorContext.restore(store.name, driver.restoredEntries())
 
     // Then
     val expWordCounts: Map[String, Int] = items.groupBy(identity).mapValues(_.length)
@@ -235,16 +239,18 @@ class CMSStoreTest extends AssertionsForJUnit with MockitoSugar {
   @Test
   def shouldRestoreFromChangelogTombstone(): Unit = {
     // Given
+    val driver: KeyValueStoreTestDriver[Integer, TopCMS[String]] = createTestDriver[String]()
     val store: CMSStore[String] = new CMSStore[String](anyStoreName, loggingEnabled = true)
     val processorContext: MockProcessorContext = {
       val changelogKeyDoesNotMatter = 123
       val tombstone: TopCMS[String] = null
       val changelogRecords = Seq((changelogKeyDoesNotMatter, tombstone))
-      createTestContext(changelogRecords = Some(changelogRecords))
+      createTestContext(driver, changelogRecords = Some(changelogRecords))
     }
 
     // When
     store.init(processorContext, store)
+    processorContext.restore(store.name, driver.restoredEntries())
 
     // Then
     assertThat(store.totalCount).isZero
@@ -254,6 +260,7 @@ class CMSStoreTest extends AssertionsForJUnit with MockitoSugar {
   @Test
   def shouldRestoreFromLatestChangelogRecordOnly(): Unit = {
     // Given
+    val driver: KeyValueStoreTestDriver[Integer, TopCMS[String]] = createTestDriver[String]()
     val store: CMSStore[String] = new CMSStore[String](anyStoreName, loggingEnabled = true)
     val expectedItems = Seq("foo", "bar", "foo", "foo", "quux", "bar", "foo")
     val unexpectedItems1 = Seq("something", "entirely", "different")
@@ -269,11 +276,12 @@ class CMSStoreTest extends AssertionsForJUnit with MockitoSugar {
         (differentKey, differentCms2),
         (sameKey, cms) /* latest entry in the changelog should "win" */
       )
-      createTestContext(changelogRecords = Some(changelogRecords))
+      createTestContext(driver, changelogRecords = Some(changelogRecords))
     }
 
     // When
     store.init(processorContext, store)
+    processorContext.restore(store.name, driver.restoredEntries())
 
     // Then
     val expWordCounts: Map[String, Int] = expectedItems.groupBy(identity).mapValues(_.length)
