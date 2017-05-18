@@ -77,7 +77,7 @@ public class SessionWindowsExampleTest {
     streams.close();
   }
 
-  @Ignore
+  @Test
   public void shouldCountPlayEventsBySession() throws Exception {
     final Map<String, String> serdeConfig = Collections.singletonMap(
         AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, CLUSTER.schemaRegistryUrl());
@@ -156,15 +156,22 @@ public class SessionWindowsExampleTest {
                                                 userId,
                                                 new PlayEvent(3L, 10L)));
 
+    playEventProducer.close();
+
 
     final List<KeyValue<String, Long>>
         merged =
         IntegrationTestUtils.waitUntilMinKeyValueRecordsReceived(consumerProps,
                                                                  SessionWindowsExample.PLAY_EVENTS_PER_SESSION,
-                                                                 1);
-
-    // should have merged all sessions into a single session.
-    assertThat(merged.get(0), equalTo(KeyValue.pair(userId + "@" +start+"->"+secondSessionStart, 3L)));
+                                                                 3);
+    // should have merged all sessions into one and sent tombstones for the sessions that were
+    // merged
+    assertThat(merged, equalTo(Arrays.asList(KeyValue.pair(userId + "@" +start+"->"+start, null),
+                                             KeyValue.pair(userId + "@" +secondSessionStart
+                                                           +"->"+secondSessionStart, null),
+                                             KeyValue.pair(userId + "@"
+                                                         +start+"->"+secondSessionStart,
+                                                    3L))));
 
     // should only have the merged session in the store
     final List<KeyValue<Windowed<String>, Long>> mergedResults = fetchSessionsFromLocalStore(userId, playEventsPerSession);
