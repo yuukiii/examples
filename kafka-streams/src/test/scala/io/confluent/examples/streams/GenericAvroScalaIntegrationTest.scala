@@ -37,17 +37,22 @@ import org.scalatest.junit.AssertionsForJUnit
   */
 class GenericAvroScalaIntegrationTest extends AssertionsForJUnit {
 
-  private val privateCluster: EmbeddedSingleNodeKafkaCluster = new EmbeddedSingleNodeKafkaCluster
-
-  @Rule def cluster: EmbeddedSingleNodeKafkaCluster = privateCluster
-
+  private var cluster: EmbeddedSingleNodeKafkaCluster = _
+  
   private val inputTopic = "inputTopic"
   private val outputTopic = "output-topic"
 
   @Before
   def startKafkaCluster() {
+    cluster = new EmbeddedSingleNodeKafkaCluster
+    cluster.start()
     cluster.createTopic(inputTopic, 2, 1)
     cluster.createTopic(outputTopic)
+  }
+
+  @After
+  def stopKafkaCluster(): Unit = {
+    cluster.stop()
   }
 
   @Test
