@@ -2,7 +2,7 @@
 
 This directory includes projects demonstrating how to use the Java Kafka producer
 and consumer. You can find detailed explanation of the code at the
-[application development section](http://confluent.io/docs/2.0.1/app-development.html)
+[application development section](http://docs.confluent.io/3.2.0/app-development.html)
 of the Confluent Platform documentation.
 
 
