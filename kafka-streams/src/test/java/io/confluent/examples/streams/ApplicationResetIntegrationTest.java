@@ -119,7 +119,7 @@ public class ApplicationResetIntegrationTest {
     final int exitCode = new StreamsResetter().run(
       new String[]{
         "--application-id", applicationId,
-        "--bootstrap-server", CLUSTER.bootstrapServers(),
+        "--bootstrap-servers", CLUSTER.bootstrapServers(),
         "--zookeeper", CLUSTER.zookeeperConnect(),
         "--input-topics", inputTopic
       });
