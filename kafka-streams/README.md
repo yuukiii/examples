@@ -343,10 +343,28 @@ $ java -cp target/streams-examples-3.3.0-SNAPSHOT-standalone.jar \
   io.confluent.examples.streams.WordCountLambdaExample
 ```
 
+which will then try to read from the specified input topic (in the above example it is ``TextLinesTopic``), 
+execute the processing logic, and finally try to write back to the specified output topic (in the above example it is ``WordsWithCountsTopic``).
+So in order to observe the expected output stream, you will need to also start a console producer to send messages into the input topic
+and start a console consumer to continuously read  from the output topic. More details in how to run the examples can be found
+in the java docs of each example code.
+
+If you want to turn on log4j while running your example application, you can edit the [log4j.properties](src/main/resources/log4j.properties) file 
+and then execute as follows:
+
+```shell
+# Run an example application from the standalone jar.
+# Here: `WordCountLambdaExample`
+$ java -cp target/streams-examples-3.3.0-SNAPSHOT-standalone.jar \
+  -Dlog4j.configuration=file:src/main/resources/log4j.properties \
+  io.confluent.examples.streams.WordCountLambdaExample
+```
+
 Keep in mind that the machine on which you run the command above must have access to the Kafka/ZK clusters you
 configured in the code examples.  By default, the code examples assume the Kafka cluster is accessible via
 `localhost:9092` (aka Kafka's ``bootstrap.servers`` parameter) and the ZooKeeper ensemble via `localhost:2181`.
 You can override the default ``bootstrap.servers`` parameter through a command line argument.
+
 
 
 <a name="development"/>
