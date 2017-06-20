@@ -343,11 +343,11 @@ $ java -cp target/streams-examples-3.3.0-SNAPSHOT-standalone.jar \
   io.confluent.examples.streams.WordCountLambdaExample
 ```
 
-which will then try to read from the specified input topic (in the above example it is ``TextLinesTopic``), 
-execute the processing logic, and finally try to write back to the specified output topic (in the above example it is ``WordsWithCountsTopic``).
-So in order to observe the expected output stream, you will need to also start a console producer to send messages into the input topic
-and start a console consumer to continuously read  from the output topic. More details in how to run the examples can be found
-in the java docs of each example code.
+The application will try to read from the specified input topic (in the above example it is ``TextLinesTopic``), 
+execute the processing logic, and then try to write back to the specified output topic (in the above example it is ``WordsWithCountsTopic``).
+In order to observe the expected output stream, you will need to start a console producer to send messages into the input topic
+and start a console consumer to continuously read from the output topic. More details in how to run the examples can be found
+in the [java docs](src/main/java/io/confluent/examples/streams/WordCountLambdaExample.java#L29) of each example code.
 
 If you want to turn on log4j while running your example application, you can edit the [log4j.properties](src/main/resources/log4j.properties) file 
 and then execute as follows:
