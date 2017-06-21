@@ -169,7 +169,7 @@ The code in this repository requires Apache Kafka 0.10+ because from this point 
 See [Version Compatibility Matrix](#version-compatibility) for further details, as different branches of this
 repository may have different Kafka requirements.
 
-> **When using the `master` branch:** The `master` branch typically requires the latest `trunk` version of Apache Kafka
+> **For the `master` branch:** To build a development version, you typically need the latest `trunk` version of Apache Kafka
 > (cf. `kafka.version` in [pom.xml](pom.xml) for details).  The following instructions will build and locally install
 > the latest `trunk` Kafka version:
 >
@@ -185,77 +185,34 @@ repository may have different Kafka requirements.
 > $ ./gradlew clean installAll
 > ```
 
-To add the Kafka Streams library to your application when using Confluent Platform and `maven` (see [pom.xml](pom.xml)
-and
-[Kafka Streams: libraries and maven artifacts](http://docs.confluent.io/current/streams/developer-guide.html#libraries-and-maven-artifacts)
-for details):
-
-```xml
-<!-- pom.xml -->
-<repositories>
-  <repository>
-    <id>confluent</id>
-    <url>http://packages.confluent.io/maven/</url>
-  </repository>
-</repositories>
-
-<dependencies>
-  <dependency>
-    <groupId>org.apache.kafka</groupId>
-    <artifactId>kafka-streams</artifactId>
-    <version>0.10.2.1-cp1</version>
-  </dependency>
-  <dependency>
-      <groupId>org.apache.kafka</groupId>
-      <artifactId>kafka-clients</artifactId>
-      <version>0.10.2.1-cp1</version>
-  </dependency>
-</dependencies>
-```
-
-To add the Kafka Streams library to your application when using Confluent Platform and `gradle`:
-
-```
-repositories {
-  maven { url "http://packages.confluent.io/maven/" }
-}
-
-dependencies {
-    compile "org.apache.kafka:kafka-streams:0.10.2.1-cp1"
-    compile "org.apache.kafka:kafka-clients:0.10.2.1-cp1"
-}
-```
-
-To add the Kafka Streams library to your application when using Confluent Platform and `sbt` (Scala):
-
-```scala
-resolvers ++= Seq(
-  "confluent-repository" at "http://packages.confluent.io/maven/"
-)
-
-libraryDependencies ++= Seq(
-  "org.apache.kafka" % "kafka-streams" % "0.10.2.1-cp1",
-  "org.apache.kafka" % "kafka-clients" % "0.10.2.1-cp1"
-)
-```
-
 <a name="requirements-confluent-platform"/>
 
 ## Confluent Platform
 
-The code in this repository requires Confluent Platform 3.1.x.
+The code in this repository requires [schema-registry](https://github.com/confluentinc/schema-registry) from Confluent Platform.
 See [Version Compatibility Matrix](#version-compatibility) for further details, as different branches of this
 repository may have different Confluent Platform requirements.
 
 * [Confluent Platform Quickstart](http://docs.confluent.io/current/quickstart.html) (how to download and install)
 * [Confluent Platform documentation](http://docs.confluent.io/current/)
 
-If you just run the integration tests (`mvn test`), then you do not need to install anything -- all maven artifacts
-will be downloaded automatically for the build.  However, if you want to interactively test-drive the examples under
-[src/main/](src/main/)
-(such as [WordCountLambdaExample](src/main/java/io/confluent/examples/streams/WordCountLambdaExample.java)), then you
-do need to install Confluent Platform.  See [Packaging and running the examples](#packaging-and-running) below.  Also,
-each example states its exact requirements at the very top.
+> **For the `master` branch:** To build a development version, you typically need the latest `master` version of Confluent Platform's
+> Schema Registry (cf. `confluent.version` in [pom.xml](pom.xml) for details). The following instructions will build and locally install
+> the latest `master` Schema Registry version:
+>
+> ```shell
+> $ git clone https://github.com/confluentinc/schema-registry.git
+> $ cd schema-registry
+> $ git checkout master
+>
+> # Now build and install schema-registry locally
+> $ mvn clean install
+> ```
+
+Note that to build schema-registry in its development version, further dependencies of Confluent Platform are needed (e.g.
+[common](https://github.com/confluentinc/common) and
+[rest-utils](https://github.com/confluentinc/rest-utils)). Please read its own [README](https://github.com/confluentinc/schema-registry)
+file for details. Also, each example states its exact requirements at the very top.
 
 
 <a name="requirements-java"/>
