@@ -342,7 +342,7 @@ $ mvn test    # Runs unit and integration tests
 
 | Branch (this repo)                                                             | Apache Kafka      | Confluent Platform | Notes                                                                                 |
 | -------------------------------------------------------------------------------|-------------------|--------------------|---------------------------------------------------------------------------------------|
-| [master](../../../tree/master/kafka-streams)                                   | 0.11.0.0-SNAPSHOT | 3.5.0-SNAPSHOT     | You must manually build the `trunk` version of Apache Kafka and `master` version of Confluent Platform.  See instructions above. |
+| [master](../../../tree/master/kafka-streams)                                   | 0.11.1.0-SNAPSHOT | 3.5.0-SNAPSHOT     | You must manually build the `trunk` version of Apache Kafka and `master` version of Confluent Platform.  See instructions above. |
 | [3.4.x](../../../tree/3.4.x/kafka-streams)                                     | 0.11.0.0(-cp1)    | 3.4.0              | Works out of the box                                                                  |
 | [3.3.x](../../../tree/3.3.x/kafka-streams)                                     | 0.11.0.0(-cp1)    | 3.3.0              | Works out of the box                                                                  |
 | [3.2.x](../../../tree/3.2.x/kafka-streams)                                     | 0.10.2.1(-cp1)    | 3.2.1              | Works out of the box                                                                  |
