@@ -134,6 +134,7 @@ public class SessionWindowsExample {
     // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
     // against which the application is run.
     config.put(StreamsConfig.APPLICATION_ID_CONFIG, "session-windows-example");
+    config.put(StreamsConfig.CLIENT_ID_CONFIG, "session-windows-example-client");
     // Where to find Kafka broker(s).
     config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     config.put(StreamsConfig.STATE_DIR_CONFIG, stateDir);

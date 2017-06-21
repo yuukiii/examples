@@ -143,6 +143,7 @@ public class SecureKafkaStreamsExample {
     // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
     // against which the application is run.
     streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "secure-kafka-streams-app");
+    streamsConfiguration.put(StreamsConfig.CLIENT_ID_CONFIG, "secure-kafka-streams-app-client");
     // Where to find secure (!) Kafka broker(s).  In the VM, the broker listens on port 9093 for
     // SSL connections.
     streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, secureBootstrapServers);
