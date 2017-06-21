@@ -189,7 +189,7 @@ repository may have different Kafka requirements.
 
 ## Confluent Platform
 
-The code in this repository requires [schema-registry](https://github.com/confluentinc/schema-registry) from Confluent Platform.
+The code in this repository requires [schema-registry](https://github.com/confluentinc/schema-registry) from the Confluent Platform.
 See [Version Compatibility Matrix](#version-compatibility) for further details, as different branches of this
 repository may have different Confluent Platform requirements.
 
@@ -287,7 +287,7 @@ Kafka Streams examples via:
 #
 $ mvn clean package
 
-# >>> Creates target/streams-examples-3.3.0-SNAPSHOT-standalone.jar
+# >>> Creates target/streams-examples-3.5.0-SNAPSHOT-standalone.jar
 
 ```
 
@@ -296,7 +296,7 @@ You can now run the example applications as follows:
 ```shell
 # Run an example application from the standalone jar.
 # Here: `WordCountLambdaExample`
-$ java -cp target/streams-examples-3.3.0-SNAPSHOT-standalone.jar \
+$ java -cp target/streams-examples-3.5.0-SNAPSHOT-standalone.jar \
   io.confluent.examples.streams.WordCountLambdaExample
 ```
 
@@ -312,7 +312,7 @@ and then execute as follows:
 ```shell
 # Run an example application from the standalone jar.
 # Here: `WordCountLambdaExample`
-$ java -cp target/streams-examples-3.3.0-SNAPSHOT-standalone.jar \
+$ java -cp target/streams-examples-3.5.0-SNAPSHOT-standalone.jar \
   -Dlog4j.configuration=file:src/main/resources/log4j.properties \
   io.confluent.examples.streams.WordCountLambdaExample
 ```
@@ -342,7 +342,9 @@ $ mvn test    # Runs unit and integration tests
 
 | Branch (this repo)                                                             | Apache Kafka      | Confluent Platform | Notes                                                                                 |
 | -------------------------------------------------------------------------------|-------------------|--------------------|---------------------------------------------------------------------------------------|
-| [master](../../../tree/master/kafka-streams)                                   | 0.11.0.0-SNAPSHOT | 3.3.0-SNAPSHOT     | You must manually build the `trunk` version of Apache Kafka.  See instructions above. |
+| [master](../../../tree/master/kafka-streams)                                   | 0.11.0.0-SNAPSHOT | 3.5.0-SNAPSHOT     | You must manually build the `trunk` version of Apache Kafka and `master` version of Confluent Platform.  See instructions above. |
+| [3.4.x](../../../tree/3.4.x/kafka-streams)                                     | 0.11.0.0(-cp1)    | 3.4.0              | Works out of the box                                                                  |
+| [3.3.x](../../../tree/3.3.x/kafka-streams)                                     | 0.11.0.0(-cp1)    | 3.3.0              | Works out of the box                                                                  |
 | [3.2.x](../../../tree/3.2.x/kafka-streams)                                     | 0.10.2.1(-cp1)    | 3.2.1              | Works out of the box                                                                  |
 | [3.1.x](../../../tree/3.1.x/kafka-streams)                                     | 0.10.1.1 [preferred], 0.10.1.0(-cp2)    | 3.1.1              | Works out of the box                                                                  |
 | [kafka-0.10.0.1-cp-3.0.1](../../../tree/kafka-0.10.0.1-cp-3.0.1/kafka-streams) | 0.10.0.1(-cp1)    | 3.0.1              | Works out of the box                                                                  |
