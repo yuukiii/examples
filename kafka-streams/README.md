@@ -189,7 +189,7 @@ repository may have different Kafka requirements.
 
 ## Confluent Platform
 
-The code in this repository requires [schema-registry](https://github.com/confluentinc/schema-registry) from Confluent Platform.
+The code in this repository requires [schema-registry](https://github.com/confluentinc/schema-registry) from the Confluent Platform.
 See [Version Compatibility Matrix](#version-compatibility) for further details, as different branches of this
 repository may have different Confluent Platform requirements.
 
@@ -287,7 +287,7 @@ Kafka Streams examples via:
 #
 $ mvn clean package
 
-# >>> Creates target/streams-examples-3.4.0-standalone.jar
+# >>> Creates target/streams-examples-3.5.0-SNAPSHOT-standalone.jar
 
 ```
 
@@ -296,7 +296,7 @@ You can now run the example applications as follows:
 ```shell
 # Run an example application from the standalone jar.
 # Here: `WordCountLambdaExample`
-$ java -cp target/streams-examples-3.4.0-standalone.jar \
+$ java -cp target/streams-examples-3.5.0-SNAPSHOT-standalone.jar \
   io.confluent.examples.streams.WordCountLambdaExample
 ```
 
