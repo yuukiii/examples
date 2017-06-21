@@ -206,7 +206,7 @@ repositories {
 
 dependencies {
     compile "org.apache.kafka:kafka-streams:0.11.0.0-cp1"
-    compile "org.apache.kafka:kafka-clients:0.10.0.0-cp1"
+    compile "org.apache.kafka:kafka-clients:0.11.0.0-cp1"
 }
 ```
 
