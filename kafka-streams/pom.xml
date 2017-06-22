@@ -7,7 +7,7 @@
     <groupId>io.confluent</groupId>
     <artifactId>streams-examples</artifactId>
     <packaging>jar</packaging>
-    <version>3.2.1</version>
+    <version>3.2.2</version>
 
     <organization>
         <name>Confluent, Inc.</name>
