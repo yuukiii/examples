@@ -55,7 +55,7 @@ import static io.confluent.examples.streams.GlobalKTablesExample.PRODUCT_TOPIC;
  * Once packaged you can then run:
  * <pre>
  * {@code
- * $ java -cp target/streams-examples-3.2.1-standalone.jar io.confluent.examples.streams.GlobalKTablesExampleDriver
+ * $ java -cp target/streams-examples-3.2.2-standalone.jar io.confluent.examples.streams.GlobalKTablesExampleDriver
  * }</pre>
  */
 public class GlobalKTablesExampleDriver {

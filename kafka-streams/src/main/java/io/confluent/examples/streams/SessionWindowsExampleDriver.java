@@ -43,7 +43,7 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
  * Once packaged you can then run:
  * <pre>
  * {@code
- * $ java -cp target/streams-examples-3.2.1-standalone.jar io.confluent.examples.streams.SessionWindowsExampleDriver
+ * $ java -cp target/streams-examples-3.2.2-standalone.jar io.confluent.examples.streams.SessionWindowsExampleDriver
  * }</pre>
  */
 public class SessionWindowsExampleDriver {

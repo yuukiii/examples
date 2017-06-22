@@ -4,8 +4,8 @@ This sub-folder contains code examples that demonstrate how to implement real-ti
 microservices using the Streams API of [Apache Kafka](http://kafka.apache.org/) aka Kafka Streams.
 
 For more information take a look at the
-[**Confluent 3.2.1 documentation on the Kafka Streams API**](http://docs.confluent.io/3.2.1/streams/), notably the
-[**Developer Guide**](http://docs.confluent.io/3.2.1/streams/developer-guide.html).
+[**Confluent 3.2.2 documentation on the Kafka Streams API**](http://docs.confluent.io/3.2.2/streams/), notably the
+[**Developer Guide**](http://docs.confluent.io/3.2.2/streams/developer-guide.html).
 
 ---
 Table of Contents
@@ -329,7 +329,7 @@ Kafka Streams examples via:
 #
 $ mvn clean package
 
-# >>> Creates target/streams-examples-3.2.1-standalone.jar
+# >>> Creates target/streams-examples-3.2.2-standalone.jar
 ```
 
 You can now run the example applications as follows:
@@ -337,7 +337,7 @@ You can now run the example applications as follows:
 ```shell
 # Run an example application from the standalone jar.
 # Here: `WordCountLambdaExample`
-$ java -cp target/streams-examples-3.2.1-standalone.jar \
+$ java -cp target/streams-examples-3.2.2-standalone.jar \
   io.confluent.examples.streams.WordCountLambdaExample
 ```
 

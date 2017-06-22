@@ -66,7 +66,7 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
  * Once packaged you can then run:
  * <pre>
  * {@code
- * $ java -cp target/streams-examples-3.2.1-standalone.jar io.confluent.examples.streams.GlobalKTablesExample
+ * $ java -cp target/streams-examples-3.2.2-standalone.jar io.confluent.examples.streams.GlobalKTablesExample
  * }</pre>
  * 4) Write some input data to the source topics (e.g. via {@link GlobalKTablesExampleDriver}). The
  * already running example application (step 3) will automatically process this input data and write
@@ -75,7 +75,7 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
  * {@code
  * # Here: Write input data using the example driver. The driver will exit once it has received
  * # all EnrichedOrders
- * $ java -cp target/streams-examples-3.2.1-standalone.jar io.confluent.examples.streams.GlobalKTablesExampleDriver
+ * $ java -cp target/streams-examples-3.2.2-standalone.jar io.confluent.examples.streams.GlobalKTablesExampleDriver
  * }</pre>
  * <p>
  * 5) Once you're done with your experiments, you can stop this example via {@code Ctrl-C}. If needed,
