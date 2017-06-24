@@ -189,7 +189,11 @@ repository may have different Kafka requirements.
 
 ## Confluent Platform
 
-The code in this repository requires [schema-registry](https://github.com/confluentinc/schema-registry) from the Confluent Platform.
+The code in this repository requires [Confluent Schema Registry](https://github.com/confluentinc/schema-registry).
+And to build Confluent Schema Registry in its development version, further dependencies of Confluent Platform are needed (e.g.
+[Confluent Common](https://github.com/confluentinc/common) and
+[Confluent Rest Utils](https://github.com/confluentinc/rest-utils), 
+please read its own [README](https://github.com/confluentinc/schema-registry) file for details).
 See [Version Compatibility Matrix](#version-compatibility) for further details, as different branches of this
 repository may have different Confluent Platform requirements.
 
@@ -201,18 +205,29 @@ repository may have different Confluent Platform requirements.
 > the latest `master` Schema Registry version:
 >
 > ```shell
+> $ git clone https://github.com/confluentinc/common.git
+> $ cd common
+> $ git checkout master
+>
+> # Build and install common locally
+> $ mvn -DskipTests=true clean install
+>
+> $ git clone https://github.com/confluentinc/rest-utils.git
+> $ cd rest-utils
+> $ git checkout master
+>
+> # Build and install rest-utils locally
+> $ mvn -DskipTests=true clean install
+>
 > $ git clone https://github.com/confluentinc/schema-registry.git
 > $ cd schema-registry
 > $ git checkout master
 >
 > # Now build and install schema-registry locally
-> $ mvn clean install
+> $ mvn -DskipTests=true clean install
 > ```
 
-Note that to build schema-registry in its development version, further dependencies of Confluent Platform are needed (e.g.
-[common](https://github.com/confluentinc/common) and
-[rest-utils](https://github.com/confluentinc/rest-utils)). Please read its own [README](https://github.com/confluentinc/schema-registry)
-file for details. Also, each example states its exact requirements at the very top.
+Also, each example states its exact requirements at the very top.
 
 
 <a name="requirements-java"/>
@@ -312,7 +327,7 @@ and then execute as follows:
 ```shell
 # Run an example application from the standalone jar.
 # Here: `WordCountLambdaExample`
-$ java -cp target/streams-examples-3.4.0-standalone.jar \
+$ java -cp target/streams-examples-3.5.0-SNAPSHOT-standalone.jar \
   -Dlog4j.configuration=file:src/main/resources/log4j.properties \
   io.confluent.examples.streams.WordCountLambdaExample
 ```
