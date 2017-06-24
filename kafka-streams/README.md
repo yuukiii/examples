@@ -189,7 +189,11 @@ repository may have different Kafka requirements.
 
 ## Confluent Platform
 
-The code in this repository requires [schema-registry](https://github.com/confluentinc/schema-registry) from the Confluent Platform.
+The code in this repository requires [Confluent Schema Registry](https://github.com/confluentinc/schema-registry).
+And to build Confluent Schema Registry in its development version, further dependencies of Confluent Platform are needed (e.g.
+[Confluent Common](https://github.com/confluentinc/common) and
+[Confluent Rest Utils](https://github.com/confluentinc/rest-utils), 
+please read its own [README](https://github.com/confluentinc/schema-registry) file for details).
 See [Version Compatibility Matrix](#version-compatibility) for further details, as different branches of this
 repository may have different Confluent Platform requirements.
 
@@ -201,18 +205,29 @@ repository may have different Confluent Platform requirements.
 > the latest `master` Schema Registry version:
 >
 > ```shell
+> $ git clone https://github.com/confluentinc/common.git
+> $ cd common
+> $ git checkout master
+>
+> # Build and install common locally
+> $ mvn -DskipTests=true clean install
+>
+> $ git clone https://github.com/confluentinc/rest-utils.git
+> $ cd rest-utils
+> $ git checkout master
+>
+> # Build and install rest-utils locally
+> $ mvn -DskipTests=true clean install
+>
 > $ git clone https://github.com/confluentinc/schema-registry.git
 > $ cd schema-registry
 > $ git checkout master
 >
 > # Now build and install schema-registry locally
-> $ mvn clean install
+> $ mvn -DskipTests=true clean install
 > ```
 
-Note that to build schema-registry in its development version, further dependencies of Confluent Platform are needed (e.g.
-[common](https://github.com/confluentinc/common) and
-[rest-utils](https://github.com/confluentinc/rest-utils)). Please read its own [README](https://github.com/confluentinc/schema-registry)
-file for details. Also, each example states its exact requirements at the very top.
+Also, each example states its exact requirements at the very top.
 
 
 <a name="requirements-java"/>
@@ -342,7 +357,7 @@ $ mvn test    # Runs unit and integration tests
 
 | Branch (this repo)                                                             | Apache Kafka      | Confluent Platform | Notes                                                                                 |
 | -------------------------------------------------------------------------------|-------------------|--------------------|---------------------------------------------------------------------------------------|
-| [master](../../../tree/master/kafka-streams)                                   | 0.11.1.0-SNAPSHOT | 3.5.0-SNAPSHOT     | You must manually build the `trunk` version of Apache Kafka and `master` version of Confluent Platform.  See instructions above. |
+| [master](../../../tree/master/kafka-streams)                                   | 0.11.1.0-SNAPSHOT | 3.5.0-SNAPSHOT     | You must manually build the `trunk` version of Apache Kafka and the `master` version of Confluent Platform.  See instructions above. |
 | [3.4.x](../../../tree/3.4.x/kafka-streams)                                     | 0.11.0.0(-cp1)    | 3.4.0              | Works out of the box                                                                  |
 | [3.3.x](../../../tree/3.3.x/kafka-streams)                                     | 0.11.0.0(-cp1)    | 3.3.0              | Works out of the box                                                                  |
 | [3.2.x](../../../tree/3.2.x/kafka-streams)                                     | 0.10.2.1(-cp1)    | 3.2.1              | Works out of the box                                                                  |
