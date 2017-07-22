@@ -37,7 +37,7 @@
         <java.version>1.7</java.version>
         <kafka.version>0.11.0.0-SNAPSHOT</kafka.version>
         <kafka.scala.version>2.11</kafka.scala.version>
-        <confluent.version>3.4.0-SNAPSHOT</confluent.version>
+        <confluent.version>3.5.0-SNAPSHOT</confluent.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
