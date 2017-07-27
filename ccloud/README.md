@@ -73,9 +73,9 @@ Before running the examples, **you should setup the Confluent Cloud CLI** by run
 		<snipped>
 		
 		[2017-07-27 14:35:27,944] INFO Kafka version : 0.10.2.1-cp2 (org.apache.kafka.common.utils.AppInfoParser)
-[2017-07-27 14:35:27,944] INFO Kafka commitId : 8041e4a077aba712 (org.apache.kafka.common.utils.AppInfoParser)
-Successfully produced 10 messages to page_visits.
-[2017-07-27 14:35:28,320] INFO Closing the Kafka producer with timeoutMillis = 9223372036854775807 ms. (org.apache.kafka.clients.producer.KafkaProducer)
+		[2017-07-27 14:35:27,944] INFO Kafka commitId : 8041e4a077aba712 (org.apache.kafka.common.utils.AppInfoParser)
+		Successfully produced 10 messages to page_visits.
+		....
 		```
 		
 
@@ -100,8 +100,8 @@ Successfully produced 10 messages to page_visits.
 		<snipped>
 		
 		[2017-07-27 14:35:41,726] INFO Setting newly assigned partitions [page_visits-11, page_visits-10, page_visits-1, page_visits-0, page_visits-7, page_visits-6, page_visits-9, page_visits-8, page_visits-3, page_visits-2, page_visits-5, page_visits-4] for group example-1759082952 (org.apache.kafka.clients.consumer.internals.ConsumerCoordinator)
-	offset = 3, key = 192.168.2.13, value = 1501191328318,www.example.com,192.168.2.13
-	offset = 3, key = 192.168.2.225, value = 1501191328318,www.example.com,192.168.2.225
+		offset = 3, key = 192.168.2.13, value = 1501191328318,www.example.com,192.168.2.13
+		offset = 3, key = 192.168.2.225, value = 1501191328318,www.example.com,192.168.2.225
 		....
 		```
 		Hit Ctrl+C to stop.
