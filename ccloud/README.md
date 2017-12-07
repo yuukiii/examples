@@ -25,7 +25,7 @@ $ brew install ccloud
 
 ### Linux
 
-Download and unzip from [here](https://s3-us-west-2.amazonaws.com/confluent.cloud/cli/ccloud-latest.tar.gz).  Add the bin directory to your PATH.
+Download and unzip from [here](https://s3-us-west-2.amazonaws.com/confluent.cloud/cli/ccloud-latest.tar.gz).  Add the contents of the bin directory to your PATH environment variable so that `which ccloud` finds the ccloud command.
 	
 
 ### Windows
@@ -69,9 +69,9 @@ $ ccloud topic list
 No topics found !
 ```
 
-Since this is a new tenant there are no topics configured. Let's change that now.
+Since this is a new cluster there are no topics configured. Let's change that now.
 
-To create a topic in your tenant use the topic command. To start, let's get some help.
+To create a topic, use the `topic` command. To start, let's get some help.
 
 ```shell
 $ ccloud help topic create
@@ -166,7 +166,7 @@ Topic:testCustom	PartitionCount:20	ReplicationFactor:3	Configs:min.insync.replic
 	Topic: testCustom	Partition: 19	Leader: 2	Replicas: 2,10,11	Isr: 2,10,11
 ```
 
-Now let's produce some items into the `test` topic.
+Now let's produce some messages into the `test` topic.
 
 ```
 ccloud produce -t test
