@@ -37,7 +37,7 @@ Download and unzip from [here](https://s3-us-west-2.amazonaws.com/confluent.clou
 To get started you will need to configure ccloud by running the `init` command.
 
 ```shell
-$ ./bin/ccloud init
+$ ccloud init
 Bootstrap broker list: <broker_list>
 API Key: <key>
 API Secret: <secret>
