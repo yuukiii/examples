@@ -1,4 +1,4 @@
-# Setup Connect with Staging Kafka Cluster
+# Setup local Connect cluster with Confluent Cloud Kafka Cluster
 
 In this document, we will look at the different steps needed to setup a local Connect cluster 
 backed by a Kafka cluster in the staging cloud. 
@@ -11,16 +11,16 @@ Firstly, setup a Kafka Cluster in Staging Cloud
 3. Copy the configurations they provide into a local text file. My configs look like:
 
 ```
-bootstrap.servers=SASL_SSL://r0.kafka-mt-1.us-west-2.aws.stag.cpdev.cloud:9092,r0.kafka-mt-1.us-west-2.aws.stag.cpdev.cloud:9093,r0.kafka-mt-1.us-west-2.aws.stag.cpdev.cloud:9094
+bootstrap.servers=SASL_SSL://<broker-list>
 ssl.endpoint.identification.algorithm=https
 sasl.mechanism=PLAIN
 request.timeout.ms=20000
 retry.backoff.ms=500
-sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="MY_API_KEY" password="MY_API_SECRET";
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="<api-key-id>" password="<secret-access-key>";
 security.protocol=SASL_SSL
 ```
 
-Replace MY_API_KEY and MY_API_SECRET with correct values for your cluster.
+Replace <api-key-id> and <secret-access-key> with correct values for your cluster.
 
 ## Install CCloud
 
@@ -38,24 +38,10 @@ the answers to the questions. This is how my session looked like:
 
 ```
 $ ccloud init
-Bootstrap broker list: SASL_SSL://r0.kafka-mt-1.us-west-2.aws.stag.cpdev.cloud:9092,r0.kafka-mt-1.us-west-2.aws.stag.cpdev.cloud:9093,r0.kafka-mt-1.us-west-2.aws.stag.cpdev.cloud:9094
-API Key: MY_API_KEY
-API Secret: MY_API_SECRET
+Bootstrap broker list: SASL_SSL://<broker-list>
+API Key: <api-key-id>
+API Secret: <secret-access-key>
 Initialized. Saved config to /Users/arjun/.ccloud/config
-```
-
-Check the contents of your `~/.ccloud/config`. It should be as following:
-
-```
-$ cat ~/.ccloud/config
-#Tue Dec 19 13:12:25 PST 2017
-ssl.endpoint.identification.algorithm=https
-sasl.mechanism=PLAIN
-request.timeout.ms=20000
-bootstrap.servers=SASL_SSL\://r0.kafka-mt-1.us-west-2.aws.stag.cpdev.cloud\:9092,r0.kafka-mt-1.us-west-2.aws.stag.cpdev.cloud\:9093,r0.kafka-mt-1.us-west-2.aws.stag.cpdev.cloud\:9094
-retry.backoff.ms=500
-sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username\="MY_API_KEY" password\="MY_API_SECRET";
-security.protocol=SASL_SSL
 ```
 
 To test your Kafka cluster and ccloud setup, first create at test topic with one partition:
@@ -98,7 +84,7 @@ and `staging-file-sink.properties`) in the config directory, whose contents look
 
 ```
 $ cat config/staging-connect-standalone.properties
-bootstrap.servers=r0.kafka-mt-1.us-west-2.aws.stag.cpdev.cloud:9092,r0.kafka-mt-1.us-west-2.aws.stag.cpdev.cloud:9093,r0.kafka-mt-1.us-west-2.aws.stag.cpdev.cloud:9094
+bootstrap.servers=<broker-list>
 
 # The converters specify the format of data in Kafka and how to translate it into Connect data. Every Connect user will
 # need to configure these based on the format they want their data in when loaded from or stored into Kafka
@@ -124,14 +110,14 @@ ssl.endpoint.identification.algorithm=https
 sasl.mechanism=PLAIN
 request.timeout.ms=20000
 retry.backoff.ms=500
-sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="MY_API_KEY" password="MY_API_SECRET";
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="<api-key-id>" password="<secret-access-key>";
 security.protocol=SASL_SSL
 
 consumer.ssl.endpoint.identification.algorithm=https
 consumer.sasl.mechanism=PLAIN
 consumer.request.timeout.ms=20000
 consumer.retry.backoff.ms=500
-consumer.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="MY_API_KEY" password="MY_API_SECRET";
+consumer.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="<api-key-id>" password="<secret-access-key>";
 consumer.security.protocol=SASL_SSL
 ```
 
@@ -175,7 +161,7 @@ file is very similar to the standalone properties file (with the exception of a 
 The contents of my `staging-connect-distributed.properties` file are:
 
 ```
-bootstrap.servers=r0.kafka-mt-1.us-west-2.aws.stag.cpdev.cloud:9092,r0.kafka-mt-1.us-west-2.aws.stag.cpdev.cloud:9093,r0.kafka-mt-1.us-west-2.aws.stag.cpdev.cloud:9094
+bootstrap.servers=<broker-list>
 
 group.id=connect-cluster
 
@@ -204,14 +190,14 @@ ssl.endpoint.identification.algorithm=https
 sasl.mechanism=PLAIN
 request.timeout.ms=20000
 retry.backoff.ms=500
-sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="MY_API_KEY" password="MY_API_SECRET";
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="<api-key-id>" password="<secret-access-key>";
 security.protocol=SASL_SSL
 
 consumer.ssl.endpoint.identification.algorithm=https
 consumer.sasl.mechanism=PLAIN
 consumer.request.timeout.ms=20000
 consumer.retry.backoff.ms=500
-consumer.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="MY_API_KEY" password="MY_API_SECRET";
+consumer.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="<api-key-id>" password="<secret-access-key>";
 consumer.security.protocol=SASL_SSL
 ```
 
