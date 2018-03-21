@@ -183,7 +183,7 @@ $ cat example-file-sink.json
     "connector.class": "org.apache.kafka.connect.file.FileStreamSinkConnector",
     "tasks.max": 3,
     "topics": "connect-test",
-    "file": "/Users/<user-name>/example_file.txt"
+    "file": "example_file.txt"
   }
 }
 ```
@@ -203,7 +203,7 @@ This should give the following response:
     "connector.class": "org.apache.kafka.connect.file.FileStreamSinkConnector",
     "tasks.max": "1",
     "topics": "connect-test",
-    "file": "/Users/<user-name>/example_file.txt",
+    "file": "example_file.txt",
     "name": "example-file-sink"
   },
   "tasks": [],
