@@ -20,8 +20,6 @@ import java.util.Properties;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -36,8 +34,8 @@ import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.KeyValue;
 
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-
-import io.confluent.examples.connectandstreams.utils.SpecificAvroSerializer;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import io.confluent.examples.connectandstreams.avro.Location;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -79,10 +77,11 @@ public class Driver {
             }
         }
 
-        Map<String, Object> config = new HashMap<>();
-        config.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, SCHEMA_REGISTRY_URL);
-        SpecificAvroSerializer<Location> locationSerializer = new SpecificAvroSerializer<>();
-        locationSerializer.configure(config, false);
+        final SpecificAvroSerializer<Location> locationSerializer = new SpecificAvroSerializer<>();
+        final boolean isKeySerde = false;
+        locationSerializer.configure(
+            Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, SCHEMA_REGISTRY_URL),
+            isKeySerde);
 
         final Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);

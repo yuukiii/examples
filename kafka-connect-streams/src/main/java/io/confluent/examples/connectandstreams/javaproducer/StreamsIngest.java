@@ -18,8 +18,6 @@ package io.confluent.examples.connectandstreams.javaproducer;
 
 import java.util.Properties;
 
-import org.apache.kafka.common.serialization.Serdes;
-
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 import org.apache.kafka.streams.KafkaStreams;
@@ -29,14 +27,14 @@ import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KGroupedStream;
 
-import io.confluent.examples.connectandstreams.utils.SpecificAvroSerde;
-import io.confluent.examples.connectandstreams.avro.Location;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
+import org.apache.kafka.common.serialization.Serde;
+import org.apache.kafka.common.serialization.Serdes;
+import io.confluent.examples.connectandstreams.avro.Location;
 
 import java.util.Collections;
-import java.util.Map;
-import java.util.HashMap;
-
 
 public class StreamsIngest {
 
@@ -68,10 +66,11 @@ public class StreamsIngest {
         streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 1000);
         streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        Map<String, Object> config = new HashMap<>();
-        config.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, SCHEMA_REGISTRY_URL);
-        SpecificAvroSerde<Location> locationSerde = new SpecificAvroSerde<>();
-        locationSerde.configure(config, false);
+        final Serde<Location> locationSerde = new SpecificAvroSerde<>();
+        final boolean isKeySerde = false;
+        locationSerde.configure(
+            Collections.singletonMap(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, SCHEMA_REGISTRY_URL),
+            isKeySerde);
 
         KStream<Long, Location> locations = builder.stream(Serdes.Long(), locationSerde, INPUT_TOPIC);
         locations.print();

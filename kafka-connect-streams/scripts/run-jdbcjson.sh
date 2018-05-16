@@ -8,7 +8,7 @@ TOPIC="$PACKAGE-$TABLE"
 
 BOOTSTRAP_SERVERS=localhost:9092
 
-sed -i "/^bootstrap.servers/c\bootstrap.servers=$BOOTSTRAP_SERVERS" files/$PACKAGE/connect-standalone.properties
+sed -i '' 's/bootstrap.servers=.*/bootstrap.servers=localhost:9092/' files/$PACKAGE/connect-standalone.properties
 scripts/helper/helper-connect.sh $TABLE $PACKAGE
 
 mvn compile

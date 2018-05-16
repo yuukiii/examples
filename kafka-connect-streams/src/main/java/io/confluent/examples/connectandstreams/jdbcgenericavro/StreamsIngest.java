@@ -29,9 +29,9 @@ import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.KeyValue;
 
 import org.apache.avro.generic.GenericRecord;
-import io.confluent.examples.connectandstreams.utils.GenericAvroSerde;
-import io.confluent.examples.connectandstreams.avro.Location;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde;
+import io.confluent.examples.connectandstreams.avro.Location;
 
 public class StreamsIngest {
 

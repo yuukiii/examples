@@ -13,7 +13,8 @@ echo "pragma table_info($TABLE);" | sqlite3 $DB
 echo -e "\n======= Viewing rows from table $TABLE in the database $DB ======="
 echo "select * from $TABLE;" | sqlite3 $DB
 
-sed -i "/^connection.url/c\connection.url=jdbc:sqlite:$DB" files/$PACKAGE/source-quickstart-sqlite.properties
+#sed -i "/^connection.url/c\connection.url=jdbc:sqlite:$DB" files/$PACKAGE/source-quickstart-sqlite.properties
+sed -i '' 's/connection.url=.*/connection.url=jdbc:sqlite:$DB/' files/$PACKAGE/source-quickstart-sqlite.properties
 
 jps | grep ConnectStandalone | awk '{print $1;}' | xargs kill -9
 SLEEPTIME=30

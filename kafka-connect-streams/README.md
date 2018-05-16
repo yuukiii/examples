@@ -1,3 +1,7 @@
+[Overview](#overview)
+[Quickstart](#quickstart)
+
+
 # Overview
 
 ## Objectives
@@ -52,7 +56,7 @@ All examples in this repo demonstrate the Kafka Streams API methods `count` and 
 
 ## Prerequisites
 
-1. You have a Kafka cluster running at least one Kafka broker, Zookeeper, and Confluent Schema Registry. We assume that these services are started with the default settings. If you need help setting up the cluster, please consult the basic [Confluent Platform Quickstart](http://docs.confluent.io/current/quickstart.html) or [Confluent Platform on Docker Quickstart](http://docs.confluent.io/current/cp-docker-images/docs/quickstart.html).
+1. Use the Confluent CLI to start a Kafka cluster running at least one Kafka broker, Zookeeper, and Confluent Schema Registry. We assume that these services are started with the default settings. If you need help setting up the cluster, please consult the [Confluent Platform Quickstart](http://docs.confluent.io/current/quickstart.html).
 
 2. By default the `timeout` command is available on most Linux distributions but not Mac OS. This `timeout` command is used by the bash scripts to terminate consumer processes after a period of time. To install it on a Mac:
 
