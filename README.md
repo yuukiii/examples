@@ -1,4 +1,4 @@
-# Confluent Examples
+# Update Your Links
 
 The main resource for demos and examples of stream processing with [Apache Kafka](http://kafka.apache.org/) and [Confluent Platform](http://www.confluent.io/product) is at https://github.com/confluentinc/quickstart-demos . Those demos and examples showcase KSQL, Kafka Streams, Confluent Replicator, Confluent Schema Registry, monitoring with Confluent Control Center, Replicator, and lots of other types of connectors.
 
